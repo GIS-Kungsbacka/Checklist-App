@@ -8,7 +8,6 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Form> Forms => Set<Form>();
-    public DbSet<FormSubmission> FormSubmissions => Set<FormSubmission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -55,8 +54,5 @@ public class AppDbContext : DbContext
                 CreatedBy = "System",
                 CreatedAt = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero)
             });
-        
-        modelBuilder.Entity<FormSubmission>().HasIndex(x => x.CreatedBy);
-        modelBuilder.Entity<FormSubmission>().HasIndex(x => x.CreatedAt);
     }
 }

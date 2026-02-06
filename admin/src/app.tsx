@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
 import FormsList from "./pages/FormsList";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -17,9 +18,16 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>
+        <BrowserRouter basename="/admin">
           <Routes>
-            <Route path="/" element={<FormsList />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <FormsList />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

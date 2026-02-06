@@ -8,7 +8,7 @@ namespace FormApp.Api.Controllers;
 [Authorize]
 public class ActiveDirectoryAdmin : ControllerBase
 {
-    private const string AdminGroup = "";
+    private const string AdminGroup = "fooGroup";
     [HttpGet]
     public IActionResult Get()
     {
