@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Container, Box, Typography, Alert } from "@mui/material";
 import { LockOutlined } from "@mui/icons-material";
 import { useAuth } from "../hooks/useAuth";
@@ -20,7 +20,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (isAdmin) {
+  if (!isAdmin) {
     return (
       <Container maxWidth="sm">
         <Box

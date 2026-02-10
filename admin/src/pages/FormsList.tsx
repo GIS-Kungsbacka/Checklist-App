@@ -2,8 +2,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Button,
-  Card,
-  CardContent,
   Container,
   IconButton,
   Paper,
@@ -21,7 +19,7 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import { Add, Edit, Delete, Visibility } from "@mui/icons-material";
+import { Add, Edit, Delete } from "@mui/icons-material";
 import { useState } from "react";
 import { formsApi } from "../api/formsApi";
 import type { Form, CreateFormDto } from "../types/form";

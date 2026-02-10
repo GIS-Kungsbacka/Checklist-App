@@ -8,15 +8,18 @@ namespace FormApp.Api.Controllers;
 [Authorize]
 public class ActiveDirectoryAdmin : ControllerBase
 {
-    private const string AdminGroup = "fooGroup";
+    private readonly string _adminGroup;
+
+    public ActiveDirectoryAdmin(IConfiguration config)
+    {
+        _adminGroup = config["Auth:AdminGroup"] ?? "";
+    }
+
     [HttpGet]
     public IActionResult Get()
     {
-        // Typically "DOMAIN\\username"
         var username = User.Identity?.Name ?? "";
-
-        // Same check as in policy
-        var isAdmin = User.IsInRole(AdminGroup);
+        var isAdmin = User.IsInRole(_adminGroup);
 
         return Ok(new { username, isAdmin });
     }

@@ -3,7 +3,6 @@ using FormApp.Api.Data;
 using FormApp.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FormApp.Api.Controllers;
 
@@ -12,12 +11,12 @@ namespace FormApp.Api.Controllers;
 [Authorize(Policy = "AdminOnly")]
 public class FormsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IFormsRepository _repository;
     private readonly ILogger<FormsController> _logger;
 
-    public FormsController(AppDbContext context, ILogger<FormsController> logger)
+    public FormsController(IFormsRepository repository, ILogger<FormsController> logger)
     {
-        _context = context;
+        _repository = repository;
         _logger = logger;
     }
 
@@ -29,9 +28,7 @@ public class FormsController : ControllerBase
     {
         try
         {
-            var forms = await _context.Forms
-                .OrderByDescending(f => f.CreatedAt)
-                .ToListAsync();
+            var forms = await _repository.GetAllAsync();
             return Ok(forms);
         }
         catch (Exception ex)
@@ -47,7 +44,7 @@ public class FormsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Form>> GetForm(int id)
     {
-        var form = await _context.Forms.FindAsync(id);
+        var form = await _repository.GetByIdAsync(id);
         if (form == null)
         {
             return NotFound();
@@ -73,11 +70,10 @@ public class FormsController : ControllerBase
             CreatedAt = DateTimeOffset.UtcNow
         };
 
-        _context.Forms.Add(form);
-        await _context.SaveChangesAsync();
+        var createdForm = await _repository.CreateAsync(form);
 
-        _logger.LogInformation("Form {FormId} created by {User}", form.Id, username);
-        return CreatedAtAction(nameof(GetForm), new { id = form.Id }, form);
+        _logger.LogInformation("Form {FormId} created by {User}", createdForm.Id, username);
+        return CreatedAtAction(nameof(GetForm), new { id = createdForm.Id }, createdForm);
     }
 
     /// <summary>
@@ -86,22 +82,29 @@ public class FormsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateForm(int id, [FromBody] UpdateFormDto dto)
     {
-        var form = await _context.Forms.FindAsync(id);
-        if (form == null)
+        var existingForm = await _repository.GetByIdAsync(id);
+        if (existingForm == null)
         {
             return NotFound();
         }
 
         var username = User.Identity?.Name ?? "Unknown";
 
-        form.Name = dto.Name;
-        form.Description = dto.Description ?? "";
-        form.SchemaJson = dto.SchemaJson ?? "{}";
-        form.IsActive = dto.IsActive;
-        form.UpdatedBy = username;
-        form.UpdatedAt = DateTimeOffset.UtcNow;
+        var form = new Form
+        {
+            Id = id,
+            Name = dto.Name,
+            Description = dto.Description ?? "",
+            SchemaJson = dto.SchemaJson ?? "{}",
+            IsActive = dto.IsActive,
+            UpdatedBy = username
+        };
 
-        await _context.SaveChangesAsync();
+        var updatedForm = await _repository.UpdateAsync(id, form);
+        if (updatedForm == null)
+        {
+            return NotFound();
+        }
 
         _logger.LogInformation("Form {FormId} updated by {User}", id, username);
         return NoContent();
@@ -113,14 +116,11 @@ public class FormsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteForm(int id)
     {
-        var form = await _context.Forms.FindAsync(id);
-        if (form == null)
+        var deleted = await _repository.DeleteAsync(id);
+        if (!deleted)
         {
             return NotFound();
         }
-
-        _context.Forms.Remove(form);
-        await _context.SaveChangesAsync();
 
         var username = User.Identity?.Name ?? "Unknown";
         _logger.LogInformation("Form {FormId} deleted by {User}", id, username);

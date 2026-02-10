@@ -14,11 +14,13 @@ const theme = createTheme({
 });
 
 function App() {
+
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter basename="/admin">
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             <Route
               path="/"

@@ -1,7 +1,6 @@
 using FormApp.Api.Data;
 using FormApp.Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace FormApp.Api.Controllers;
 
@@ -9,15 +8,15 @@ namespace FormApp.Api.Controllers;
 /// Public endpoint for clients to view active forms (no authentication required)
 /// </summary>
 [ApiController]
-[Route("api/forms")]
+[Route("forms")]  // Route is "forms" since API app is already at /FormApp/api/
 public class PublicFormsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IFormsRepository _repository;
     private readonly ILogger<PublicFormsController> _logger;
 
-    public PublicFormsController(AppDbContext context, ILogger<PublicFormsController> logger)
+    public PublicFormsController(IFormsRepository repository, ILogger<PublicFormsController> logger)
     {
-        _context = context;
+        _repository = repository;
         _logger = logger;
     }
 
@@ -29,10 +28,7 @@ public class PublicFormsController : ControllerBase
     {
         try
         {
-            var forms = await _context.Forms
-                .Where(f => f.IsActive)
-                .OrderByDescending(f => f.CreatedAt)
-                .ToListAsync();
+            var forms = await _repository.GetActiveAsync();
             return Ok(forms);
         }
         catch (Exception ex)
@@ -48,14 +44,20 @@ public class PublicFormsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Form>> GetActiveForm(int id)
     {
-        var form = await _context.Forms
-            .Where(f => f.Id == id && f.IsActive)
-            .FirstOrDefaultAsync();
-        
-        if (form == null)
+        try
         {
-            return NotFound();
+            var form = await _repository.GetActiveByIdAsync(id);
+            
+            if (form == null)
+            {
+                return NotFound();
+            }
+            return Ok(form);
         }
-        return Ok(form);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving form {FormId}", id);
+            return StatusCode(500, new { error = "An error occurred while retrieving the form", details = ex.Message });
+        }
     }
 }

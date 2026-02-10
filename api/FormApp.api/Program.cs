@@ -7,16 +7,56 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---- EF Core + Postgres ----
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres"))
-);
+// ---- Data Storage Configuration ----
+// Check UseJsonFile setting and connection string
+var postgresConnection = builder.Configuration.GetConnectionString("Postgres");
+var useJsonFileSetting = builder.Configuration.GetValue<bool>("UseJsonFile", false);
+
+// Logic (priority order):
+// 1. If UseJsonFile is explicitly set to true → use JSON (regardless of connection string)
+// 2. If UseJsonFile is false/not set AND connection string exists → use Postgres
+// 3. If no connection string → use JSON (fallback)
+bool useJsonFile;
+
+if (useJsonFileSetting == true)
+{
+    // Explicitly set to use JSON file
+    useJsonFile = true;
+    Console.WriteLine("INFO: UseJsonFile is set to true, using JSON file storage");
+}
+else if (!string.IsNullOrWhiteSpace(postgresConnection))
+{
+    // UseJsonFile is false/not set and connection string exists → use Postgres
+    useJsonFile = false;
+    Console.WriteLine("INFO: Connection string found and UseJsonFile is false, using Postgres database");
+}
+else
+{
+    // No connection string available → fallback to JSON
+    useJsonFile = true;
+    Console.WriteLine("INFO: No connection string found, falling back to JSON file storage");
+}
+
+if (useJsonFile)
+{
+    builder.Services.AddScoped<IFormsRepository, JsonFormsRepository>();
+    Console.WriteLine("INFO: Using JSON file storage for forms data");
+}
+else
+{
+    // Use Postgres database
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(postgresConnection)
+    );
+    builder.Services.AddScoped<IFormsRepository, DbContextFormsRepository>();
+    Console.WriteLine("INFO: Using Postgres database for forms data");
+}
 
 // ---- Windows Integrated Auth (IIS) ----
 builder.Services.AddAuthentication(IISDefaults.AuthenticationScheme);
 
 // AD group allowed for admin endpoints:
-const string AdminGroup = "fooGroup";
+var AdminGroup = builder.Configuration["Auth:AdminGroup"];
 
 builder.Services.AddAuthorization(options =>
 {
@@ -50,7 +90,8 @@ builder.Services.AddCors(options =>
     // Development policy for separate dev servers
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", 
+                          "https://localhost:3000", "https://localhost:3001")
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -91,56 +132,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Configure content type provider for SPA files
-var contentTypeProvider = new FileExtensionContentTypeProvider();
-contentTypeProvider.Mappings[".js"] = "application/javascript";
-contentTypeProvider.Mappings[".mjs"] = "application/javascript";
-contentTypeProvider.Mappings[".json"] = "application/json";
-
-// Serve static files from wwwroot/admin for /admin path
-var adminPath = Path.Combine(builder.Environment.ContentRootPath, "..", "admin");
-if (Directory.Exists(adminPath))
-{
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(adminPath),
-        RequestPath = "/admin",
-        ContentTypeProvider = contentTypeProvider
-    });
-}
-
-// Serve static files from wwwroot/client for root path
-var clientPath = Path.Combine(builder.Environment.ContentRootPath, "..", "client");
-if (Directory.Exists(clientPath))
-{
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(clientPath),
-        RequestPath = "",
-        ContentTypeProvider = contentTypeProvider
-    });
-}
-
-// API routes - must come before SPA fallback
+// API routes only - admin and client are separate IIS applications
 app.MapControllers();
-
-// SPA fallback routing
-// Admin app at /admin - must come before root fallback
-if (Directory.Exists(adminPath))
-{
-    app.MapFallbackToFile("/admin/{*path}", "index.html", new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(adminPath)
-    });
-}
-
-// Client app at root - catch all other routes
-if (Directory.Exists(clientPath))
-{
-    app.MapFallbackToFile("index.html", new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(clientPath)
-    });
-}
 
 app.Run();
