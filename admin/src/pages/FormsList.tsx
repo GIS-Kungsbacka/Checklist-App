@@ -18,17 +18,31 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Switch,
+  FormControlLabel,
+  CircularProgress,
+  Alert,
+  Tooltip,
+  Stack,
+  Divider,
+  InputAdornment,
+  Pagination,
 } from "@mui/material";
-import { Add, Edit, Delete } from "@mui/icons-material";
-import { useState } from "react";
+import { Add, Edit, Delete, Code, Search } from "@mui/icons-material";
+import { useState, useMemo } from "react";
 import { formsApi } from "../api/formsApi";
 import type { Form, CreateFormDto } from "../types/form";
+
+const ITEMS_PER_PAGE = 10;
 
 export default function FormsList() {
   const queryClient = useQueryClient();
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState<Form | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Form | null>(null);
+  const [schemaError, setSchemaError] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [page, setPage] = useState<number>(1);
   const [formData, setFormData] = useState<CreateFormDto>({
     name: "",
     description: "",
@@ -41,12 +55,46 @@ export default function FormsList() {
     queryFn: formsApi.getAll,
   });
 
+  // Filter forms based on search query
+  const filteredForms = useMemo(() => {
+    if (!forms) return [];
+    if (!searchQuery.trim()) return forms;
+
+    const query = searchQuery.toLowerCase().trim();
+    return forms.filter(
+      (form) =>
+        form.name.toLowerCase().includes(query) ||
+        form.description?.toLowerCase().includes(query) ||
+        form.createdBy.toLowerCase().includes(query) ||
+        form.id.toString().includes(query),
+    );
+  }, [forms, searchQuery]);
+
+  // Paginate filtered forms
+  const paginatedForms = useMemo(() => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    return filteredForms.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredForms, page]);
+
+  const totalPages = Math.ceil(filteredForms.length / ITEMS_PER_PAGE);
+
+  // Reset to page 1 when search changes
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setPage(1);
+  };
+
   const createMutation = useMutation({
     mutationFn: formsApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forms"] });
       setOpenCreate(false);
-      setFormData({ name: "", description: "", schemaJson: "{}", isActive: true });
+      setFormData({
+        name: "",
+        description: "",
+        schemaJson: "{}",
+        isActive: true,
+      });
     },
   });
 
@@ -67,20 +115,26 @@ export default function FormsList() {
     },
   });
 
-  const handleCreate = () => {
-    createMutation.mutate(formData);
-  };
-
-  const handleUpdate = () => {
-    if (openEdit) {
-      updateMutation.mutate({ id: openEdit.id, dto: formData });
-    }
-  };
-
   const handleDelete = () => {
     if (deleteConfirm) {
       deleteMutation.mutate(deleteConfirm.id);
     }
+  };
+
+  const handleCloseCreate = () => {
+    setOpenCreate(false);
+    setFormData({
+      name: "",
+      description: "",
+      schemaJson: "{}",
+      isActive: true,
+    });
+    setSchemaError("");
+  };
+
+  const handleCloseEdit = () => {
+    setOpenEdit(null);
+    setSchemaError("");
   };
 
   const handleEditClick = (form: Form) => {
@@ -91,50 +145,214 @@ export default function FormsList() {
       schemaJson: form.schemaJson,
       isActive: form.isActive,
     });
+    setSchemaError("");
+  };
+
+  const validateSchema = (json: string): boolean => {
+    try {
+      const parsed = JSON.parse(json);
+      if (typeof parsed !== "object" || parsed === null) {
+        setSchemaError("Schema must be a valid JSON object");
+        return false;
+      }
+      setSchemaError("");
+      return true;
+    } catch (e) {
+      setSchemaError("Invalid JSON format");
+      return false;
+    }
+  };
+
+  const handleSchemaChange = (value: string) => {
+    setFormData({ ...formData, schemaJson: value });
+    validateSchema(value);
+  };
+
+  const handleCreate = () => {
+    if (!validateSchema(formData.schemaJson || "{}")) return;
+    createMutation.mutate(formData);
+  };
+
+  const handleUpdate = () => {
+    if (!openEdit) return;
+    if (!validateSchema(formData.schemaJson || "{}")) return;
+    updateMutation.mutate({ id: openEdit.id, dto: formData });
+  };
+
+  const formatSchemaPreview = (schemaJson: string): string => {
+    try {
+      const parsed = JSON.parse(schemaJson);
+      if (parsed.fields && Array.isArray(parsed.fields)) {
+        return `${parsed.fields.length} field(s) defined`;
+      }
+      return "No fields defined";
+    } catch {
+      return "Invalid schema";
+    }
   };
 
   if (isLoading) {
     return (
-      <Container>
-        <Typography>Loading...</Typography>
+      <Container maxWidth="xl">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
+          <CircularProgress size={60} />
+        </Box>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" component="h1">
-          Forms Management
-        </Typography>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={4}
+        flexWrap="wrap"
+        gap={2}
+      >
+        <Box>
+          <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
+            Forms Management
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Create, edit, and manage your forms
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => setOpenCreate(true)}
+          onClick={() => {
+            setOpenCreate(true);
+            setFormData({
+              name: "",
+              description: "",
+              schemaJson: "{}",
+              isActive: true,
+            });
+            setSchemaError("");
+          }}
+          size="large"
+          sx={{ height: 42 }}
         >
           Create Form
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
+      {/* Search Bar */}
+      <Box mb={3}>
+        <TextField
+          fullWidth
+          placeholder="Search forms by name, description, creator, or ID..."
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="action" />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "background.paper",
+            },
+          }}
+        />
+        {searchQuery && (
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 1, display: "block" }}
+          >
+            Showing {filteredForms.length} of {forms?.length || 0} forms
+          </Typography>
+        )}
+      </Box>
+
+      {createMutation.isError && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          Failed to create form. Please try again.
+        </Alert>
+      )}
+
+      {updateMutation.isError && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          Failed to update form. Please try again.
+        </Alert>
+      )}
+
+      {deleteMutation.isError && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          Failed to delete form. Please try again.
+        </Alert>
+      )}
+
+      <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
         <Table>
           <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Created By</TableCell>
-              <TableCell>Created At</TableCell>
-              <TableCell align="right">Actions</TableCell>
+            <TableRow sx={{ backgroundColor: "grey.50" }}>
+              <TableCell sx={{ fontWeight: 600 }}>ID</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Schema</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Created By</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Created At</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 600 }}>
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {forms?.map((form) => (
-              <TableRow key={form.id}>
+            {paginatedForms.map((form) => (
+              <TableRow
+                key={form.id}
+                sx={{
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+              >
                 <TableCell>{form.id}</TableCell>
-                <TableCell>{form.name}</TableCell>
-                <TableCell>{form.description || "-"}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight={500}>
+                    {form.name}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      maxWidth: 200,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {form.description || "-"}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Tooltip title={form.schemaJson} arrow>
+                    <Chip
+                      icon={<Code />}
+                      label={formatSchemaPreview(form.schemaJson)}
+                      size="small"
+                      variant="outlined"
+                    />
+                  </Tooltip>
+                </TableCell>
                 <TableCell>
                   <Chip
                     label={form.isActive ? "Active" : "Inactive"}
@@ -147,30 +365,74 @@ export default function FormsList() {
                   {new Date(form.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell align="right">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleEditClick(form)}
-                    title="Edit"
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    justifyContent="flex-end"
                   >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => setDeleteConfirm(form)}
-                    color="error"
-                    title="Delete"
-                  >
-                    <Delete />
-                  </IconButton>
+                    <Tooltip title="Edit" arrow>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditClick(form)}
+                        color="primary"
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete" arrow>
+                      <IconButton
+                        size="small"
+                        onClick={() => setDeleteConfirm(form)}
+                        color="error"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
                 </TableCell>
               </TableRow>
             ))}
-            {forms?.length === 0 && (
+            {paginatedForms.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} align="center">
-                  <Typography color="text.secondary" sx={{ py: 2 }}>
-                    No forms found. Create your first form to get started.
-                  </Typography>
+                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <Box>
+                    <Typography
+                      variant="h6"
+                      color="text.secondary"
+                      gutterBottom
+                    >
+                      {searchQuery
+                        ? "No forms match your search"
+                        : "No forms found"}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 2 }}
+                    >
+                      {searchQuery
+                        ? "Try adjusting your search query"
+                        : "Create your first form to get started."}
+                    </Typography>
+                    {!searchQuery && (
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => {
+                          setOpenCreate(true);
+                          setFormData({
+                            name: "",
+                            description: "",
+                            schemaJson: "{}",
+                            isActive: true,
+                          });
+                          setSchemaError("");
+                        }}
+                      >
+                        Create Form
+                      </Button>
+                    )}
+                  </Box>
                 </TableCell>
               </TableRow>
             )}
@@ -178,50 +440,131 @@ export default function FormsList() {
         </Table>
       </TableContainer>
 
+      {/* Pagination */}
+      {filteredForms.length > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 4,
+            mb: 2,
+          }}
+        >
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_event, value) => setPage(value)}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
+
       {/* Create Dialog */}
-      <Dialog open={openCreate} onClose={() => setOpenCreate(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Form</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            margin="normal"
-            multiline
-            rows={3}
-          />
-          <TextField
-            fullWidth
-            label="Schema JSON"
-            value={formData.schemaJson}
-            onChange={(e) =>
-              setFormData({ ...formData, schemaJson: e.target.value })
-            }
-            margin="normal"
-            multiline
-            rows={6}
-            helperText="JSON schema defining the form structure"
-          />
+      <Dialog
+        open={openCreate}
+        onClose={handleCloseCreate}
+        maxWidth="md"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 2 },
+          },
+        }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h5" fontWeight={600}>
+            Create New Form
+          </Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ pt: 3 }}>
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label="Form Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              required
+              helperText="Enter a descriptive name for this form"
+              error={createMutation.isError}
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              multiline
+              rows={3}
+              helperText="Optional description of what this form is used for"
+            />
+            <Box>
+              <TextField
+                fullWidth
+                label="Schema JSON"
+                value={formData.schemaJson}
+                onChange={(e) => handleSchemaChange(e.target.value)}
+                multiline
+                rows={8}
+                error={!!schemaError}
+                helperText={
+                  schemaError ||
+                  'JSON schema defining the form structure. Example: {"fields": [{"name": "email", "label": "Email", "type": "email", "required": true}]}'
+                }
+                sx={{
+                  "& .MuiInputBase-root": {
+                    fontFamily: "monospace",
+                    fontSize: "0.875rem",
+                  },
+                }}
+              />
+              {schemaError && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {schemaError}
+                </Alert>
+              )}
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isActive ?? true}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                />
+              }
+              label="Active"
+            />
+          </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreate(false)}>Cancel</Button>
+        <Divider />
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button
+            onClick={handleCloseCreate}
+            disabled={createMutation.isPending}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleCreate}
             variant="contained"
-            disabled={!formData.name || createMutation.isPending}
+            disabled={
+              !formData.name || !!schemaError || createMutation.isPending
+            }
+            sx={{ minWidth: 100 }}
           >
-            Create
+            {createMutation.isPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Create"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -229,52 +572,107 @@ export default function FormsList() {
       {/* Edit Dialog */}
       <Dialog
         open={openEdit !== null}
-        onClose={() => setOpenEdit(null)}
-        maxWidth="sm"
+        onClose={handleCloseEdit}
+        maxWidth="md"
         fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 2 },
+          },
+        }}
       >
-        <DialogTitle>Edit Form</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            margin="normal"
-            required
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            margin="normal"
-            multiline
-            rows={3}
-          />
-          <TextField
-            fullWidth
-            label="Schema JSON"
-            value={formData.schemaJson}
-            onChange={(e) =>
-              setFormData({ ...formData, schemaJson: e.target.value })
-            }
-            margin="normal"
-            multiline
-            rows={6}
-            helperText="JSON schema defining the form structure"
-          />
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h5" fontWeight={600}>
+            Edit Form
+          </Typography>
+          {openEdit && (
+            <Typography variant="caption" color="text.secondary">
+              Form ID: {openEdit.id}
+            </Typography>
+          )}
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ pt: 3 }}>
+          <Stack spacing={3}>
+            <TextField
+              fullWidth
+              label="Form Name"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              required
+              helperText="Enter a descriptive name for this form"
+              error={updateMutation.isError}
+            />
+            <TextField
+              fullWidth
+              label="Description"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              multiline
+              rows={3}
+              helperText="Optional description of what this form is used for"
+            />
+            <Box>
+              <TextField
+                fullWidth
+                label="Schema JSON"
+                value={formData.schemaJson}
+                onChange={(e) => handleSchemaChange(e.target.value)}
+                multiline
+                rows={8}
+                error={!!schemaError}
+                helperText={
+                  schemaError ||
+                  'JSON schema defining the form structure. Example: {"fields": [{"name": "email", "label": "Email", "type": "email", "required": true}]}'
+                }
+                sx={{
+                  "& .MuiInputBase-root": {
+                    fontFamily: "monospace",
+                    fontSize: "0.875rem",
+                  },
+                }}
+              />
+              {schemaError && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {schemaError}
+                </Alert>
+              )}
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isActive ?? true}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isActive: e.target.checked })
+                  }
+                />
+              }
+              label="Active"
+            />
+          </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEdit(null)}>Cancel</Button>
+        <Divider />
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button onClick={handleCloseEdit} disabled={updateMutation.isPending}>
+            Cancel
+          </Button>
           <Button
             onClick={handleUpdate}
             variant="contained"
-            disabled={!formData.name || updateMutation.isPending}
+            disabled={
+              !formData.name || !!schemaError || updateMutation.isPending
+            }
+            sx={{ minWidth: 100 }}
           >
-            Update
+            {updateMutation.isPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Update"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -283,23 +681,67 @@ export default function FormsList() {
       <Dialog
         open={deleteConfirm !== null}
         onClose={() => setDeleteConfirm(null)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: { borderRadius: 2 },
+          },
+        }}
       >
-        <DialogTitle>Delete Form</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete "{deleteConfirm?.name}"? This action
-            cannot be undone.
+        <DialogTitle sx={{ pb: 1 }}>
+          <Typography variant="h5" fontWeight={600} color="error">
+            Delete Form
           </Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ pt: 3 }}>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            This action cannot be undone.
+          </Alert>
+          <Typography variant="body1">
+            Are you sure you want to delete the form{" "}
+            <strong>"{deleteConfirm?.name}"</strong>?
+          </Typography>
+          {deleteConfirm && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
+                Form ID: {deleteConfirm.id}
+              </Typography>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                display="block"
+              >
+                Created by: {deleteConfirm.createdBy}
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirm(null)}>Cancel</Button>
+        <Divider />
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button
+            onClick={() => setDeleteConfirm(null)}
+            disabled={deleteMutation.isPending}
+          >
+            Cancel
+          </Button>
           <Button
             onClick={handleDelete}
             color="error"
             variant="contained"
             disabled={deleteMutation.isPending}
+            sx={{ minWidth: 100 }}
           >
-            Delete
+            {deleteMutation.isPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Delete"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

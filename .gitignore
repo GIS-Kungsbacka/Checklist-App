@@ -16,6 +16,9 @@ obj/
 secrets.json
 *.pdb
 
+# Ignore all publish profiles
+**/Properties/PublishProfiles/
+
 ####################################
 # Node / React / Vite
 ####################################
