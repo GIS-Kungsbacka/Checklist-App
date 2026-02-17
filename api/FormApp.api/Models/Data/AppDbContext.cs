@@ -19,7 +19,7 @@ public class AppDbContext : DbContext
         
         // Configure BestallaUppdragFrageformular entity
         modelBuilder.Entity<BestallaUppdragFrageformular>()
-            .ToTable("bestalla_uppdrag_frageformular")
+            .ToTable("bestalla_uppdrag_frageformular","idebank")
             .HasKey(x => x.Gid);
         
         // Map property names to database column names (snake_case to PascalCase)
@@ -65,7 +65,7 @@ public class AppDbContext : DbContext
 
         // Read-only view: bestallningsspecifikation
         modelBuilder.Entity<Bestallningsspecifikation>()
-            .ToView("bestallningsspecifikation")
+            .ToView("bestallningsspecifikation","idebank")
             .HasKey(x => x.BestallningGid);
         modelBuilder.Entity<Bestallningsspecifikation>()
             .Property(x => x.BestallningGid).HasColumnName("bestallning_gid");
