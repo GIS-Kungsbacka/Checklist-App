@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FormApp.Api.Controllers;
 
 [ApiController]
-[Route("admin/ordersummary")]
-[Authorize(Policy = "AdminOnly")]
+[Route("ordersummary")]
 public class BestallningsspecifikationController : ControllerBase
 {
     private readonly IBestallningsspecifikationRepository _repository;

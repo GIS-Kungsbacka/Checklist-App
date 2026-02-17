@@ -8,7 +8,7 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const BASE = "/admin/ordersummary";
+const BASE = "/ordersummary";
 
 export const bestallningsspecifikationApi = {
   getAll: async (): Promise<Bestallningsspecifikation[]> => {
