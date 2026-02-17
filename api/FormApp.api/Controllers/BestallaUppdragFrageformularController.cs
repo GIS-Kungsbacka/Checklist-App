@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FormApp.Api.Controllers;
 
 [ApiController]
-[Route("admin/forms")]
+[Route("admin/checklist")]
 [Authorize(Policy = "AdminOnly")]
 public class BestallaUppdragFrageformularController : ControllerBase
 {

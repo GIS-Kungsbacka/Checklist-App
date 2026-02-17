@@ -2,7 +2,7 @@ using System.Text.Json;
 using FormApp.Api.Models;
 
 namespace FormApp.Api.Data;
-
+// Test data
 public class JsonBestallningsspecifikationRepository : IBestallningsspecifikationRepository
 {
     private readonly string _jsonFilePath;
@@ -47,7 +47,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 KansligInformation = false,
                 FrageformularGid = 1,
                 Dataunderlag = "Kundregister och transaktionsdata",
-                Dataadministrator = "Anna Andersson",
+                Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
                 NyttjandeInterntExternt = "Internt",
                 Leverans = "Rapport i PDF-format",

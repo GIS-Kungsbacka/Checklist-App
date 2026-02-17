@@ -5,22 +5,22 @@
     "BestallareOrganisation": "IT-avdelningen",
     "BestallareTjanstetitel": "Systemansvarig",
     "DatumInkommet": "2024-03-15",
-    "Beskrivning": "Analys av kundregister för segmentering och målgruppsrapporter.",
-    "Nytta": "Förbättrad målgruppsanpassad kommunikation.",
+    "Beskrivning": "Analys av kundregister f\u00F6r segmentering och m\u00E5lgruppsrapporter.",
+    "Nytta": "F\u00F6rb\u00E4ttrad m\u00E5lgruppsanpassad kommunikation.",
     "SistaDatum": "2024-04-30",
     "ForankradChef": true,
     "KansligInformation": false,
     "FrageformularGid": 1,
     "Dataunderlag": "Kundregister och transaktionsdata",
-    "Dataadministrator": "Anna Andersson",
-    "Malgrupper": "Marknadsföring, Försäljning",
+    "Dataadministrator": "Anna",
+    "Malgrupper": "Marknadsf\u00F6ring, F\u00F6rs\u00E4ljning",
     "NyttjandeInterntExternt": "Internt",
     "Leverans": "Rapport i PDF-format",
     "LeveransArbetstimmar": "40 timmar",
     "Kategori": "Dataanalys",
     "KategoriTyp": "Standard",
-    "Prioritet": "Hög",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Projektet är välplanerat och har tillräcklig budget."
+    "AntagenJaNejMotivering": "Projektet \u00E4r v\u00E4lplanerat och har tillr\u00E4cklig budget."
   }
 ]

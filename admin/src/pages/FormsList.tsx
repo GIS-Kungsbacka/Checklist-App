@@ -12,196 +12,144 @@ import {
   TableHead,
   TableRow,
   Typography,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  Switch,
-  FormControlLabel,
   CircularProgress,
   Alert,
-  Tooltip,
   Stack,
   Divider,
   InputAdornment,
   Pagination,
+  Grid,
 } from "@mui/material";
-import { Add, Edit, Delete, Code, Search } from "@mui/icons-material";
+import { Add, Edit, Delete, Search } from "@mui/icons-material";
 import { useState, useMemo } from "react";
-import { formsApi } from "../api/formsApi";
-import type { Form, CreateFormDto } from "../types/form";
+import { bestallaUppdragFrageformularApi } from "../api/bestallaUppdragFrageformularApi";
+import type {
+  BestallaUppdragFrageformular,
+  CreateBestallaUppdragFrageformularDto,
+} from "../types/bestallaUppdragFrageformular";
 
 const ITEMS_PER_PAGE = 10;
+
+const emptyFormData: CreateBestallaUppdragFrageformularDto = {
+  arendernummer: "",
+  dataunderlag: "",
+  dataadministrator: "",
+  malgrupper: "",
+  nyttjandeInterntExternt: "",
+  leverans: "",
+  leveransArbetstimmar: "",
+  kategori: "",
+  kategoriTyp: "",
+  parioritet: "",
+  antagenJaNej: "",
+  antagenJaNejMotivering: "",
+};
 
 export default function FormsList() {
   const queryClient = useQueryClient();
   const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState<Form | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<Form | null>(null);
-  const [schemaError, setSchemaError] = useState<string>("");
+  const [openEdit, setOpenEdit] = useState<BestallaUppdragFrageformular | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<BestallaUppdragFrageformular | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [formData, setFormData] = useState<CreateFormDto>({
-    name: "",
-    description: "",
-    schemaJson: "{}",
-    isActive: true,
+  const [formData, setFormData] = useState<CreateBestallaUppdragFrageformularDto>(emptyFormData);
+
+  const { data: items, isLoading } = useQuery({
+    queryKey: ["bestallaUppdragFrageformular"],
+    queryFn: bestallaUppdragFrageformularApi.getAll,
   });
 
-  const { data: forms, isLoading } = useQuery({
-    queryKey: ["forms"],
-    queryFn: formsApi.getAll,
-  });
-
-  // Filter forms based on search query
-  const filteredForms = useMemo(() => {
-    if (!forms) return [];
-    if (!searchQuery.trim()) return forms;
-
-    const query = searchQuery.toLowerCase().trim();
-    return forms.filter(
-      (form) =>
-        form.name.toLowerCase().includes(query) ||
-        form.description?.toLowerCase().includes(query) ||
-        form.createdBy.toLowerCase().includes(query) ||
-        form.id.toString().includes(query),
+  const filteredItems = useMemo(() => {
+    if (!items) return [];
+    if (!searchQuery.trim()) return items;
+    const q = searchQuery.toLowerCase().trim();
+    return items.filter(
+      (item) =>
+        item.arendernummer?.toLowerCase().includes(q) ||
+        item.dataadministrator?.toLowerCase().includes(q) ||
+        item.kategori?.toLowerCase().includes(q) ||
+        item.dataunderlag?.toLowerCase().includes(q) ||
+        item.gid.toString().includes(q),
     );
-  }, [forms, searchQuery]);
+  }, [items, searchQuery]);
 
-  // Paginate filtered forms
-  const paginatedForms = useMemo(() => {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return filteredForms.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredForms, page]);
+  const paginatedItems = useMemo(() => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    return filteredItems.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredItems, page]);
 
-  const totalPages = Math.ceil(filteredForms.length / ITEMS_PER_PAGE);
-
-  // Reset to page 1 when search changes
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-    setPage(1);
-  };
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
 
   const createMutation = useMutation({
-    mutationFn: formsApi.create,
+    mutationFn: bestallaUppdragFrageformularApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forms"] });
+      queryClient.invalidateQueries({ queryKey: ["bestallaUppdragFrageformular"] });
       setOpenCreate(false);
-      setFormData({
-        name: "",
-        description: "",
-        schemaJson: "{}",
-        isActive: true,
-      });
+      setFormData(emptyFormData);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: CreateFormDto }) =>
-      formsApi.update(id, { ...dto, isActive: dto.isActive ?? true }),
+    mutationFn: ({ gid, dto }: { gid: number; dto: CreateBestallaUppdragFrageformularDto }) =>
+      bestallaUppdragFrageformularApi.update(gid, dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forms"] });
+      queryClient.invalidateQueries({ queryKey: ["bestallaUppdragFrageformular"] });
       setOpenEdit(null);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: formsApi.delete,
+    mutationFn: bestallaUppdragFrageformularApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forms"] });
+      queryClient.invalidateQueries({ queryKey: ["bestallaUppdragFrageformular"] });
       setDeleteConfirm(null);
     },
   });
 
-  const handleDelete = () => {
-    if (deleteConfirm) {
-      deleteMutation.mutate(deleteConfirm.id);
-    }
-  };
-
-  const handleCloseCreate = () => {
-    setOpenCreate(false);
+  const handleEditClick = (item: BestallaUppdragFrageformular) => {
+    setOpenEdit(item);
     setFormData({
-      name: "",
-      description: "",
-      schemaJson: "{}",
-      isActive: true,
+      arendernummer: item.arendernummer ?? "",
+      dataunderlag: item.dataunderlag ?? "",
+      dataadministrator: item.dataadministrator ?? "",
+      malgrupper: item.malgrupper ?? "",
+      nyttjandeInterntExternt: item.nyttjandeInterntExternt ?? "",
+      leverans: item.leverans ?? "",
+      leveransArbetstimmar: item.leveransArbetstimmar ?? "",
+      kategori: item.kategori ?? "",
+      kategoriTyp: item.kategoriTyp ?? "",
+      parioritet: item.parioritet ?? "",
+      antagenJaNej: item.antagenJaNej ?? "",
+      antagenJaNejMotivering: item.antagenJaNejMotivering ?? "",
     });
-    setSchemaError("");
-  };
-
-  const handleCloseEdit = () => {
-    setOpenEdit(null);
-    setSchemaError("");
-  };
-
-  const handleEditClick = (form: Form) => {
-    setOpenEdit(form);
-    setFormData({
-      name: form.name,
-      description: form.description,
-      schemaJson: form.schemaJson,
-      isActive: form.isActive,
-    });
-    setSchemaError("");
-  };
-
-  const validateSchema = (json: string): boolean => {
-    try {
-      const parsed = JSON.parse(json);
-      if (typeof parsed !== "object" || parsed === null) {
-        setSchemaError("Schema must be a valid JSON object");
-        return false;
-      }
-      setSchemaError("");
-      return true;
-    } catch (e) {
-      setSchemaError("Invalid JSON format");
-      return false;
-    }
-  };
-
-  const handleSchemaChange = (value: string) => {
-    setFormData({ ...formData, schemaJson: value });
-    validateSchema(value);
   };
 
   const handleCreate = () => {
-    if (!validateSchema(formData.schemaJson || "{}")) return;
     createMutation.mutate(formData);
   };
 
   const handleUpdate = () => {
     if (!openEdit) return;
-    if (!validateSchema(formData.schemaJson || "{}")) return;
-    updateMutation.mutate({ id: openEdit.id, dto: formData });
+    updateMutation.mutate({ gid: openEdit.gid, dto: formData });
   };
 
-  const formatSchemaPreview = (schemaJson: string): string => {
-    try {
-      const parsed = JSON.parse(schemaJson);
-      if (parsed.fields && Array.isArray(parsed.fields)) {
-        return `${parsed.fields.length} field(s) defined`;
-      }
-      return "No fields defined";
-    } catch {
-      return "Invalid schema";
-    }
+  const handleDelete = () => {
+    if (deleteConfirm) deleteMutation.mutate(deleteConfirm.gid);
+  };
+
+  const setField = (key: keyof CreateBestallaUppdragFrageformularDto, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   if (isLoading) {
     return (
       <Container maxWidth="xl">
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "60vh",
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
           <CircularProgress size={60} />
         </Box>
       </Container>
@@ -210,20 +158,13 @@ export default function FormsList() {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={4}
-        flexWrap="wrap"
-        gap={2}
-      >
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
         <Box>
           <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-            Forms Management
+            Beställa uppdrag – frågeformulär
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Create, edit, and manage your forms
+            Skapa, redigera och ta bort poster
           </Typography>
         </Box>
         <Button
@@ -231,28 +172,24 @@ export default function FormsList() {
           startIcon={<Add />}
           onClick={() => {
             setOpenCreate(true);
-            setFormData({
-              name: "",
-              description: "",
-              schemaJson: "{}",
-              isActive: true,
-            });
-            setSchemaError("");
+            setFormData(emptyFormData);
           }}
           size="large"
           sx={{ height: 42 }}
         >
-          Create Form
+          Skapa ny
         </Button>
       </Box>
 
-      {/* Search Bar */}
       <Box mb={3}>
         <TextField
           fullWidth
-          placeholder="Search forms by name, description, creator, or ID..."
+          placeholder="Sök på ärendenummer, dataadministratör, kategori, dataunderlag eller GID..."
           value={searchQuery}
-          onChange={(e) => handleSearchChange(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setPage(1);
+          }}
           slotProps={{
             input: {
               startAdornment: (
@@ -262,177 +199,89 @@ export default function FormsList() {
               ),
             },
           }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "background.paper",
-            },
-          }}
+          sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "background.paper" } }}
         />
         {searchQuery && (
-          <Typography
-            variant="caption"
-            color="text.secondary"
-            sx={{ mt: 1, display: "block" }}
-          >
-            Showing {filteredForms.length} of {forms?.length || 0} forms
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+            Visar {filteredItems.length} av {items?.length ?? 0} poster
           </Typography>
         )}
       </Box>
 
       {createMutation.isError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          Failed to create form. Please try again.
-        </Alert>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>Kunde inte skapa. Försök igen.</Alert>
       )}
-
       {updateMutation.isError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          Failed to update form. Please try again.
-        </Alert>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>Kunde inte uppdatera. Försök igen.</Alert>
       )}
-
       {deleteMutation.isError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          Failed to delete form. Please try again.
-        </Alert>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>Kunde inte ta bort. Försök igen.</Alert>
       )}
 
-      <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
-        <Table>
+      <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2, overflowX: "auto" }}>
+        <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: "grey.50" }}>
-              <TableCell sx={{ fontWeight: 600 }}>ID</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Schema</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Created By</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Created At</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600 }}>
-                Actions
-              </TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>GID</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Ärendenummer</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Dataunderlag</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Dataadministratör</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Målgrupper</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Nyttjande</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Leverans</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Kategori</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Prioritet</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Antagen</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 600 }}>Åtgärder</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedForms.map((form) => (
-              <TableRow
-                key={form.id}
-                sx={{
-                  "&:hover": {
-                    backgroundColor: "action.hover",
-                  },
-                }}
-              >
-                <TableCell>{form.id}</TableCell>
-                <TableCell>
-                  <Typography variant="body2" fontWeight={500}>
-                    {form.name}
-                  </Typography>
+            {paginatedItems.map((item) => (
+              <TableRow key={item.gid} sx={{ "&:hover": { backgroundColor: "action.hover" } }}>
+                <TableCell>{item.gid}</TableCell>
+                <TableCell>{item.arendernummer ?? "-"}</TableCell>
+                <TableCell sx={{ maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {item.dataunderlag ?? "-"}
                 </TableCell>
-                <TableCell>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      maxWidth: 200,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {form.description || "-"}
-                  </Typography>
+                <TableCell>{item.dataadministrator ?? "-"}</TableCell>
+                <TableCell sx={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {item.malgrupper ?? "-"}
                 </TableCell>
-                <TableCell>
-                  <Tooltip title={form.schemaJson} arrow>
-                    <Chip
-                      icon={<Code />}
-                      label={formatSchemaPreview(form.schemaJson)}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </Tooltip>
+                <TableCell>{item.nyttjandeInterntExternt ?? "-"}</TableCell>
+                <TableCell sx={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {item.leverans ?? "-"}
                 </TableCell>
-                <TableCell>
-                  <Chip
-                    label={form.isActive ? "Active" : "Inactive"}
-                    color={form.isActive ? "success" : "default"}
-                    size="small"
-                  />
-                </TableCell>
-                <TableCell>{form.createdBy}</TableCell>
-                <TableCell>
-                  {new Date(form.createdAt).toLocaleDateString()}
-                </TableCell>
+                <TableCell>{item.kategori ?? "-"}</TableCell>
+                <TableCell>{item.parioritet ?? "-"}</TableCell>
+                <TableCell>{item.antagenJaNej ?? "-"}</TableCell>
                 <TableCell align="right">
-                  <Stack
-                    direction="row"
-                    spacing={0.5}
-                    justifyContent="flex-end"
-                  >
-                    <Tooltip title="Edit" arrow>
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditClick(form)}
-                        color="primary"
-                      >
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete" arrow>
-                      <IconButton
-                        size="small"
-                        onClick={() => setDeleteConfirm(form)}
-                        color="error"
-                      >
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                  <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                    <IconButton size="small" onClick={() => handleEditClick(item)} color="primary">
+                      <Edit fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" onClick={() => setDeleteConfirm(item)} color="error">
+                      <Delete fontSize="small" />
+                    </IconButton>
                   </Stack>
                 </TableCell>
               </TableRow>
             ))}
-            {paginatedForms.length === 0 && (
+            {paginatedItems.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
-                  <Box>
-                    <Typography
-                      variant="h6"
-                      color="text.secondary"
-                      gutterBottom
+                <TableCell colSpan={11} align="center" sx={{ py: 6 }}>
+                  <Typography color="text.secondary">
+                    {searchQuery ? "Inga poster matchar sökningen" : "Inga poster. Skapa en för att börja."}
+                  </Typography>
+                  {!searchQuery && (
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={() => setOpenCreate(true)}
+                      sx={{ mt: 2 }}
                     >
-                      {searchQuery
-                        ? "No forms match your search"
-                        : "No forms found"}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ mb: 2 }}
-                    >
-                      {searchQuery
-                        ? "Try adjusting your search query"
-                        : "Create your first form to get started."}
-                    </Typography>
-                    {!searchQuery && (
-                      <Button
-                        variant="contained"
-                        startIcon={<Add />}
-                        onClick={() => {
-                          setOpenCreate(true);
-                          setFormData({
-                            name: "",
-                            description: "",
-                            schemaJson: "{}",
-                            isActive: true,
-                          });
-                          setSchemaError("");
-                        }}
-                      >
-                        Create Form
-                      </Button>
-                    )}
-                  </Box>
+                      Skapa ny
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             )}
@@ -440,21 +289,12 @@ export default function FormsList() {
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
-      {filteredForms.length > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            mt: 4,
-            mb: 2,
-          }}
-        >
+      {filteredItems.length > 0 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
           <Pagination
             count={totalPages}
             page={page}
-            onChange={(_event, value) => setPage(value)}
+            onChange={(_e, value) => setPage(value)}
             color="primary"
             size="large"
             showFirstButton
@@ -464,284 +304,109 @@ export default function FormsList() {
       )}
 
       {/* Create Dialog */}
-      <Dialog
-        open={openCreate}
-        onClose={handleCloseCreate}
-        maxWidth="md"
-        fullWidth
-        slotProps={{
-          paper: {
-            sx: { borderRadius: 2 },
-          },
-        }}
-      >
-        <DialogTitle sx={{ pb: 1 }}>
-          <Typography variant="h5" fontWeight={600}>
-            Create New Form
-          </Typography>
-        </DialogTitle>
+      <Dialog open={openCreate} onClose={() => setOpenCreate(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Skapa ny post</DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
-          <Stack spacing={3}>
-            <TextField
-              fullWidth
-              label="Form Name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-              helperText="Enter a descriptive name for this form"
-              error={createMutation.isError}
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              multiline
-              rows={3}
-              helperText="Optional description of what this form is used for"
-            />
-            <Box>
-              <TextField
-                fullWidth
-                label="Schema JSON"
-                value={formData.schemaJson}
-                onChange={(e) => handleSchemaChange(e.target.value)}
-                multiline
-                rows={8}
-                error={!!schemaError}
-                helperText={
-                  schemaError ||
-                  'JSON schema defining the form structure. Example: {"fields": [{"name": "email", "label": "Email", "type": "email", "required": true}]}'
-                }
-                sx={{
-                  "& .MuiInputBase-root": {
-                    fontFamily: "monospace",
-                    fontSize: "0.875rem",
-                  },
-                }}
-              />
-              {schemaError && (
-                <Alert severity="error" sx={{ mt: 1 }}>
-                  {schemaError}
-                </Alert>
-              )}
-            </Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isActive ?? true}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isActive: e.target.checked })
-                  }
+          <Grid container spacing={2}>
+            {(
+              [
+                ["arendernummer", "Ärendenummer"],
+                ["dataunderlag", "Dataunderlag"],
+                ["dataadministrator", "Dataadministratör"],
+                ["malgrupper", "Målgrupper"],
+                ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
+                ["leverans", "Leverans"],
+                ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
+                ["kategori", "Kategori"],
+                ["kategoriTyp", "Kategori typ"],
+                ["parioritet", "Prioritet"],
+                ["antagenJaNej", "Antagen ja/nej"],
+                ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+              ] as const
+            ).map(([key, label]) => (
+              <Grid size={{ xs: 12, sm: 6 }} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  value={formData[key] ?? ""}
+                  onChange={(e) => setField(key, e.target.value)}
+                  multiline={key === "antagenJaNejMotivering"}
+                  rows={key === "antagenJaNejMotivering" ? 2 : 1}
                 />
-              }
-              label="Active"
-            />
-          </Stack>
+              </Grid>
+            ))}
+          </Grid>
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2.5 }}>
-          <Button
-            onClick={handleCloseCreate}
-            disabled={createMutation.isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreate}
-            variant="contained"
-            disabled={
-              !formData.name || !!schemaError || createMutation.isPending
-            }
-            sx={{ minWidth: 100 }}
-          >
-            {createMutation.isPending ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              "Create"
-            )}
+          <Button onClick={() => setOpenCreate(false)} disabled={createMutation.isPending}>Avbryt</Button>
+          <Button onClick={handleCreate} variant="contained" disabled={createMutation.isPending} sx={{ minWidth: 100 }}>
+            {createMutation.isPending ? <CircularProgress size={20} color="inherit" /> : "Skapa"}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog
-        open={openEdit !== null}
-        onClose={handleCloseEdit}
-        maxWidth="md"
-        fullWidth
-        slotProps={{
-          paper: {
-            sx: { borderRadius: 2 },
-          },
-        }}
-      >
-        <DialogTitle sx={{ pb: 1 }}>
-          <Typography variant="h5" fontWeight={600}>
-            Edit Form
-          </Typography>
-          {openEdit && (
-            <Typography variant="caption" color="text.secondary">
-              Form ID: {openEdit.id}
-            </Typography>
-          )}
-        </DialogTitle>
+      <Dialog open={openEdit !== null} onClose={() => setOpenEdit(null)} maxWidth="md" fullWidth>
+        <DialogTitle>Redigera post {openEdit?.gid}</DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
-          <Stack spacing={3}>
-            <TextField
-              fullWidth
-              label="Form Name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              required
-              helperText="Enter a descriptive name for this form"
-              error={updateMutation.isError}
-            />
-            <TextField
-              fullWidth
-              label="Description"
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              multiline
-              rows={3}
-              helperText="Optional description of what this form is used for"
-            />
-            <Box>
-              <TextField
-                fullWidth
-                label="Schema JSON"
-                value={formData.schemaJson}
-                onChange={(e) => handleSchemaChange(e.target.value)}
-                multiline
-                rows={8}
-                error={!!schemaError}
-                helperText={
-                  schemaError ||
-                  'JSON schema defining the form structure. Example: {"fields": [{"name": "email", "label": "Email", "type": "email", "required": true}]}'
-                }
-                sx={{
-                  "& .MuiInputBase-root": {
-                    fontFamily: "monospace",
-                    fontSize: "0.875rem",
-                  },
-                }}
-              />
-              {schemaError && (
-                <Alert severity="error" sx={{ mt: 1 }}>
-                  {schemaError}
-                </Alert>
-              )}
-            </Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.isActive ?? true}
-                  onChange={(e) =>
-                    setFormData({ ...formData, isActive: e.target.checked })
-                  }
+          <Grid container spacing={2}>
+            {(
+              [
+                ["arendernummer", "Ärendenummer"],
+                ["dataunderlag", "Dataunderlag"],
+                ["dataadministrator", "Dataadministratör"],
+                ["malgrupper", "Målgrupper"],
+                ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
+                ["leverans", "Leverans"],
+                ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
+                ["kategori", "Kategori"],
+                ["kategoriTyp", "Kategori typ"],
+                ["parioritet", "Prioritet"],
+                ["antagenJaNej", "Antagen ja/nej"],
+                ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+              ] as const
+            ).map(([key, label]) => (
+              <Grid size={{ xs: 12, sm: 6 }} key={key}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  value={formData[key] ?? ""}
+                  onChange={(e) => setField(key, e.target.value)}
+                  multiline={key === "antagenJaNejMotivering"}
+                  rows={key === "antagenJaNejMotivering" ? 2 : 1}
                 />
-              }
-              label="Active"
-            />
-          </Stack>
+              </Grid>
+            ))}
+          </Grid>
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={handleCloseEdit} disabled={updateMutation.isPending}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpdate}
-            variant="contained"
-            disabled={
-              !formData.name || !!schemaError || updateMutation.isPending
-            }
-            sx={{ minWidth: 100 }}
-          >
-            {updateMutation.isPending ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              "Update"
-            )}
+          <Button onClick={() => setOpenEdit(null)} disabled={updateMutation.isPending}>Avbryt</Button>
+          <Button onClick={handleUpdate} variant="contained" disabled={updateMutation.isPending} sx={{ minWidth: 100 }}>
+            {updateMutation.isPending ? <CircularProgress size={20} color="inherit" /> : "Spara"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={deleteConfirm !== null}
-        onClose={() => setDeleteConfirm(null)}
-        maxWidth="sm"
-        fullWidth
-        slotProps={{
-          paper: {
-            sx: { borderRadius: 2 },
-          },
-        }}
-      >
-        <DialogTitle sx={{ pb: 1 }}>
-          <Typography variant="h5" fontWeight={600} color="error">
-            Delete Form
-          </Typography>
-        </DialogTitle>
+      {/* Delete Dialog */}
+      <Dialog open={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: "error" }}>Ta bort post</DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            This action cannot be undone.
-          </Alert>
-          <Typography variant="body1">
-            Are you sure you want to delete the form{" "}
-            <strong>"{deleteConfirm?.name}"</strong>?
+          <Alert severity="warning" sx={{ mb: 2 }}>Åtgärden kan inte ångras.</Alert>
+          <Typography>
+            Vill du ta bort posten med GID <strong>{deleteConfirm?.gid}</strong>
+            {deleteConfirm?.arendernummer ? <> (ärendenummer: {deleteConfirm.arendernummer})</> : null}?
           </Typography>
-          {deleteConfirm && (
-            <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                display="block"
-              >
-                Form ID: {deleteConfirm.id}
-              </Typography>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                display="block"
-              >
-                Created by: {deleteConfirm.createdBy}
-              </Typography>
-            </Box>
-          )}
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2.5 }}>
-          <Button
-            onClick={() => setDeleteConfirm(null)}
-            disabled={deleteMutation.isPending}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDelete}
-            color="error"
-            variant="contained"
-            disabled={deleteMutation.isPending}
-            sx={{ minWidth: 100 }}
-          >
-            {deleteMutation.isPending ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              "Delete"
-            )}
+          <Button onClick={() => setDeleteConfirm(null)} disabled={deleteMutation.isPending}>Avbryt</Button>
+          <Button onClick={handleDelete} color="error" variant="contained" disabled={deleteMutation.isPending} sx={{ minWidth: 100 }}>
+            {deleteMutation.isPending ? <CircularProgress size={20} color="inherit" /> : "Ta bort"}
           </Button>
         </DialogActions>
       </Dialog>

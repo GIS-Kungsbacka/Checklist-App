@@ -6,7 +6,11 @@ export default function Header() {
     <AppBar position="static" elevation={2}>
       <Toolbar>
         <AdminPanelSettings sx={{ mr: 2, fontSize: 28 }} />
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1, fontWeight: 600 }}
+        >
           Checklist Admin Panel
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
