@@ -72,7 +72,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
         {
             var item = new BestallaUppdragFrageformular
             {
-                Arendernummer = dto.Arendernummer,
+                Arendenummer = dto.Arendenummer,
                 Dataunderlag = dto.Dataunderlag,
                 Dataadministrator = dto.Dataadministrator,
                 Malgrupper = dto.Malgrupper,
@@ -116,7 +116,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
             var item = new BestallaUppdragFrageformular
             {
                 Gid = gid,
-                Arendernummer = dto.Arendernummer,
+                Arendenummer = dto.Arendenummer,
                 Dataunderlag = dto.Dataunderlag,
                 Dataadministrator = dto.Dataadministrator,
                 Malgrupper = dto.Malgrupper,
@@ -176,7 +176,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
 public class CreateBestallaUppdragFrageformularDto
 {
     [MaxLength(255)]
-    public string? Arendernummer { get; set; }
+    public string? Arendenummer { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }
@@ -215,7 +215,7 @@ public class CreateBestallaUppdragFrageformularDto
 public class UpdateBestallaUppdragFrageformularDto
 {
     [MaxLength(255)]
-    public string? Arendernummer { get; set; }
+    public string? Arendenummer { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }

@@ -39,7 +39,7 @@ public class DbContextBestallaUppdragFrageformularRepository : IBestallaUppdragF
             return null;
         }
 
-        existing.Arendernummer = item.Arendernummer;
+        existing.Arendenummer = item.Arendenummer;
         existing.Dataunderlag = item.Dataunderlag;
         existing.Dataadministrator = item.Dataadministrator;
         existing.Malgrupper = item.Malgrupper;

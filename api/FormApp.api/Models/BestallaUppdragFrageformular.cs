@@ -7,7 +7,7 @@ public class BestallaUppdragFrageformular
     public int Gid { get; set; }
 
     [MaxLength(255)]
-    public string? Arendernummer { get; set; }
+    public string? Arendenummer { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }

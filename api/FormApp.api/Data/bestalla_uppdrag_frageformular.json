@@ -1,7 +1,7 @@
 [
   {
     "Gid": 1,
-    "Arendernummer": "AR-2024-001",
+    "Arendenummer": "AR-2024-001",
     "Dataunderlag": "Kundregister och transaktionsdata",
     "Dataadministrator": "Anna",
     "Malgrupper": "Marknadsf\u00F6ring, F\u00F6rs\u00E4ljning",
@@ -16,7 +16,7 @@
   },
   {
     "Gid": 2,
-    "Arendernummer": "AR-2024-002",
+    "Arendenummer": "AR-2024-002",
     "Dataunderlag": "Produktkatalog och lagerdata",
     "Dataadministrator": "Erik",
     "Malgrupper": "Logistik, Lager",
@@ -31,7 +31,7 @@
   },
   {
     "Gid": 3,
-    "Arendernummer": "AR-2024-003",
+    "Arendenummer": "AR-2024-003",
     "Dataunderlag": "Anv\u00E4ndardata och beteendeanalys",
     "Dataadministrator": "Maria",
     "Malgrupper": "IT, Utveckling",
@@ -46,7 +46,7 @@
   },
   {
     "Gid": 4,
-    "Arendernummer": "AR-2024-004",
+    "Arendenummer": "AR-2024-004",
     "Dataunderlag": "Ekonomiska rapporter och budgetdata",
     "Dataadministrator": "Lars",
     "Malgrupper": "Ekonomi, Ledning",
@@ -61,7 +61,7 @@
   },
   {
     "Gid": 5,
-    "Arendernummer": "AR-2024-005",
+    "Arendenummer": "AR-2024-005",
     "Dataunderlag": "Kundfeedback och n\u00F6jdhetsunders\u00F6kningar",
     "Dataadministrator": "Sara",
     "Malgrupper": "Kundservice, Marknadsf\u00F6ring",

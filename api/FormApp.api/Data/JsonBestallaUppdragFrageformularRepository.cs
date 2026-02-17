@@ -44,7 +44,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
             new BestallaUppdragFrageformular
             {
                 Gid = 1,
-                Arendernummer = "AR-2024-001",
+                Arendenummer = "AR-2024-001",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -60,7 +60,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
             new BestallaUppdragFrageformular
             {
                 Gid = 2,
-                Arendernummer = "AR-2024-002",
+                Arendenummer = "AR-2024-002",
                 Dataunderlag = "Produktkatalog och lagerdata",
                 Dataadministrator = "Erik",
                 Malgrupper = "Logistik, Lager",
@@ -76,7 +76,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
             new BestallaUppdragFrageformular
             {
                 Gid = 3,
-                Arendernummer = "AR-2024-003",
+                Arendenummer = "AR-2024-003",
                 Dataunderlag = "Användardata och beteendeanalys",
                 Dataadministrator = "Maria",
                 Malgrupper = "IT, Utveckling",
@@ -92,7 +92,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
             new BestallaUppdragFrageformular
             {
                 Gid = 4,
-                Arendernummer = "AR-2024-004",
+                Arendenummer = "AR-2024-004",
                 Dataunderlag = "Ekonomiska rapporter och budgetdata",
                 Dataadministrator = "Lars",
                 Malgrupper = "Ekonomi, Ledning",
@@ -108,7 +108,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
             new BestallaUppdragFrageformular
             {
                 Gid = 5,
-                Arendernummer = "AR-2024-005",
+                Arendenummer = "AR-2024-005",
                 Dataunderlag = "Kundfeedback och nöjdhetsundersökningar",
                 Dataadministrator = "Sara",
                 Malgrupper = "Kundservice, Marknadsföring",
@@ -247,7 +247,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
             return Task.FromResult<BestallaUppdragFrageformular?>(null);
         }
 
-        existing.Arendernummer = item.Arendernummer;
+        existing.Arendenummer = item.Arendenummer;
         existing.Dataunderlag = item.Dataunderlag;
         existing.Dataadministrator = item.Dataadministrator;
         existing.Malgrupper = item.Malgrupper;

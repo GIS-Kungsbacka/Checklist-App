@@ -27,8 +27,8 @@ public class AppDbContext : DbContext
             .Property(x => x.Gid)
             .HasColumnName("gid");
         modelBuilder.Entity<BestallaUppdragFrageformular>()
-            .Property(x => x.Arendernummer)
-            .HasColumnName("arendernummer");
+            .Property(x => x.Arendenummer)
+            .HasColumnName("arendenummer");
         modelBuilder.Entity<BestallaUppdragFrageformular>()
             .Property(x => x.Dataunderlag)
             .HasColumnName("dataunderlag");

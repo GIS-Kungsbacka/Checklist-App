@@ -36,7 +36,7 @@ import type {
 const ITEMS_PER_PAGE = 10;
 
 const emptyFormData: CreateBestallaUppdragFrageformularDto = {
-  arendernummer: "",
+  arendenummer: "",
   dataunderlag: "",
   dataadministrator: "",
   malgrupper: "",
@@ -53,11 +53,15 @@ const emptyFormData: CreateBestallaUppdragFrageformularDto = {
 export default function FormsList() {
   const queryClient = useQueryClient();
   const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState<BestallaUppdragFrageformular | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<BestallaUppdragFrageformular | null>(null);
+  const [openEdit, setOpenEdit] = useState<BestallaUppdragFrageformular | null>(
+    null,
+  );
+  const [deleteConfirm, setDeleteConfirm] =
+    useState<BestallaUppdragFrageformular | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [formData, setFormData] = useState<CreateBestallaUppdragFrageformularDto>(emptyFormData);
+  const [formData, setFormData] =
+    useState<CreateBestallaUppdragFrageformularDto>(emptyFormData);
 
   const { data: items, isLoading } = useQuery({
     queryKey: ["bestallaUppdragFrageformular"],
@@ -70,7 +74,7 @@ export default function FormsList() {
     const q = searchQuery.toLowerCase().trim();
     return items.filter(
       (item) =>
-        item.arendernummer?.toLowerCase().includes(q) ||
+        item.arendenummer?.toLowerCase().includes(q) ||
         item.dataadministrator?.toLowerCase().includes(q) ||
         item.kategori?.toLowerCase().includes(q) ||
         item.dataunderlag?.toLowerCase().includes(q) ||
@@ -83,22 +87,34 @@ export default function FormsList() {
     return filteredItems.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredItems, page]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
+  );
 
   const createMutation = useMutation({
     mutationFn: bestallaUppdragFrageformularApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bestallaUppdragFrageformular"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bestallaUppdragFrageformular"],
+      });
       setOpenCreate(false);
       setFormData(emptyFormData);
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ gid, dto }: { gid: number; dto: CreateBestallaUppdragFrageformularDto }) =>
-      bestallaUppdragFrageformularApi.update(gid, dto),
+    mutationFn: ({
+      gid,
+      dto,
+    }: {
+      gid: number;
+      dto: CreateBestallaUppdragFrageformularDto;
+    }) => bestallaUppdragFrageformularApi.update(gid, dto),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bestallaUppdragFrageformular"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bestallaUppdragFrageformular"],
+      });
       setOpenEdit(null);
     },
   });
@@ -106,7 +122,9 @@ export default function FormsList() {
   const deleteMutation = useMutation({
     mutationFn: bestallaUppdragFrageformularApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bestallaUppdragFrageformular"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bestallaUppdragFrageformular"],
+      });
       setDeleteConfirm(null);
     },
   });
@@ -114,7 +132,7 @@ export default function FormsList() {
   const handleEditClick = (item: BestallaUppdragFrageformular) => {
     setOpenEdit(item);
     setFormData({
-      arendernummer: item.arendernummer ?? "",
+      arendenummer: item.arendenummer ?? "",
       dataunderlag: item.dataunderlag ?? "",
       dataadministrator: item.dataadministrator ?? "",
       malgrupper: item.malgrupper ?? "",
@@ -142,14 +160,24 @@ export default function FormsList() {
     if (deleteConfirm) deleteMutation.mutate(deleteConfirm.gid);
   };
 
-  const setField = (key: keyof CreateBestallaUppdragFrageformularDto, value: string) => {
+  const setField = (
+    key: keyof CreateBestallaUppdragFrageformularDto,
+    value: string,
+  ) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   if (isLoading) {
     return (
       <Container maxWidth="xl">
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
           <CircularProgress size={60} />
         </Box>
       </Container>
@@ -158,7 +186,14 @@ export default function FormsList() {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={4}
+        flexWrap="wrap"
+        gap={2}
+      >
         <Box>
           <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
             Beställa uppdrag – frågeformulär
@@ -199,26 +234,42 @@ export default function FormsList() {
               ),
             },
           }}
-          sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "background.paper" } }}
+          sx={{
+            "& .MuiOutlinedInput-root": { backgroundColor: "background.paper" },
+          }}
         />
         {searchQuery && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: 1, display: "block" }}
+          >
             Visar {filteredItems.length} av {items?.length ?? 0} poster
           </Typography>
         )}
       </Box>
 
       {createMutation.isError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>Kunde inte skapa. Försök igen.</Alert>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          Kunde inte skapa. Försök igen.
+        </Alert>
       )}
       {updateMutation.isError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>Kunde inte uppdatera. Försök igen.</Alert>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          Kunde inte uppdatera. Försök igen.
+        </Alert>
       )}
       {deleteMutation.isError && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>Kunde inte ta bort. Försök igen.</Alert>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          Kunde inte ta bort. Försök igen.
+        </Alert>
       )}
 
-      <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2, overflowX: "auto" }}>
+      <TableContainer
+        component={Paper}
+        elevation={2}
+        sx={{ borderRadius: 2, overflowX: "auto" }}
+      >
         <Table size="small">
           <TableHead>
             <TableRow sx={{ backgroundColor: "grey.50" }}>
@@ -232,34 +283,72 @@ export default function FormsList() {
               <TableCell sx={{ fontWeight: 600 }}>Kategori</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Prioritet</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Antagen</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600 }}>Åtgärder</TableCell>
+              <TableCell align="right" sx={{ fontWeight: 600 }}>
+                Åtgärder
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedItems.map((item) => (
-              <TableRow key={item.gid} sx={{ "&:hover": { backgroundColor: "action.hover" } }}>
+              <TableRow
+                key={item.gid}
+                sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+              >
                 <TableCell>{item.gid}</TableCell>
-                <TableCell>{item.arendernummer ?? "-"}</TableCell>
-                <TableCell sx={{ maxWidth: 140, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <TableCell>{item.arendenummer ?? "-"}</TableCell>
+                <TableCell
+                  sx={{
+                    maxWidth: 140,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {item.dataunderlag ?? "-"}
                 </TableCell>
                 <TableCell>{item.dataadministrator ?? "-"}</TableCell>
-                <TableCell sx={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <TableCell
+                  sx={{
+                    maxWidth: 120,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {item.malgrupper ?? "-"}
                 </TableCell>
                 <TableCell>{item.nyttjandeInterntExternt ?? "-"}</TableCell>
-                <TableCell sx={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <TableCell
+                  sx={{
+                    maxWidth: 120,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {item.leverans ?? "-"}
                 </TableCell>
                 <TableCell>{item.kategori ?? "-"}</TableCell>
                 <TableCell>{item.parioritet ?? "-"}</TableCell>
                 <TableCell>{item.antagenJaNej ?? "-"}</TableCell>
                 <TableCell align="right">
-                  <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                    <IconButton size="small" onClick={() => handleEditClick(item)} color="primary">
+                  <Stack
+                    direction="row"
+                    spacing={0.5}
+                    justifyContent="flex-end"
+                  >
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditClick(item)}
+                      color="primary"
+                    >
                       <Edit fontSize="small" />
                     </IconButton>
-                    <IconButton size="small" onClick={() => setDeleteConfirm(item)} color="error">
+                    <IconButton
+                      size="small"
+                      onClick={() => setDeleteConfirm(item)}
+                      color="error"
+                    >
                       <Delete fontSize="small" />
                     </IconButton>
                   </Stack>
@@ -270,7 +359,9 @@ export default function FormsList() {
               <TableRow>
                 <TableCell colSpan={11} align="center" sx={{ py: 6 }}>
                   <Typography color="text.secondary">
-                    {searchQuery ? "Inga poster matchar sökningen" : "Inga poster. Skapa en för att börja."}
+                    {searchQuery
+                      ? "Inga poster matchar sökningen"
+                      : "Inga poster. Skapa en för att börja."}
                   </Typography>
                   {!searchQuery && (
                     <Button
@@ -304,14 +395,19 @@ export default function FormsList() {
       )}
 
       {/* Create Dialog */}
-      <Dialog open={openCreate} onClose={() => setOpenCreate(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Skapa ny post</DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
           <Grid container spacing={2}>
             {(
               [
-                ["arendernummer", "Ärendenummer"],
+                ["arendenummer", "Ärendenummer"],
                 ["dataunderlag", "Dataunderlag"],
                 ["dataadministrator", "Dataadministratör"],
                 ["malgrupper", "Målgrupper"],
@@ -340,22 +436,41 @@ export default function FormsList() {
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={() => setOpenCreate(false)} disabled={createMutation.isPending}>Avbryt</Button>
-          <Button onClick={handleCreate} variant="contained" disabled={createMutation.isPending} sx={{ minWidth: 100 }}>
-            {createMutation.isPending ? <CircularProgress size={20} color="inherit" /> : "Skapa"}
+          <Button
+            onClick={() => setOpenCreate(false)}
+            disabled={createMutation.isPending}
+          >
+            Avbryt
+          </Button>
+          <Button
+            onClick={handleCreate}
+            variant="contained"
+            disabled={createMutation.isPending}
+            sx={{ minWidth: 100 }}
+          >
+            {createMutation.isPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Skapa"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={openEdit !== null} onClose={() => setOpenEdit(null)} maxWidth="md" fullWidth>
+      <Dialog
+        open={openEdit !== null}
+        onClose={() => setOpenEdit(null)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Redigera post {openEdit?.gid}</DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
           <Grid container spacing={2}>
             {(
               [
-                ["arendernummer", "Ärendenummer"],
+                ["arendenummer", "Ärendenummer"],
                 ["dataunderlag", "Dataunderlag"],
                 ["dataadministrator", "Dataadministratör"],
                 ["malgrupper", "Målgrupper"],
@@ -384,29 +499,68 @@ export default function FormsList() {
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={() => setOpenEdit(null)} disabled={updateMutation.isPending}>Avbryt</Button>
-          <Button onClick={handleUpdate} variant="contained" disabled={updateMutation.isPending} sx={{ minWidth: 100 }}>
-            {updateMutation.isPending ? <CircularProgress size={20} color="inherit" /> : "Spara"}
+          <Button
+            onClick={() => setOpenEdit(null)}
+            disabled={updateMutation.isPending}
+          >
+            Avbryt
+          </Button>
+          <Button
+            onClick={handleUpdate}
+            variant="contained"
+            disabled={updateMutation.isPending}
+            sx={{ minWidth: 100 }}
+          >
+            {updateMutation.isPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Spara"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Dialog */}
-      <Dialog open={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle sx={{ color: "error" }}>Ta bort post</DialogTitle>
         <Divider />
         <DialogContent sx={{ pt: 3 }}>
-          <Alert severity="warning" sx={{ mb: 2 }}>Åtgärden kan inte ångras.</Alert>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Åtgärden kan inte ångras.
+          </Alert>
           <Typography>
             Vill du ta bort posten med GID <strong>{deleteConfirm?.gid}</strong>
-            {deleteConfirm?.arendernummer ? <> (ärendenummer: {deleteConfirm.arendernummer})</> : null}?
+            {deleteConfirm?.arendenummer ? (
+              <> (ärendenummer: {deleteConfirm.arendenummer})</>
+            ) : null}
+            ?
           </Typography>
         </DialogContent>
         <Divider />
         <DialogActions sx={{ p: 2.5 }}>
-          <Button onClick={() => setDeleteConfirm(null)} disabled={deleteMutation.isPending}>Avbryt</Button>
-          <Button onClick={handleDelete} color="error" variant="contained" disabled={deleteMutation.isPending} sx={{ minWidth: 100 }}>
-            {deleteMutation.isPending ? <CircularProgress size={20} color="inherit" /> : "Ta bort"}
+          <Button
+            onClick={() => setDeleteConfirm(null)}
+            disabled={deleteMutation.isPending}
+          >
+            Avbryt
+          </Button>
+          <Button
+            onClick={handleDelete}
+            color="error"
+            variant="contained"
+            disabled={deleteMutation.isPending}
+            sx={{ minWidth: 100 }}
+          >
+            {deleteMutation.isPending ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Ta bort"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,6 +1,6 @@
 export interface BestallaUppdragFrageformular {
   gid: number;
-  arendernummer?: string;
+  arendenummer?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;
@@ -15,7 +15,7 @@ export interface BestallaUppdragFrageformular {
 }
 
 export interface CreateBestallaUppdragFrageformularDto {
-  arendernummer?: string;
+  arendenummer?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;
@@ -30,7 +30,7 @@ export interface CreateBestallaUppdragFrageformularDto {
 }
 
 export interface UpdateBestallaUppdragFrageformularDto {
-  arendernummer?: string;
+  arendenummer?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;
