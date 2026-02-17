@@ -1,0 +1,26 @@
+[
+  {
+    "BestallningGid": 1,
+    "Arendenummer": "AR-2024-001",
+    "BestallareOrganisation": "IT-avdelningen",
+    "BestallareTjanstetitel": "Systemansvarig",
+    "DatumInkommet": "2024-03-15",
+    "Beskrivning": "Analys av kundregister för segmentering och målgruppsrapporter.",
+    "Nytta": "Förbättrad målgruppsanpassad kommunikation.",
+    "SistaDatum": "2024-04-30",
+    "ForankradChef": true,
+    "KansligInformation": false,
+    "FrageformularGid": 1,
+    "Dataunderlag": "Kundregister och transaktionsdata",
+    "Dataadministrator": "Anna Andersson",
+    "Malgrupper": "Marknadsföring, Försäljning",
+    "NyttjandeInterntExternt": "Internt",
+    "Leverans": "Rapport i PDF-format",
+    "LeveransArbetstimmar": "40 timmar",
+    "Kategori": "Dataanalys",
+    "KategoriTyp": "Standard",
+    "Prioritet": "Hög",
+    "AntagenJaNej": "Ja",
+    "AntagenJaNejMotivering": "Projektet är välplanerat och har tillräcklig budget."
+  }
+]
