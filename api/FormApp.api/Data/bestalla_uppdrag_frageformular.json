@@ -10,9 +10,10 @@
     "LeveransArbetstimmar": "40 timmar",
     "Kategori": "Dataanalys",
     "KategoriTyp": "Standard",
-    "Parioritet": "H\u00F6g",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Projektet \u00E4r v\u00E4lplanerat och har tillr\u00E4cklig budget"
+    "AntagenJaNejMotivering": "Projektet \u00E4r v\u00E4lplanerat och har tillr\u00E4cklig budget",
+    "Handlaggare":null
   },
   {
     "Gid": 2,
@@ -25,9 +26,10 @@
     "LeveransArbetstimmar": "60 timmar",
     "Kategori": "Systemintegration",
     "KategoriTyp": "Komplex",
-    "Parioritet": "Medel",
+    "Prioritet": "Medel",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Godk\u00E4nd efter teknisk granskning"
+    "AntagenJaNejMotivering": "Godk\u00E4nd efter teknisk granskning",
+    "Handlaggare": "Test3"
   },
   {
     "Gid": 3,
@@ -40,9 +42,10 @@
     "LeveransArbetstimmar": "80 timmar",
     "Kategori": "Business Intelligence",
     "KategoriTyp": "Avancerad",
-    "Parioritet": "H\u00F6g",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Nej",
-    "AntagenJaNejMotivering": "Projektet kr\u00E4ver ytterligare resurser som inte finns tillg\u00E4ngliga"
+    "AntagenJaNejMotivering": "Projektet kr\u00E4ver ytterligare resurser som inte finns tillg\u00E4ngliga",
+    "Handlaggare": "Test2"
   },
   {
     "Gid": 4,
@@ -55,9 +58,10 @@
     "LeveransArbetstimmar": "20 timmar",
     "Kategori": "Rapportering",
     "KategoriTyp": "Standard",
-    "Parioritet": "L\u00E5g",
+    "Prioritet": "L\u00E5g",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Rutinuppdrag som kan genomf\u00F6ras snabbt"
+    "AntagenJaNejMotivering": "Rutinuppdrag som kan genomf\u00F6ras snabbt",
+    "Handlaggare": "Test"
   },
   {
     "Gid": 5,
@@ -70,8 +74,9 @@
     "LeveransArbetstimmar": "30 timmar",
     "Kategori": "Kundanalys",
     "KategoriTyp": "Standard",
-    "Parioritet": "Medel",
+    "Prioritet": "Medel",
     "AntagenJaNej": null,
-    "AntagenJaNejMotivering": null
+    "AntagenJaNejMotivering": null,
+    "Handlaggare": null
   }
 ]

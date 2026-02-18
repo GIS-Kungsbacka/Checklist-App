@@ -53,9 +53,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 LeveransArbetstimmar = "40 timmar",
                 Kategori = "Dataanalys",
                 KategoriTyp = "Standard",
-                Parioritet = "Hög",
+                Prioritet = "Hög",
                 AntagenJaNej = "Ja",
-                AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget"
+                AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget",
+                Handlaggare = null,
             },
             new BestallaUppdragFrageformular
             {
@@ -69,9 +70,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 LeveransArbetstimmar = "60 timmar",
                 Kategori = "Systemintegration",
                 KategoriTyp = "Komplex",
-                Parioritet = "Medel",
+                Prioritet = "Medel",
                 AntagenJaNej = "Ja",
-                AntagenJaNejMotivering = "Godkänd efter teknisk granskning"
+                AntagenJaNejMotivering = "Godkänd efter teknisk granskning",
+                Handlaggare = "Test3",
             },
             new BestallaUppdragFrageformular
             {
@@ -85,9 +87,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 LeveransArbetstimmar = "80 timmar",
                 Kategori = "Business Intelligence",
                 KategoriTyp = "Avancerad",
-                Parioritet = "Hög",
+                Prioritet = "Hög",
                 AntagenJaNej = "Nej",
-                AntagenJaNejMotivering = "Projektet kräver ytterligare resurser som inte finns tillgängliga"
+                AntagenJaNejMotivering = "Projektet kräver ytterligare resurser som inte finns tillgängliga",
+                Handlaggare = "Test2",
             },
             new BestallaUppdragFrageformular
             {
@@ -101,9 +104,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 LeveransArbetstimmar = "20 timmar",
                 Kategori = "Rapportering",
                 KategoriTyp = "Standard",
-                Parioritet = "Låg",
+                Prioritet = "Låg",
                 AntagenJaNej = "Ja",
-                AntagenJaNejMotivering = "Rutinuppdrag som kan genomföras snabbt"
+                AntagenJaNejMotivering = "Rutinuppdrag som kan genomföras snabbt",
+                Handlaggare = "Test",
             },
             new BestallaUppdragFrageformular
             {
@@ -117,9 +121,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 LeveransArbetstimmar = "30 timmar",
                 Kategori = "Kundanalys",
                 KategoriTyp = "Standard",
-                Parioritet = "Medel",
+                Prioritet = "Medel",
                 AntagenJaNej = null,
-                AntagenJaNejMotivering = null
+                AntagenJaNejMotivering = null,
+                Handlaggare = null,
             }
         };
 
@@ -256,9 +261,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
         existing.LeveransArbetstimmar = item.LeveransArbetstimmar;
         existing.Kategori = item.Kategori;
         existing.KategoriTyp = item.KategoriTyp;
-        existing.Parioritet = item.Parioritet;
+        existing.Prioritet = item.Prioritet;
         existing.AntagenJaNej = item.AntagenJaNej;
         existing.AntagenJaNejMotivering = item.AntagenJaNejMotivering;
+        existing.Handlaggare = item.Handlaggare;
         
         SaveData(data);
         return Task.FromResult<BestallaUppdragFrageformular?>(existing);

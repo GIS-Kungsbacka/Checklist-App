@@ -81,9 +81,10 @@ public class BestallaUppdragFrageformularController : ControllerBase
                 LeveransArbetstimmar = dto.LeveransArbetstimmar,
                 Kategori = dto.Kategori,
                 KategoriTyp = dto.KategoriTyp,
-                Parioritet = dto.Parioritet,
+                Prioritet = dto.Prioritet,
                 AntagenJaNej = dto.AntagenJaNej,
-                AntagenJaNejMotivering = dto.AntagenJaNejMotivering
+                AntagenJaNejMotivering = dto.AntagenJaNejMotivering,
+                Handlaggare = dto.Handlaggare,
             };
 
             var createdItem = await _repository.CreateAsync(item);
@@ -125,9 +126,10 @@ public class BestallaUppdragFrageformularController : ControllerBase
                 LeveransArbetstimmar = dto.LeveransArbetstimmar,
                 Kategori = dto.Kategori,
                 KategoriTyp = dto.KategoriTyp,
-                Parioritet = dto.Parioritet,
+                Prioritet = dto.Prioritet,
                 AntagenJaNej = dto.AntagenJaNej,
-                AntagenJaNejMotivering = dto.AntagenJaNejMotivering
+                AntagenJaNejMotivering = dto.AntagenJaNejMotivering,
+                Handlaggare = dto.Handlaggare,
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -203,13 +205,16 @@ public class CreateBestallaUppdragFrageformularDto
     public string? KategoriTyp { get; set; }
 
     [MaxLength(255)]
-    public string? Parioritet { get; set; }
+    public string? Prioritet { get; set; }
 
     [MaxLength(255)]
     public string? AntagenJaNej { get; set; }
 
     [MaxLength(255)]
     public string? AntagenJaNejMotivering { get; set; }
+
+    [MaxLength(255)]
+    public string? Handlaggare { get; set; }
 }
 
 public class UpdateBestallaUppdragFrageformularDto
@@ -242,11 +247,14 @@ public class UpdateBestallaUppdragFrageformularDto
     public string? KategoriTyp { get; set; }
 
     [MaxLength(255)]
-    public string? Parioritet { get; set; }
+    public string? Prioritet { get; set; }
 
     [MaxLength(255)]
     public string? AntagenJaNej { get; set; }
 
     [MaxLength(255)]
     public string? AntagenJaNejMotivering { get; set; }
+
+    [MaxLength(255)]
+    public string? Handlaggare { get; set; }
 }

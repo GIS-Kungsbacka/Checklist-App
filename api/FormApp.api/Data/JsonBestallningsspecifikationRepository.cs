@@ -37,6 +37,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
             {
                 BestallningGid = 1,
                 Arendenummer = "AR-2024-001",
+                BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
                 DatumInkommet = new DateOnly(2024, 3, 15),
@@ -56,7 +57,8 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 KategoriTyp = "Standard",
                 Prioritet = "Hög",
                 AntagenJaNej = "Ja",
-                AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget."
+                AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
+                Handlaggare = "Test10"
             }
         };
 

@@ -2,6 +2,7 @@
   {
     "BestallningGid": 1,
     "Arendenummer": "AR-2024-001",
+    "BestallareEpost": "Test@hotmail.com",
     "BestallareOrganisation": "IT-avdelningen",
     "BestallareTjanstetitel": "Systemansvarig",
     "DatumInkommet": "2024-03-15",
@@ -21,6 +22,7 @@
     "KategoriTyp": "Standard",
     "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Projektet \u00E4r v\u00E4lplanerat och har tillr\u00E4cklig budget."
+    "AntagenJaNejMotivering": "Projektet \u00E4r v\u00E4lplanerat och har tillr\u00E4cklig budget.",
+    "Hanlaggare": "Test10"
   }
 ]

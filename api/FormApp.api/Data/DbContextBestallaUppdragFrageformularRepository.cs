@@ -48,9 +48,10 @@ public class DbContextBestallaUppdragFrageformularRepository : IBestallaUppdragF
         existing.LeveransArbetstimmar = item.LeveransArbetstimmar;
         existing.Kategori = item.Kategori;
         existing.KategoriTyp = item.KategoriTyp;
-        existing.Parioritet = item.Parioritet;
+        existing.Prioritet = item.Prioritet;
         existing.AntagenJaNej = item.AntagenJaNej;
         existing.AntagenJaNejMotivering = item.AntagenJaNejMotivering;
+        existing.Handlaggare = item.Handlaggare;
 
         await _context.SaveChangesAsync();
         return existing;

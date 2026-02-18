@@ -13,6 +13,9 @@ public class Bestallningsspecifikation
     public string? Arendenummer { get; set; }
 
     [MaxLength(255)]
+    public string? BestallareEpost { get; set; }
+
+    [MaxLength(255)]
     public string? BestallareOrganisation { get; set; }
 
     [MaxLength(255)]
@@ -67,4 +70,7 @@ public class Bestallningsspecifikation
 
     [MaxLength(2000)]
     public string? AntagenJaNejMotivering { get; set; }
+
+    [MaxLength(255)]
+    public string? Handlaggare { get; set; }
 }

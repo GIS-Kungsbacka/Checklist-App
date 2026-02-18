@@ -34,11 +34,14 @@ public class BestallaUppdragFrageformular
     public string? KategoriTyp { get; set; }
 
     [MaxLength(255)]
-    public string? Parioritet { get; set; }
+    public string? Prioritet { get; set; }
 
     [MaxLength(255)]
     public string? AntagenJaNej { get; set; }
 
     [MaxLength(255)]
     public string? AntagenJaNejMotivering { get; set; }
+
+    [MaxLength(255)]
+    public string? Handlaggare {  get; set; }
 }

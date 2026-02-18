@@ -9,9 +9,11 @@ export interface BestallaUppdragFrageformular {
   leveransArbetstimmar?: string;
   kategori?: string;
   kategoriTyp?: string;
-  parioritet?: string;
+  prioritet?: string;
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
+  handlaggare?: string;
+  handlaggare?: string;
 }
 
 export interface CreateBestallaUppdragFrageformularDto {
@@ -24,9 +26,10 @@ export interface CreateBestallaUppdragFrageformularDto {
   leveransArbetstimmar?: string;
   kategori?: string;
   kategoriTyp?: string;
-  parioritet?: string;
+  prioritet?: string;
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
+  handlaggare?: string;
 }
 
 export interface UpdateBestallaUppdragFrageformularDto {
@@ -39,7 +42,8 @@ export interface UpdateBestallaUppdragFrageformularDto {
   leveransArbetstimmar?: string;
   kategori?: string;
   kategoriTyp?: string;
-  parioritet?: string;
+  prioritet?: string;
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
+  handlaggare?: string;
 }

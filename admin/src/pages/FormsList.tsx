@@ -45,9 +45,10 @@ const emptyFormData: CreateBestallaUppdragFrageformularDto = {
   leveransArbetstimmar: "",
   kategori: "",
   kategoriTyp: "",
-  parioritet: "",
+  prioritet: "",
   antagenJaNej: "",
   antagenJaNejMotivering: "",
+  handlaggare: "",
 };
 
 export default function FormsList() {
@@ -141,9 +142,10 @@ export default function FormsList() {
       leveransArbetstimmar: item.leveransArbetstimmar ?? "",
       kategori: item.kategori ?? "",
       kategoriTyp: item.kategoriTyp ?? "",
-      parioritet: item.parioritet ?? "",
+      prioritet: item.prioritet ?? "",
       antagenJaNej: item.antagenJaNej ?? "",
       antagenJaNejMotivering: item.antagenJaNejMotivering ?? "",
+      handlaggare: item.handlaggare ?? "",
     });
   };
 
@@ -283,6 +285,7 @@ export default function FormsList() {
               <TableCell sx={{ fontWeight: 600 }}>Kategori</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Prioritet</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Antagen</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Handlaggare</TableCell>
               <TableCell align="right" sx={{ fontWeight: 600 }}>
                 Åtgärder
               </TableCell>
@@ -329,8 +332,9 @@ export default function FormsList() {
                   {item.leverans ?? "-"}
                 </TableCell>
                 <TableCell>{item.kategori ?? "-"}</TableCell>
-                <TableCell>{item.parioritet ?? "-"}</TableCell>
+                <TableCell>{item.prioritet ?? "-"}</TableCell>
                 <TableCell>{item.antagenJaNej ?? "-"}</TableCell>
+                <TableCell>{item.handlaggare ?? "-"}</TableCell>
                 <TableCell align="right">
                   <Stack
                     direction="row"
@@ -416,9 +420,10 @@ export default function FormsList() {
                 ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
                 ["kategori", "Kategori"],
                 ["kategoriTyp", "Kategori typ"],
-                ["parioritet", "Prioritet"],
+                ["prioritet", "Prioritet"],
                 ["antagenJaNej", "Antagen ja/nej"],
                 ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+                ["handlaggare", "Handlaggare"],
               ] as const
             ).map(([key, label]) => (
               <Grid size={{ xs: 12, sm: 6 }} key={key}>
@@ -479,9 +484,10 @@ export default function FormsList() {
                 ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
                 ["kategori", "Kategori"],
                 ["kategoriTyp", "Kategori typ"],
-                ["parioritet", "Prioritet"],
+                ["prioritet", "Prioritet"],
                 ["antagenJaNej", "Antagen ja/nej"],
                 ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+                ["handlaggare", "Handlaggare"],
               ] as const
             ).map(([key, label]) => (
               <Grid size={{ xs: 12, sm: 6 }} key={key}>

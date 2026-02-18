@@ -54,14 +54,17 @@ public class AppDbContext : DbContext
             .Property(x => x.KategoriTyp)
             .HasColumnName("kategori_typ");
         modelBuilder.Entity<BestallaUppdragFrageformular>()
-            .Property(x => x.Parioritet)
-            .HasColumnName("parioritet");
+            .Property(x => x.Prioritet)
+            .HasColumnName("prioritet");
         modelBuilder.Entity<BestallaUppdragFrageformular>()
             .Property(x => x.AntagenJaNej)
             .HasColumnName("antagen_ja_nej");
         modelBuilder.Entity<BestallaUppdragFrageformular>()
             .Property(x => x.AntagenJaNejMotivering)
             .HasColumnName("antagen_ja_nej_motivering");
+        modelBuilder.Entity<BestallaUppdragFrageformular>()
+           .Property(x => x.Handlaggare)
+           .HasColumnName("handlaggare");
 
         // Read-only view: bestallningsspecifikation
         modelBuilder.Entity<Bestallningsspecifikation>()
@@ -71,6 +74,8 @@ public class AppDbContext : DbContext
             .Property(x => x.BestallningGid).HasColumnName("bestallning_gid");
         modelBuilder.Entity<Bestallningsspecifikation>()
             .Property(x => x.Arendenummer).HasColumnName("arendenummer");
+        modelBuilder.Entity<Bestallningsspecifikation>()
+            .Property(x => x.BestallareEpost).HasColumnName("bestallare_epost");
         modelBuilder.Entity<Bestallningsspecifikation>()
             .Property(x => x.BestallareOrganisation).HasColumnName("bestallare_organisation");
         modelBuilder.Entity<Bestallningsspecifikation>()
@@ -111,5 +116,7 @@ public class AppDbContext : DbContext
             .Property(x => x.AntagenJaNej).HasColumnName("antagen_ja_nej");
         modelBuilder.Entity<Bestallningsspecifikation>()
             .Property(x => x.AntagenJaNejMotivering).HasColumnName("antagen_ja_nej_motivering");
+        modelBuilder.Entity<Bestallningsspecifikation>()
+            .Property(x => x.Handlaggare).HasColumnName("handlaggare");
     }
 }

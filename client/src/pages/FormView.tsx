@@ -20,6 +20,7 @@ import { bestallningsspecifikationApi } from "../api/bestallningsspecifikationAp
 const fieldLabels: Record<string, string> = {
   bestallningGid: "Beställning GID",
   arendenummer: "Ärendenummer",
+  bestallareEpost: "Beställare e-post",
   bestallareOrganisation: "Beställare organisation",
   bestallareTjanstetitel: "Beställare tjänstetitel",
   datumInkommet: "Datum inkommet",
@@ -40,6 +41,7 @@ const fieldLabels: Record<string, string> = {
   prioritet: "Prioritet",
   antagenJaNej: "Antagen ja/nej",
   antagenJaNejMotivering: "Antagen ja/nej motivering",
+  handlaggare: "Handlaggare",
 };
 
 function formatValue(value: unknown): string {
@@ -52,7 +54,11 @@ export default function FormView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: item, isLoading, error } = useQuery({
+  const {
+    data: item,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["bestallningsspecifikation", id],
     queryFn: () => bestallningsspecifikationApi.getById(Number(id)),
     enabled: !!id,
@@ -61,7 +67,14 @@ export default function FormView() {
   if (isLoading) {
     return (
       <Container maxWidth="md">
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "50vh" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "50vh",
+          }}
+        >
           <CircularProgress />
         </Box>
       </Container>
@@ -75,7 +88,11 @@ export default function FormView() {
           <Alert severity="error">
             Kunde inte ladda beställningsspecifikationen. Försök igen senare.
           </Alert>
-          <Button startIcon={<ArrowBack />} onClick={() => navigate("/")} sx={{ mt: 2 }}>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate("/")}
+            sx={{ mt: 2 }}
+          >
             Tillbaka till listan
           </Button>
         </Box>
@@ -87,23 +104,52 @@ export default function FormView() {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Button startIcon={<ArrowBack />} onClick={() => navigate("/")} sx={{ mb: 3 }}>
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate("/")}
+        sx={{ mb: 3 }}
+      >
         Tillbaka till beställningsspecifikationer
       </Button>
 
       <Card elevation={3}>
         <CardContent sx={{ p: 4 }}>
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h4" component="h1" gutterBottom fontWeight={600}>
+            <Typography
+              variant="h4"
+              component="h1"
+              gutterBottom
+              fontWeight={600}
+            >
               {item.arendenummer || `Beställning ${item.bestallningGid}`}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
               Beställningsspecifikation (endast visning)
             </Typography>
-            <Stack direction="row" spacing={1} sx={{ mt: 2 }} flexWrap="wrap" useFlexGap>
-              <Chip label={`GID ${item.bestallningGid}`} size="small" variant="outlined" />
-              {item.kategori && <Chip label={item.kategori} size="small" color="primary" variant="outlined" />}
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ mt: 2 }}
+              flexWrap="wrap"
+              useFlexGap
+            >
+              <Chip
+                label={`GID ${item.bestallningGid}`}
+                size="small"
+                variant="outlined"
+              />
+              {item.kategori && (
+                <Chip
+                  label={item.kategori}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
               {item.prioritet && <Chip label={item.prioritet} size="small" />}
+              {item.handlaggare && (
+                <Chip label={item.handlaggare} size="small" />
+              )}
             </Stack>
           </Box>
 
@@ -118,7 +164,11 @@ export default function FormView() {
               if (display === "–" && key !== "bestallningGid") return null; // optionally hide empty fields
               return (
                 <Grid size={{ xs: 12, sm: 6 }} key={key}>
-                  <Typography variant="caption" color="text.secondary" display="block">
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                  >
                     {label}
                   </Typography>
                   <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
