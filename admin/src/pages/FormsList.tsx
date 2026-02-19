@@ -1,4 +1,3 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Box,
   Button,
@@ -27,60 +26,77 @@ import {
 } from "@mui/material";
 import { Add, Edit, Delete, Search } from "@mui/icons-material";
 import { useState, useMemo } from "react";
-import { bestallaUppdragFrageformularApi } from "../api/bestallaUppdragFrageformularApi";
-import type {
-  BestallaUppdragFrageformular,
-  CreateBestallaUppdragFrageformularDto,
-} from "../types/bestallaUppdragFrageformular";
+import { useForm, Controller } from "react-hook-form";
+import {
+  useChecklists,
+  useCreateChecklist,
+  useUpdateChecklist,
+  useDeleteChecklist,
+} from "../hooks/useChecklist";
+import type { Checklist, CreateChecklistDto } from "../types/checklist";
 
 const ITEMS_PER_PAGE = 10;
 
-const emptyFormData: CreateBestallaUppdragFrageformularDto = {
-  arendenummer: "",
-  dataunderlag: "",
-  dataadministrator: "",
-  malgrupper: "",
-  nyttjandeInterntExternt: "",
-  leverans: "",
-  leveransArbetstimmar: "",
-  kategori: "",
-  kategoriTyp: "",
-  prioritet: "",
-  antagenJaNej: "",
-  antagenJaNejMotivering: "",
-  handlaggare: "",
-};
-
 export default function FormsList() {
-  const queryClient = useQueryClient();
+  const { data: items = [], isLoading, error } = useChecklists();
+  const createMutation = useCreateChecklist();
+  const updateMutation = useUpdateChecklist();
+  const deleteMutation = useDeleteChecklist();
   const [openCreate, setOpenCreate] = useState(false);
-  const [openEdit, setOpenEdit] = useState<BestallaUppdragFrageformular | null>(
-    null,
-  );
-  const [deleteConfirm, setDeleteConfirm] =
-    useState<BestallaUppdragFrageformular | null>(null);
+  const [openEdit, setOpenEdit] = useState<Checklist | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Checklist | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const [formData, setFormData] =
-    useState<CreateBestallaUppdragFrageformularDto>(emptyFormData);
 
-  const { data: items, isLoading } = useQuery({
-    queryKey: ["bestallaUppdragFrageformular"],
-    queryFn: bestallaUppdragFrageformularApi.getAll,
+  const {
+    control: createControl,
+    handleSubmit: handleCreateSubmit,
+    reset: resetCreateForm,
+    setError,
+    formState: { isSubmitting: isCreating },
+  } = useForm<CreateChecklistDto>({
+    defaultValues: {
+      arendenummer: "",
+      dataunderlag: "",
+      dataadministrator: "",
+      malgrupper: "",
+      nyttjandeInterntExternt: "",
+      leverans: "",
+      leveransArbetstimmar: "",
+      kategori: "",
+      kategoriTyp: "",
+      prioritet: "",
+      antagenJaNej: "",
+      antagenJaNejMotivering: "",
+      handlaggare: "",
+    },
   });
 
+  const {
+    control: editControl,
+    handleSubmit: handleEditSubmit,
+    reset: resetEditForm,
+    formState: { isSubmitting: isUpdating },
+  } = useForm<CreateChecklistDto>();
+
   const filteredItems = useMemo(() => {
-    if (!items) return [];
-    if (!searchQuery.trim()) return items;
-    const q = searchQuery.toLowerCase().trim();
-    return items.filter(
-      (item) =>
-        item.arendenummer?.toLowerCase().includes(q) ||
-        item.dataadministrator?.toLowerCase().includes(q) ||
-        item.kategori?.toLowerCase().includes(q) ||
-        item.dataunderlag?.toLowerCase().includes(q) ||
-        item.gid.toString().includes(q),
-    );
+    let result = items;
+
+    // Filter by search query if provided
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = items.filter(
+        (item) =>
+          item.arendenummer?.toLowerCase().includes(q) ||
+          item.dataadministrator?.toLowerCase().includes(q) ||
+          item.kategori?.toLowerCase().includes(q) ||
+          item.dataunderlag?.toLowerCase().includes(q) ||
+          item.gid.toString().includes(q),
+      );
+    }
+
+    // Sort by GID in ascending order
+    return [...result].sort((a, b) => a.gid - b.gid);
   }, [items, searchQuery]);
 
   const paginatedItems = useMemo(() => {
@@ -93,46 +109,9 @@ export default function FormsList() {
     Math.ceil(filteredItems.length / ITEMS_PER_PAGE),
   );
 
-  const createMutation = useMutation({
-    mutationFn: bestallaUppdragFrageformularApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["bestallaUppdragFrageformular"],
-      });
-      setOpenCreate(false);
-      setFormData(emptyFormData);
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({
-      gid,
-      dto,
-    }: {
-      gid: number;
-      dto: CreateBestallaUppdragFrageformularDto;
-    }) => bestallaUppdragFrageformularApi.update(gid, dto),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["bestallaUppdragFrageformular"],
-      });
-      setOpenEdit(null);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: bestallaUppdragFrageformularApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["bestallaUppdragFrageformular"],
-      });
-      setDeleteConfirm(null);
-    },
-  });
-
-  const handleEditClick = (item: BestallaUppdragFrageformular) => {
+  const handleEditClick = (item: Checklist) => {
     setOpenEdit(item);
-    setFormData({
+    resetEditForm({
       arendenummer: item.arendenummer ?? "",
       dataunderlag: item.dataunderlag ?? "",
       dataadministrator: item.dataadministrator ?? "",
@@ -149,24 +128,53 @@ export default function FormsList() {
     });
   };
 
-  const handleCreate = () => {
-    createMutation.mutate(formData);
+  const handleCreate = (data: CreateChecklistDto) => {
+    // Additional validation check (react-hook-form validation should catch this, but this is a backup)
+    const arendenummer = data.arendenummer?.trim();
+    if (arendenummer) {
+      const duplicateExists = items.some(
+        (item) =>
+          item.arendenummer?.toLowerCase().trim() ===
+          arendenummer.toLowerCase().trim(),
+      );
+
+      if (duplicateExists) {
+        setError("arendenummer", {
+          type: "manual",
+          message: "Ärendenummer finns redan",
+        });
+        return;
+      }
+    }
+
+    createMutation.mutate(data, {
+      onSuccess: () => {
+        setOpenCreate(false);
+        resetCreateForm();
+      },
+    });
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = (data: CreateChecklistDto) => {
     if (!openEdit) return;
-    updateMutation.mutate({ gid: openEdit.gid, dto: formData });
+    updateMutation.mutate(
+      { gid: openEdit.gid, data },
+      {
+        onSuccess: () => {
+          setOpenEdit(null);
+        },
+      },
+    );
   };
 
   const handleDelete = () => {
-    if (deleteConfirm) deleteMutation.mutate(deleteConfirm.gid);
-  };
-
-  const setField = (
-    key: keyof CreateBestallaUppdragFrageformularDto,
-    value: string,
-  ) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
+    if (deleteConfirm) {
+      deleteMutation.mutate(deleteConfirm.gid, {
+        onSuccess: () => {
+          setDeleteConfirm(null);
+        },
+      });
+    }
   };
 
   if (isLoading) {
@@ -209,7 +217,7 @@ export default function FormsList() {
           startIcon={<Add />}
           onClick={() => {
             setOpenCreate(true);
-            setFormData(emptyFormData);
+            resetCreateForm();
           }}
           size="large"
           sx={{ height: 42 }}
@@ -246,24 +254,37 @@ export default function FormsList() {
             color="text.secondary"
             sx={{ mt: 1, display: "block" }}
           >
-            Visar {filteredItems.length} av {items?.length ?? 0} poster
+            Visar {filteredItems.length} av {items.length} poster
           </Typography>
         )}
       </Box>
 
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          {error instanceof Error
+            ? error.message
+            : "Kunde inte ladda data. Försök igen senare."}
+        </Alert>
+      )}
       {createMutation.isError && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          Kunde inte skapa. Försök igen.
+          {createMutation.error instanceof Error
+            ? createMutation.error.message
+            : "Kunde inte skapa. Försök igen."}
         </Alert>
       )}
       {updateMutation.isError && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          Kunde inte uppdatera. Försök igen.
+          {updateMutation.error instanceof Error
+            ? updateMutation.error.message
+            : "Kunde inte uppdatera. Försök igen."}
         </Alert>
       )}
       {deleteMutation.isError && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          Kunde inte ta bort. Försök igen.
+          {deleteMutation.error instanceof Error
+            ? deleteMutation.error.message
+            : "Kunde inte ta bort. Försök igen."}
         </Alert>
       )}
 
@@ -405,61 +426,88 @@ export default function FormsList() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Skapa ny post</DialogTitle>
-        <Divider />
-        <DialogContent sx={{ pt: 3 }}>
-          <Grid container spacing={2}>
-            {(
-              [
-                ["arendenummer", "Ärendenummer"],
-                ["dataunderlag", "Dataunderlag"],
-                ["dataadministrator", "Dataadministratör"],
-                ["malgrupper", "Målgrupper"],
-                ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
-                ["leverans", "Leverans"],
-                ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
-                ["kategori", "Kategori"],
-                ["kategoriTyp", "Kategori typ"],
-                ["prioritet", "Prioritet"],
-                ["antagenJaNej", "Antagen ja/nej"],
-                ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
-                ["handlaggare", "Handlaggare"],
-              ] as const
-            ).map(([key, label]) => (
-              <Grid size={{ xs: 12, sm: 6 }} key={key}>
-                <TextField
-                  fullWidth
-                  label={label}
-                  value={formData[key] ?? ""}
-                  onChange={(e) => setField(key, e.target.value)}
-                  multiline={key === "antagenJaNejMotivering"}
-                  rows={key === "antagenJaNejMotivering" ? 2 : 1}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContent>
-        <Divider />
-        <DialogActions sx={{ p: 2.5 }}>
-          <Button
-            onClick={() => setOpenCreate(false)}
-            disabled={createMutation.isPending}
-          >
-            Avbryt
-          </Button>
-          <Button
-            onClick={handleCreate}
-            variant="contained"
-            disabled={createMutation.isPending}
-            sx={{ minWidth: 100 }}
-          >
-            {createMutation.isPending ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              "Skapa"
-            )}
-          </Button>
-        </DialogActions>
+        <form onSubmit={handleCreateSubmit(handleCreate)}>
+          <DialogTitle>Skapa ny post</DialogTitle>
+          <Divider />
+          <DialogContent sx={{ pt: 3 }}>
+            <Grid container spacing={2}>
+              {(
+                [
+                  ["arendenummer", "Ärendenummer"],
+                  ["dataunderlag", "Dataunderlag"],
+                  ["dataadministrator", "Dataadministratör"],
+                  ["malgrupper", "Målgrupper"],
+                  ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
+                  ["leverans", "Leverans"],
+                  ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
+                  ["kategori", "Kategori"],
+                  ["kategoriTyp", "Kategori typ"],
+                  ["prioritet", "Prioritet"],
+                  ["antagenJaNej", "Antagen ja/nej"],
+                  ["handlaggare", "Handlaggare"],
+                  ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+                ] as const
+              ).map(([key, label]) => (
+                <Grid size={{ xs: 12, sm: 6 }} key={key}>
+                  <Controller
+                    name={key as keyof CreateChecklistDto}
+                    control={createControl}
+                    rules={
+                      key === "arendenummer"
+                        ? {
+                            validate: (value) => {
+                              if (!value || !value.trim()) return true; // Allow empty
+                              const duplicateExists = items.some(
+                                (item) =>
+                                  item.arendenummer?.toLowerCase().trim() ===
+                                  value.toLowerCase().trim(),
+                              );
+                              return duplicateExists
+                                ? "Ärendenummer finns redan"
+                                : true;
+                            },
+                          }
+                        : undefined
+                    }
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label={label}
+                        multiline={key === "antagenJaNejMotivering"}
+                        rows={key === "antagenJaNejMotivering" ? 2 : 1}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </DialogContent>
+          <Divider />
+          <DialogActions sx={{ p: 2.5 }}>
+            <Button
+              type="button"
+              onClick={() => setOpenCreate(false)}
+              disabled={createMutation.isPending || isCreating}
+            >
+              Avbryt
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={createMutation.isPending || isCreating}
+              sx={{ minWidth: 100 }}
+            >
+              {createMutation.isPending || isCreating ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Skapa"
+              )}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
       {/* Edit Dialog */}
@@ -469,61 +517,69 @@ export default function FormsList() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Redigera post {openEdit?.gid}</DialogTitle>
-        <Divider />
-        <DialogContent sx={{ pt: 3 }}>
-          <Grid container spacing={2}>
-            {(
-              [
-                ["arendenummer", "Ärendenummer"],
-                ["dataunderlag", "Dataunderlag"],
-                ["dataadministrator", "Dataadministratör"],
-                ["malgrupper", "Målgrupper"],
-                ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
-                ["leverans", "Leverans"],
-                ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
-                ["kategori", "Kategori"],
-                ["kategoriTyp", "Kategori typ"],
-                ["prioritet", "Prioritet"],
-                ["antagenJaNej", "Antagen ja/nej"],
-                ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
-                ["handlaggare", "Handlaggare"],
-              ] as const
-            ).map(([key, label]) => (
-              <Grid size={{ xs: 12, sm: 6 }} key={key}>
-                <TextField
-                  fullWidth
-                  label={label}
-                  value={formData[key] ?? ""}
-                  onChange={(e) => setField(key, e.target.value)}
-                  multiline={key === "antagenJaNejMotivering"}
-                  rows={key === "antagenJaNejMotivering" ? 2 : 1}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </DialogContent>
-        <Divider />
-        <DialogActions sx={{ p: 2.5 }}>
-          <Button
-            onClick={() => setOpenEdit(null)}
-            disabled={updateMutation.isPending}
-          >
-            Avbryt
-          </Button>
-          <Button
-            onClick={handleUpdate}
-            variant="contained"
-            disabled={updateMutation.isPending}
-            sx={{ minWidth: 100 }}
-          >
-            {updateMutation.isPending ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              "Spara"
-            )}
-          </Button>
-        </DialogActions>
+        <form onSubmit={handleEditSubmit(handleUpdate)}>
+          <DialogTitle>Redigera post {openEdit?.gid}</DialogTitle>
+          <Divider />
+          <DialogContent sx={{ pt: 3 }}>
+            <Grid container spacing={2}>
+              {(
+                [
+                  ["arendenummer", "Ärendenummer"],
+                  ["dataunderlag", "Dataunderlag"],
+                  ["dataadministrator", "Dataadministratör"],
+                  ["malgrupper", "Målgrupper"],
+                  ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
+                  ["leverans", "Leverans"],
+                  ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
+                  ["kategori", "Kategori"],
+                  ["kategoriTyp", "Kategori typ"],
+                  ["prioritet", "Prioritet"],
+                  ["antagenJaNej", "Antagen ja/nej"],
+                  ["handlaggare", "Handläggare"],
+                  ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+                ] as const
+              ).map(([key, label]) => (
+                <Grid size={{ xs: 12, sm: 6 }} key={key}>
+                  <Controller
+                    name={key as keyof CreateChecklistDto}
+                    control={editControl}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label={label}
+                        multiline={key === "antagenJaNejMotivering"}
+                        rows={key === "antagenJaNejMotivering" ? 4 : 1}
+                      />
+                    )}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          </DialogContent>
+          <Divider />
+          <DialogActions sx={{ p: 2.5 }}>
+            <Button
+              type="button"
+              onClick={() => setOpenEdit(null)}
+              disabled={updateMutation.isPending || isUpdating}
+            >
+              Avbryt
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={updateMutation.isPending || isUpdating}
+              sx={{ minWidth: 100 }}
+            >
+              {updateMutation.isPending || isUpdating ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Spara"
+              )}
+            </Button>
+          </DialogActions>
+        </form>
       </Dialog>
 
       {/* Delete Dialog */}

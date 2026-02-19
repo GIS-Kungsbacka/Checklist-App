@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import {
@@ -38,7 +37,7 @@ import {
   ViewList,
   Search,
 } from "@mui/icons-material";
-import { bestallningsspecifikationApi } from "../api/bestallningsspecifikationApi";
+import { useOrders } from "../hooks/useOrders";
 
 type ViewMode = "cards" | "list";
 
@@ -61,24 +60,27 @@ export default function FormsList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data: items, isLoading, error } = useQuery({
-    queryKey: ["bestallningsspecifikation"],
-    queryFn: bestallningsspecifikationApi.getAll,
-  });
+  const { data: items = [], isLoading, error } = useOrders();
 
   const filteredItems = useMemo(() => {
-    if (!items) return [];
-    if (!searchQuery.trim()) return items;
-    const q = searchQuery.toLowerCase().trim();
-    return items.filter(
-      (item) =>
-        item.arendenummer?.toLowerCase().includes(q) ||
-        item.beskrivning?.toLowerCase().includes(q) ||
-        item.bestallareOrganisation?.toLowerCase().includes(q) ||
-        item.dataadministrator?.toLowerCase().includes(q) ||
-        item.kategori?.toLowerCase().includes(q) ||
-        item.bestallningGid.toString().includes(q),
-    );
+    let result = items;
+    
+    // Filter by search query if provided
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = items.filter(
+        (item) =>
+          item.arendenummer?.toLowerCase().includes(q) ||
+          item.beskrivning?.toLowerCase().includes(q) ||
+          item.bestallareOrganisation?.toLowerCase().includes(q) ||
+          item.dataadministrator?.toLowerCase().includes(q) ||
+          item.kategori?.toLowerCase().includes(q) ||
+          item.bestallningGid.toString().includes(q),
+      );
+    }
+    
+    // Sort by GID in ascending order
+    return [...result].sort((a, b) => a.bestallningGid - b.bestallningGid);
   }, [items, searchQuery]);
 
   const paginatedItems = useMemo(() => {
@@ -108,7 +110,14 @@ export default function FormsList() {
   if (isLoading) {
     return (
       <Container maxWidth="lg">
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
           <CircularProgress size={60} />
         </Box>
       </Container>
@@ -120,7 +129,9 @@ export default function FormsList() {
       <Container maxWidth="lg">
         <Box sx={{ mt: 4 }}>
           <Alert severity="error" sx={{ borderRadius: 2 }}>
-            Kunde inte ladda beställningsspecifikationer. Försök igen senare.
+            {error instanceof Error
+              ? error.message
+              : "Kunde inte ladda beställningsspecifikationer. Försök igen senare."}
           </Alert>
         </Box>
       </Container>
@@ -128,11 +139,40 @@ export default function FormsList() {
   }
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: viewMode === "cards" ? "calc(100vh - 180px)" : "auto" }}>
-      <Container maxWidth="xl" sx={{ mt: 4, mb: 6, flexGrow: 1, display: "flex", flexDirection: "column" }}>
-        <Box mb={4} sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: viewMode === "cards" ? "calc(100vh - 180px)" : "auto",
+      }}
+    >
+      <Container
+        maxWidth="xl"
+        sx={{
+          mt: 4,
+          mb: 6,
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Box
+          mb={4}
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
           <Box>
-            <Typography variant="h3" component="h1" gutterBottom fontWeight={700}>
+            <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              fontWeight={700}
+            >
               Beställningsspecifikationer
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
@@ -149,7 +189,11 @@ export default function FormsList() {
               "& .MuiToggleButton-root": {
                 border: "1px solid",
                 borderColor: "divider",
-                "&.Mui-selected": { backgroundColor: "primary.main", color: "white", "&:hover": { backgroundColor: "primary.dark" } },
+                "&.Mui-selected": {
+                  backgroundColor: "primary.main",
+                  color: "white",
+                  "&:hover": { backgroundColor: "primary.dark" },
+                },
               },
             }}
           >
@@ -184,11 +228,19 @@ export default function FormsList() {
                 ),
               },
             }}
-            sx={{ "& .MuiOutlinedInput-root": { backgroundColor: "background.paper" } }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "background.paper",
+              },
+            }}
           />
           {searchQuery && (
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
-              Visar {filteredItems.length} av {items?.length ?? 0} poster
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mt: 1, display: "block" }}
+            >
+              Visar {filteredItems.length} av {items.length} poster
             </Typography>
           )}
         </Box>
@@ -197,16 +249,23 @@ export default function FormsList() {
           <Card elevation={2}>
             <Box sx={{ textAlign: "center", py: 8 }}>
               <Typography variant="h6" color="text.secondary" gutterBottom>
-                {searchQuery ? "Inga poster matchar sökningen" : "Inga beställningsspecifikationer tillgängliga."}
+                {searchQuery
+                  ? "Inga poster matchar sökningen"
+                  : "Inga beställningsspecifikationer tillgängliga."}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {searchQuery ? "Justera sökningen" : "Kontakta administratören."}
+                {searchQuery
+                  ? "Justera sökningen"
+                  : "Kontakta administratören."}
               </Typography>
             </Box>
           </Card>
         ) : viewMode === "cards" ? (
           <>
-            <Paper elevation={3} sx={{ p: 2, borderRadius: 2, flexGrow: 1, overflow: "auto" }}>
+            <Paper
+              elevation={3}
+              sx={{ p: 2, borderRadius: 2, flexGrow: 1, overflow: "auto" }}
+            >
               <Grid container spacing={2}>
                 {paginatedItems.map((item) => (
                   <Grid size={6} key={item.bestallningGid}>
@@ -218,20 +277,48 @@ export default function FormsList() {
                         cursor: "pointer",
                         border: "1px solid",
                         borderColor: "divider",
-                        "&:hover": { borderColor: "primary.main", boxShadow: 4 },
+                        "&:hover": {
+                          borderColor: "primary.main",
+                          boxShadow: 4,
+                        },
                       }}
                       onClick={() => navigate(`/form/${item.bestallningGid}`)}
                     >
                       <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                        <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", mb: 2 }}>
-                          <Typography variant="h6" fontWeight={600} sx={{ flex: 1, pr: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "flex-start",
+                            justifyContent: "space-between",
+                            mb: 2,
+                          }}
+                        >
+                          <Typography
+                            variant="h6"
+                            fontWeight={600}
+                            sx={{ flex: 1, pr: 1 }}
+                          >
                             {item.arendenummer || `GID ${item.bestallningGid}`}
                           </Typography>
-                          <Chip label={`GID ${item.bestallningGid}`} size="small" variant="outlined" />
+                          <Chip
+                            label={`GID ${item.bestallningGid}`}
+                            size="small"
+                            variant="outlined"
+                          />
                         </Box>
                         {item.beskrivning && (
-                          <Box sx={{ display: "flex", alignItems: "flex-start", mb: 1.5, minHeight: 50 }}>
-                            <Description sx={{ color: "text.secondary", mr: 1, mt: 0.5 }} fontSize="small" />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              mb: 1.5,
+                              minHeight: 50,
+                            }}
+                          >
+                            <Description
+                              sx={{ color: "text.secondary", mr: 1, mt: 0.5 }}
+                              fontSize="small"
+                            />
                             <Typography
                               variant="body2"
                               color="text.secondary"
@@ -250,26 +337,44 @@ export default function FormsList() {
                         <Stack spacing={0.75} sx={{ mt: 1.5 }}>
                           {item.bestallareOrganisation && (
                             <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Person sx={{ color: "text.secondary", mr: 1 }} fontSize="small" />
-                              <Typography variant="caption" color="text.secondary">
+                              <Person
+                                sx={{ color: "text.secondary", mr: 1 }}
+                                fontSize="small"
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {item.bestallareOrganisation}
                               </Typography>
                             </Box>
                           )}
                           {item.datumInkommet && (
                             <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <CalendarToday sx={{ color: "text.secondary", mr: 1 }} fontSize="small" />
-                              <Typography variant="caption" color="text.secondary">
+                              <CalendarToday
+                                sx={{ color: "text.secondary", mr: 1 }}
+                                fontSize="small"
+                              />
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
                                 {item.datumInkommet}
                               </Typography>
                             </Box>
                           )}
                           {item.kategori && (
-                            <Chip label={item.kategori} size="small" sx={{ alignSelf: "flex-start" }} />
+                            <Chip
+                              label={item.kategori}
+                              size="small"
+                              sx={{ alignSelf: "flex-start" }}
+                            />
                           )}
                         </Stack>
                       </CardContent>
-                      <CardActions sx={{ p: 1.5, pt: 0, justifyContent: "flex-end" }}>
+                      <CardActions
+                        sx={{ p: 1.5, pt: 0, justifyContent: "flex-end" }}
+                      >
                         <Button
                           endIcon={<ArrowForward />}
                           variant="contained"
@@ -288,7 +393,9 @@ export default function FormsList() {
               </Grid>
             </Paper>
             {totalPages > 1 && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
+              <Box
+                sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
+              >
                 <Pagination
                   count={totalPages}
                   page={page}
@@ -303,38 +410,63 @@ export default function FormsList() {
           </>
         ) : (
           <>
-            <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 2 }}>
+            <TableContainer
+              component={Paper}
+              elevation={2}
+              sx={{ borderRadius: 2 }}
+            >
               <Table>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: "grey.50" }}>
-                    <TableCell sx={{ fontWeight: 600 }}>GID</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Ärendenummer</TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Beställare</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Datum inkommet</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      Datum inkommet
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 600 }}>Kategori</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>Åtgärd</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                      Åtgärd
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedItems.map((item) => (
                     <TableRow
                       key={item.bestallningGid}
-                      sx={{ cursor: "pointer", "&:hover": { backgroundColor: "action.hover" } }}
+                      sx={{
+                        cursor: "pointer",
+                        "&:hover": { backgroundColor: "action.hover" },
+                      }}
                       onClick={() => navigate(`/form/${item.bestallningGid}`)}
                     >
-                      <TableCell>{item.bestallningGid}</TableCell>
                       <TableCell>{item.arendenummer ?? "-"}</TableCell>
                       <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <Person sx={{ fontSize: 16, color: "text.secondary" }} />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
+                        >
+                          <Person
+                            sx={{ fontSize: 16, color: "text.secondary" }}
+                          />
                           <Typography variant="body2" color="text.secondary">
                             {item.bestallareOrganisation ?? "-"}
                           </Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                          <CalendarToday sx={{ fontSize: 16, color: "text.secondary" }} />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
+                        >
+                          <CalendarToday
+                            sx={{ fontSize: 16, color: "text.secondary" }}
+                          />
                           <Typography variant="body2" color="text.secondary">
                             {item.datumInkommet ?? "-"}
                           </Typography>
@@ -359,7 +491,9 @@ export default function FormsList() {
               </Table>
             </TableContainer>
             {filteredItems.length > 0 && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
+              <Box
+                sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
+              >
                 <Pagination
                   count={totalPages}
                   page={page}

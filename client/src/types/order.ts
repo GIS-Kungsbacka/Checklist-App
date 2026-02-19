@@ -1,6 +1,7 @@
-export interface Bestallningsspecifikation {
+export interface Order {
   bestallningGid: number;
   arendenummer?: string;
+  bestallareEpost?: string;
   bestallareOrganisation?: string;
   bestallareTjanstetitel?: string;
   datumInkommet?: string; // ISO date "YYYY-MM-DD"
@@ -21,4 +22,5 @@ export interface Bestallningsspecifikation {
   prioritet?: string;
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
+  handlaggare?: string;
 }

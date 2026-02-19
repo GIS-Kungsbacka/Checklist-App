@@ -1,4 +1,4 @@
-export interface BestallaUppdragFrageformular {
+export interface Checklist {
   gid: number;
   arendenummer?: string;
   dataunderlag?: string;
@@ -13,10 +13,9 @@ export interface BestallaUppdragFrageformular {
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
   handlaggare?: string;
-  handlaggare?: string;
 }
 
-export interface CreateBestallaUppdragFrageformularDto {
+export interface CreateChecklistDto {
   arendenummer?: string;
   dataunderlag?: string;
   dataadministrator?: string;
@@ -32,7 +31,7 @@ export interface CreateBestallaUppdragFrageformularDto {
   handlaggare?: string;
 }
 
-export interface UpdateBestallaUppdragFrageformularDto {
+export interface UpdateChecklistDto {
   arendenummer?: string;
   dataunderlag?: string;
   dataadministrator?: string;

@@ -1,12 +1,4 @@
-import axios from "axios";
-
-// Get API base URL from environment variable, default to /FormApp/api
-const apiBase = import.meta.env.VITE_API_BASE || "/FormApp/api";
-
-const api = axios.create({
-  baseURL: apiBase,
-  withCredentials: true,
-});
+import { api } from "./axiosConfig";
 
 export interface UserInfo {
   username: string;

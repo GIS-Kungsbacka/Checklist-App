@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -15,7 +14,7 @@ import {
   Chip,
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
-import { bestallningsspecifikationApi } from "../api/bestallningsspecifikationApi";
+import { useOrderById } from "../hooks/useOrders";
 
 const fieldLabels: Record<string, string> = {
   bestallningGid: "Beställning GID",
@@ -41,7 +40,7 @@ const fieldLabels: Record<string, string> = {
   prioritet: "Prioritet",
   antagenJaNej: "Antagen ja/nej",
   antagenJaNejMotivering: "Antagen ja/nej motivering",
-  handlaggare: "Handlaggare",
+  handlaggare: "Handläggare",
 };
 
 function formatValue(value: unknown): string {
@@ -54,15 +53,8 @@ export default function FormView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const {
-    data: item,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["bestallningsspecifikation", id],
-    queryFn: () => bestallningsspecifikationApi.getById(Number(id)),
-    enabled: !!id,
-  });
+  const orderId = id ? Number(id) : 0;
+  const { data: item, isLoading, error } = useOrderById(orderId);
 
   if (isLoading) {
     return (
@@ -81,12 +73,33 @@ export default function FormView() {
     );
   }
 
-  if (error || !item) {
+  if (error) {
     return (
       <Container maxWidth="md">
         <Box sx={{ mt: 4 }}>
           <Alert severity="error">
-            Kunde inte ladda beställningsspecifikationen. Försök igen senare.
+            {error instanceof Error
+              ? error.message
+              : "Kunde inte ladda beställningsspecifikationen. Försök igen senare."}
+          </Alert>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate("/")}
+            sx={{ mt: 2 }}
+          >
+            Tillbaka till listan
+          </Button>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!item) {
+    return (
+      <Container maxWidth="md">
+        <Box sx={{ mt: 4 }}>
+          <Alert severity="info">
+            Beställningsspecifikationen hittades inte.
           </Alert>
           <Button
             startIcon={<ArrowBack />}
@@ -147,9 +160,6 @@ export default function FormView() {
                 />
               )}
               {item.prioritet && <Chip label={item.prioritet} size="small" />}
-              {item.handlaggare && (
-                <Chip label={item.handlaggare} size="small" />
-              )}
             </Stack>
           </Box>
 
