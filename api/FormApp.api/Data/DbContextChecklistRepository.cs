@@ -3,43 +3,43 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FormApp.Api.Data;
 
-public class DbContextBestallaUppdragFrageformularRepository : IBestallaUppdragFrageformularRepository
+public class DbContextChecklistRepository : IChecklistRepository
 {
     private readonly AppDbContext _context;
 
-    public DbContextBestallaUppdragFrageformularRepository(AppDbContext context)
+    public DbContextChecklistRepository(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<BestallaUppdragFrageformular>> GetAllAsync()
+    public async Task<IEnumerable<Checklist>> GetAllAsync()
     {
-        return await _context.BestallaUppdragFrageformulars
+        return await _context.Checklists
             .OrderByDescending(x => x.Gid)
             .ToListAsync();
     }
 
-    public async Task<BestallaUppdragFrageformular?> GetByIdAsync(int gid)
+    public async Task<Checklist?> GetByIdAsync(int gid)
     {
-        return await _context.BestallaUppdragFrageformulars.FindAsync(gid);
+        return await _context.Checklists.FindAsync(gid);
     }
 
-    public async Task<BestallaUppdragFrageformular> CreateAsync(BestallaUppdragFrageformular item)
+    public async Task<Checklist> CreateAsync(Checklist item)
     {
-        _context.BestallaUppdragFrageformulars.Add(item);
+        _context.Checklists.Add(item);
         await _context.SaveChangesAsync();
         return item;
     }
 
-    public async Task<BestallaUppdragFrageformular?> UpdateAsync(int gid, BestallaUppdragFrageformular item)
+    public async Task<Checklist?> UpdateAsync(int gid, Checklist item)
     {
-        var existing = await _context.BestallaUppdragFrageformulars.FindAsync(gid);
+        var existing = await _context.Checklists.FindAsync(gid);
         if (existing == null)
         {
             return null;
         }
 
-        existing.Arendenummer = item.Arendenummer;
+        existing.ArendenummerArtvise = item.ArendenummerArtvise;
         existing.Dataunderlag = item.Dataunderlag;
         existing.Dataadministrator = item.Dataadministrator;
         existing.Malgrupper = item.Malgrupper;
@@ -59,13 +59,13 @@ public class DbContextBestallaUppdragFrageformularRepository : IBestallaUppdragF
 
     public async Task<bool> DeleteAsync(int gid)
     {
-        var item = await _context.BestallaUppdragFrageformulars.FindAsync(gid);
+        var item = await _context.Checklists.FindAsync(gid);
         if (item == null)
         {
             return false;
         }
 
-        _context.BestallaUppdragFrageformulars.Remove(item);
+        _context.Checklists.Remove(item);
         await _context.SaveChangesAsync();
         return true;
     }

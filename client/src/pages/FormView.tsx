@@ -17,8 +17,8 @@ import { ArrowBack } from "@mui/icons-material";
 import { useOrderById } from "../hooks/useOrders";
 
 const fieldLabels: Record<string, string> = {
-  bestallningGid: "Beställning GID",
-  arendenummer: "Ärendenummer",
+  arendenummerArtvise: "Ärendenummer",
+  arendenummerOpenE: "Ärendenummer OpenE",
   bestallareEpost: "Beställare e-post",
   bestallareOrganisation: "Beställare organisation",
   bestallareTjanstetitel: "Beställare tjänstetitel",
@@ -28,7 +28,7 @@ const fieldLabels: Record<string, string> = {
   sistaDatum: "Sista datum",
   forankradChef: "Förankrad chef",
   kansligInformation: "Känslig information",
-  frageformularGid: "Frågeformulär GID",
+  kansligInformationBeskrivning: "Känslig information beskrivning",
   dataunderlag: "Dataunderlag",
   dataadministrator: "Dataadministratör",
   malgrupper: "Målgrupper",
@@ -53,7 +53,7 @@ export default function FormView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const orderId = id ? Number(id) : 0;
+  const orderId = id ? id : "";
   const { data: item, isLoading, error } = useOrderById(orderId);
 
   if (isLoading) {
@@ -134,7 +134,8 @@ export default function FormView() {
               gutterBottom
               fontWeight={600}
             >
-              {item.arendenummer || `Beställning ${item.bestallningGid}`}
+              {item.arendenummerArtvise ||
+                `Beställning ${item.arendenummerArtvise}`}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
               Beställningsspecifikation (endast visning)
@@ -147,7 +148,7 @@ export default function FormView() {
               useFlexGap
             >
               <Chip
-                label={`GID ${item.bestallningGid}`}
+                label={`Ärendenummer Artvise ${item.arendenummerArtvise}`}
                 size="small"
                 variant="outlined"
               />
@@ -171,7 +172,7 @@ export default function FormView() {
               const label = fieldLabels[key];
               if (label === undefined) return null;
               const display = formatValue(value);
-              if (display === "–" && key !== "bestallningGid") return null; // optionally hide empty fields
+              if (display === "–" && key !== "arendenummerArtvise") return null; // optionally hide empty fields
               return (
                 <Grid size={{ xs: 12, sm: 6 }} key={key}>
                   <Typography

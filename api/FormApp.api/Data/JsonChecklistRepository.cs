@@ -3,19 +3,19 @@ using FormApp.Api.Models;
 
 namespace FormApp.Api.Data;
 // Test data
-public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFrageformularRepository
+public class JsonChecklistRepository : IChecklistRepository
 {
     private readonly string _jsonFilePath;
-    private readonly ILogger<JsonBestallaUppdragFrageformularRepository> _logger;
+    private readonly ILogger<JsonChecklistRepository> _logger;
     private readonly object _lock = new object();
 
-    public JsonBestallaUppdragFrageformularRepository(ILogger<JsonBestallaUppdragFrageformularRepository> logger, IWebHostEnvironment env)
+    public JsonChecklistRepository(ILogger<JsonChecklistRepository> logger, IWebHostEnvironment env)
     {
         _logger = logger;
         // Store JSON file in the API folder
-        _jsonFilePath = Path.Combine(env.ContentRootPath, "data", "bestalla_uppdrag_frageformular.json");
+        _jsonFilePath = Path.Combine(env.ContentRootPath, "data", "checklist.json");
         
-        _logger.LogInformation("JSON Bestalla Uppdrag Frageformular Repository initialized. File path: {Path}", _jsonFilePath);
+        _logger.LogInformation("JSON Checklist Repository initialized. File path: {Path}", _jsonFilePath);
         
         // Ensure directory exists
         var directory = Path.GetDirectoryName(_jsonFilePath);
@@ -39,12 +39,12 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
 
     private void InitializeSampleData()
     {
-        var sampleData = new List<BestallaUppdragFrageformular>
+        var sampleData = new List<Checklist>
         {
-            new BestallaUppdragFrageformular
+            new Checklist
             {
                 Gid = 1,
-                Arendenummer = "AR-2024-001",
+                ArendenummerArtvise = "AR-2024-001",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -58,10 +58,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget",
                 Handlaggare = null,
             },
-            new BestallaUppdragFrageformular
+            new Checklist
             {
                 Gid = 2,
-                Arendenummer = "AR-2024-002",
+                ArendenummerArtvise = "AR-2024-002",
                 Dataunderlag = "Produktkatalog och lagerdata",
                 Dataadministrator = "Erik",
                 Malgrupper = "Logistik, Lager",
@@ -75,10 +75,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 AntagenJaNejMotivering = "Godkänd efter teknisk granskning",
                 Handlaggare = "Test3",
             },
-            new BestallaUppdragFrageformular
+            new Checklist
             {
                 Gid = 3,
-                Arendenummer = "AR-2024-003",
+                ArendenummerArtvise = "AR-2024-003",
                 Dataunderlag = "Användardata och beteendeanalys",
                 Dataadministrator = "Maria",
                 Malgrupper = "IT, Utveckling",
@@ -92,10 +92,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 AntagenJaNejMotivering = "Projektet kräver ytterligare resurser som inte finns tillgängliga",
                 Handlaggare = "Test2",
             },
-            new BestallaUppdragFrageformular
+            new Checklist
             {
                 Gid = 4,
-                Arendenummer = "AR-2024-004",
+                ArendenummerArtvise = "AR-2024-004",
                 Dataunderlag = "Ekonomiska rapporter och budgetdata",
                 Dataadministrator = "Lars",
                 Malgrupper = "Ekonomi, Ledning",
@@ -109,10 +109,10 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 AntagenJaNejMotivering = "Rutinuppdrag som kan genomföras snabbt",
                 Handlaggare = "Test",
             },
-            new BestallaUppdragFrageformular
+            new Checklist
             {
                 Gid = 5,
-                Arendenummer = "AR-2024-005",
+                ArendenummerArtvise = "AR-2024-005",
                 Dataunderlag = "Kundfeedback och nöjdhetsundersökningar",
                 Dataadministrator = "Sara",
                 Malgrupper = "Kundservice, Marknadsföring",
@@ -132,7 +132,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
         _logger.LogInformation("Initialized JSON file with sample data at {Path}", _jsonFilePath);
     }
 
-    private List<BestallaUppdragFrageformular> LoadData()
+    private List<Checklist> LoadData()
     {
         lock (_lock)
         {
@@ -155,7 +155,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                     json = File.ReadAllText(_jsonFilePath);
                 }
                 
-                var data = JsonSerializer.Deserialize<List<BestallaUppdragFrageformular>>(json, new JsonSerializerOptions
+                var data = JsonSerializer.Deserialize<List<Checklist>>(json, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
@@ -166,13 +166,13 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                     _logger.LogWarning("JSON file contains no valid data, re-initializing with sample data");
                     InitializeSampleData();
                     json = File.ReadAllText(_jsonFilePath);
-                    data = JsonSerializer.Deserialize<List<BestallaUppdragFrageformular>>(json, new JsonSerializerOptions
+                    data = JsonSerializer.Deserialize<List<Checklist>>(json, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
                 }
                 
-                return data ?? new List<BestallaUppdragFrageformular>();
+                return data ?? new List<Checklist>();
             }
             catch (Exception ex)
             {
@@ -182,21 +182,21 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
                 {
                     InitializeSampleData();
                     var json = File.ReadAllText(_jsonFilePath);
-                    var data = JsonSerializer.Deserialize<List<BestallaUppdragFrageformular>>(json, new JsonSerializerOptions
+                    var data = JsonSerializer.Deserialize<List<Checklist>>(json, new JsonSerializerOptions
                     {
                         PropertyNameCaseInsensitive = true
                     });
-                    return data ?? new List<BestallaUppdragFrageformular>();
+                    return data ?? new List<Checklist>();
                 }
                 catch
                 {
-                    return new List<BestallaUppdragFrageformular>();
+                    return new List<Checklist>();
                 }
             }
         }
     }
 
-    private void SaveData(List<BestallaUppdragFrageformular> data)
+    private void SaveData(List<Checklist> data)
     {
         lock (_lock)
         {
@@ -216,19 +216,19 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
         }
     }
 
-    public Task<IEnumerable<BestallaUppdragFrageformular>> GetAllAsync()
+    public Task<IEnumerable<Checklist>> GetAllAsync()
     {
         var data = LoadData();
-        return Task.FromResult<IEnumerable<BestallaUppdragFrageformular>>(data.OrderByDescending(x => x.Gid));
+        return Task.FromResult<IEnumerable<Checklist>>(data.OrderByDescending(x => x.Gid));
     }
 
-    public Task<BestallaUppdragFrageformular?> GetByIdAsync(int gid)
+    public Task<Checklist?> GetByIdAsync(int gid)
     {
         var data = LoadData();
         return Task.FromResult(data.FirstOrDefault(x => x.Gid == gid));
     }
 
-    public Task<BestallaUppdragFrageformular> CreateAsync(BestallaUppdragFrageformular item)
+    public Task<Checklist> CreateAsync(Checklist item)
     {
         var data = LoadData();
         
@@ -242,17 +242,17 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
         return Task.FromResult(item);
     }
 
-    public Task<BestallaUppdragFrageformular?> UpdateAsync(int gid, BestallaUppdragFrageformular item)
+    public Task<Checklist?> UpdateAsync(int gid, Checklist item)
     {
         var data = LoadData();
         var existing = data.FirstOrDefault(x => x.Gid == gid);
         
         if (existing == null)
         {
-            return Task.FromResult<BestallaUppdragFrageformular?>(null);
+            return Task.FromResult<Checklist?>(null);
         }
 
-        existing.Arendenummer = item.Arendenummer;
+        existing.ArendenummerArtvise = item.ArendenummerArtvise;
         existing.Dataunderlag = item.Dataunderlag;
         existing.Dataadministrator = item.Dataadministrator;
         existing.Malgrupper = item.Malgrupper;
@@ -267,7 +267,7 @@ public class JsonBestallaUppdragFrageformularRepository : IBestallaUppdragFragef
         existing.Handlaggare = item.Handlaggare;
         
         SaveData(data);
-        return Task.FromResult<BestallaUppdragFrageformular?>(existing);
+        return Task.FromResult<Checklist?>(existing);
     }
 
     public Task<bool> DeleteAsync(int gid)

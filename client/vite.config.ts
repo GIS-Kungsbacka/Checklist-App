@@ -24,9 +24,9 @@ export default defineConfig(({ mode }) => {
           target: "https://localhost:7188",
           changeOrigin: true,
           secure: false,
-          //rewrite: (path) => path.replace(/^\/api/, "")
-        }
-      }
-    }
+          //rewrite: (path) => path.replace(/^\/api/, ""),
+        },
+      },
+    },
   };
 });

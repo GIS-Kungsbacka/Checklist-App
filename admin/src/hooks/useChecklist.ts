@@ -4,7 +4,7 @@ import {
   useQueryClient,
   type UseQueryResult,
 } from "@tanstack/react-query";
-import { checklistRequests } from "../api/bestallaUppdragFrageformularApi";
+import { checklistRequests } from "../api/checkListRequests";
 import type { Checklist, UpdateChecklistDto } from "../types/checklist";
 
 export const useChecklists = (): UseQueryResult<Checklist[]> => {

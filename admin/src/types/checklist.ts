@@ -1,6 +1,6 @@
 export interface Checklist {
   gid: number;
-  arendenummer?: string;
+  arendenummerArtvise?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;
@@ -16,7 +16,7 @@ export interface Checklist {
 }
 
 export interface CreateChecklistDto {
-  arendenummer?: string;
+  arendenummerArtvise?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;
@@ -32,7 +32,7 @@ export interface CreateChecklistDto {
 }
 
 export interface UpdateChecklistDto {
-  arendenummer?: string;
+  arendenummerArtvise?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;

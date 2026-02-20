@@ -2,12 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FormApp.Api.Models;
 
-public class BestallaUppdragFrageformular
+public class Checklist
 {
     public int Gid { get; set; }
 
     [MaxLength(255)]
-    public string? Arendenummer { get; set; }
+    public string? ArendenummerArtvise { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }

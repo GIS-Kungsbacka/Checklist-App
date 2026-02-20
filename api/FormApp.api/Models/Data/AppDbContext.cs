@@ -8,8 +8,8 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
   
-    public DbSet<BestallaUppdragFrageformular> BestallaUppdragFrageformulars => Set<BestallaUppdragFrageformular>();
-    public DbSet<Bestallningsspecifikation> Bestallningsspecifikationer => Set<Bestallningsspecifikation>();
+    public DbSet<Checklist> Checklists => Set<Checklist>();
+    public DbSet<OrderSummary> OrderSummaries => Set<OrderSummary>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -17,106 +17,106 @@ public class AppDbContext : DbContext
         
         
         
-        // Configure BestallaUppdragFrageformular entity
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        // Configure Checklist entity (table: bestalla_uppdrag_frageformular)
+        modelBuilder.Entity<Checklist>()
             .ToTable("bestalla_uppdrag_frageformular","idebank")
             .HasKey(x => x.Gid);
         
         // Map property names to database column names (snake_case to PascalCase)
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Gid)
             .HasColumnName("gid");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
-            .Property(x => x.Arendenummer)
-            .HasColumnName("arendenummer");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.ArendenummerArtvise)
+            .HasColumnName("arendenummer_artvise");
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Dataunderlag)
             .HasColumnName("dataunderlag");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Dataadministrator)
             .HasColumnName("dataadministrator");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Malgrupper)
             .HasColumnName("malgrupper");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.NyttjandeInterntExternt)
             .HasColumnName("nyttjande_internt_externt");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Leverans)
             .HasColumnName("leverans");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.LeveransArbetstimmar)
             .HasColumnName("leverans_arbetstimmar");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Kategori)
             .HasColumnName("kategori");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.KategoriTyp)
             .HasColumnName("kategori_typ");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.Prioritet)
             .HasColumnName("prioritet");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.AntagenJaNej)
             .HasColumnName("antagen_ja_nej");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
             .Property(x => x.AntagenJaNejMotivering)
             .HasColumnName("antagen_ja_nej_motivering");
-        modelBuilder.Entity<BestallaUppdragFrageformular>()
+        modelBuilder.Entity<Checklist>()
            .Property(x => x.Handlaggare)
            .HasColumnName("handlaggare");
 
-        // Read-only view: bestallningsspecifikation
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        // Read-only view: orderSummary
+        modelBuilder.Entity<OrderSummary>()
             .ToView("bestallningsspecifikation","idebank")
-            .HasKey(x => x.BestallningGid);
-        modelBuilder.Entity<Bestallningsspecifikation>()
-            .Property(x => x.BestallningGid).HasColumnName("bestallning_gid");
-        modelBuilder.Entity<Bestallningsspecifikation>()
-            .Property(x => x.Arendenummer).HasColumnName("arendenummer");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+            .HasKey(x => x.ArendenummerArtvise);
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.ArendenummerArtvise).HasColumnName("arendenummer_artvise");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.ArendenummerOpenE).HasColumnName("arendenummer_open_e");
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.BestallareEpost).HasColumnName("bestallare_epost");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.BestallareOrganisation).HasColumnName("bestallare_organisation");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.BestallareTjanstetitel).HasColumnName("bestallare_tjanstetitel");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.DatumInkommet).HasColumnName("datum_inkommet");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Beskrivning).HasColumnName("beskrivning");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Nytta).HasColumnName("nytta");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.SistaDatum).HasColumnName("sista_datum");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.ForankradChef).HasColumnName("forankrad_chef");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.KansligInformation).HasColumnName("kanslig_information");
-        modelBuilder.Entity<Bestallningsspecifikation>()
-            .Property(x => x.FrageformularGid).HasColumnName("frageformular_gid");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.KansligInformationBeskrivning).HasColumnName("kanslig_information_beskrivning");
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Dataunderlag).HasColumnName("dataunderlag");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Dataadministrator).HasColumnName("dataadministrator");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Malgrupper).HasColumnName("malgrupper");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.NyttjandeInterntExternt).HasColumnName("nyttjande_internt_externt");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Leverans).HasColumnName("leverans");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.LeveransArbetstimmar).HasColumnName("leverans_arbetstimmar");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Kategori).HasColumnName("kategori");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.KategoriTyp).HasColumnName("kategori_typ");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Prioritet).HasColumnName("prioritet");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.AntagenJaNej).HasColumnName("antagen_ja_nej");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.AntagenJaNejMotivering).HasColumnName("antagen_ja_nej_motivering");
-        modelBuilder.Entity<Bestallningsspecifikation>()
+        modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Handlaggare).HasColumnName("handlaggare");
     }
 }

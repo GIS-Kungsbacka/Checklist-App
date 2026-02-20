@@ -39,8 +39,8 @@ else
 
 if (useJsonFile)
 {
-    builder.Services.AddScoped<IBestallaUppdragFrageformularRepository, JsonBestallaUppdragFrageformularRepository>();
-    builder.Services.AddScoped<IBestallningsspecifikationRepository, JsonBestallningsspecifikationRepository>();
+    builder.Services.AddScoped<IChecklistRepository, JsonChecklistRepository>();
+    builder.Services.AddScoped<IOrderSummaryRepository, JsonOrderSummaryRepository>();
     Console.WriteLine("INFO: Using JSON file storage for forms data");
 }
 else
@@ -49,8 +49,8 @@ else
     builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseNpgsql(postgresConnection)
     );
-    builder.Services.AddScoped<IBestallaUppdragFrageformularRepository, DbContextBestallaUppdragFrageformularRepository>();
-    builder.Services.AddScoped<IBestallningsspecifikationRepository, DbContextBestallningsspecifikationRepository>();
+    builder.Services.AddScoped<IChecklistRepository, DbContextChecklistRepository>();
+    builder.Services.AddScoped<IOrderSummaryRepository, DbContextOrderSummaryRepository>();
     Console.WriteLine("INFO: Using Postgres database for forms data");
 }
 

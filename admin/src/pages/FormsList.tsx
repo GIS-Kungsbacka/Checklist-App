@@ -56,7 +56,7 @@ export default function FormsList() {
     formState: { isSubmitting: isCreating },
   } = useForm<CreateChecklistDto>({
     defaultValues: {
-      arendenummer: "",
+      arendenummerArtvise: "",
       dataunderlag: "",
       dataadministrator: "",
       malgrupper: "",
@@ -87,7 +87,7 @@ export default function FormsList() {
       const q = searchQuery.toLowerCase().trim();
       result = items.filter(
         (item) =>
-          item.arendenummer?.toLowerCase().includes(q) ||
+          item.arendenummerArtvise?.toLowerCase().includes(q) ||
           item.dataadministrator?.toLowerCase().includes(q) ||
           item.kategori?.toLowerCase().includes(q) ||
           item.dataunderlag?.toLowerCase().includes(q) ||
@@ -112,7 +112,7 @@ export default function FormsList() {
   const handleEditClick = (item: Checklist) => {
     setOpenEdit(item);
     resetEditForm({
-      arendenummer: item.arendenummer ?? "",
+      arendenummerArtvise: item.arendenummerArtvise ?? "",
       dataunderlag: item.dataunderlag ?? "",
       dataadministrator: item.dataadministrator ?? "",
       malgrupper: item.malgrupper ?? "",
@@ -130,16 +130,16 @@ export default function FormsList() {
 
   const handleCreate = (data: CreateChecklistDto) => {
     // Additional validation check (react-hook-form validation should catch this, but this is a backup)
-    const arendenummer = data.arendenummer?.trim();
-    if (arendenummer) {
+    const arendenummerArtvise = data.arendenummerArtvise?.trim();
+    if (arendenummerArtvise) {
       const duplicateExists = items.some(
         (item) =>
-          item.arendenummer?.toLowerCase().trim() ===
-          arendenummer.toLowerCase().trim(),
+          item.arendenummerArtvise?.toLowerCase().trim() ===
+          arendenummerArtvise.toLowerCase().trim(),
       );
 
       if (duplicateExists) {
-        setError("arendenummer", {
+        setError("arendenummerArtvise", {
           type: "manual",
           message: "Ärendenummer finns redan",
         });
@@ -319,7 +319,7 @@ export default function FormsList() {
                 sx={{ "&:hover": { backgroundColor: "action.hover" } }}
               >
                 <TableCell>{item.gid}</TableCell>
-                <TableCell>{item.arendenummer ?? "-"}</TableCell>
+                <TableCell>{item.arendenummerArtvise ?? "-"}</TableCell>
                 <TableCell
                   sx={{
                     maxWidth: 140,
@@ -433,7 +433,7 @@ export default function FormsList() {
             <Grid container spacing={2}>
               {(
                 [
-                  ["arendenummer", "Ärendenummer"],
+                  ["arendenummerArtvise", "Ärendenummer"],
                   ["dataunderlag", "Dataunderlag"],
                   ["dataadministrator", "Dataadministratör"],
                   ["malgrupper", "Målgrupper"],
@@ -453,14 +453,15 @@ export default function FormsList() {
                     name={key as keyof CreateChecklistDto}
                     control={createControl}
                     rules={
-                      key === "arendenummer"
+                      key === "arendenummerArtvise"
                         ? {
                             validate: (value) => {
                               if (!value || !value.trim()) return true; // Allow empty
                               const duplicateExists = items.some(
                                 (item) =>
-                                  item.arendenummer?.toLowerCase().trim() ===
-                                  value.toLowerCase().trim(),
+                                  item.arendenummerArtvise
+                                    ?.toLowerCase()
+                                    .trim() === value.toLowerCase().trim(),
                               );
                               return duplicateExists
                                 ? "Ärendenummer finns redan"
@@ -524,7 +525,7 @@ export default function FormsList() {
             <Grid container spacing={2}>
               {(
                 [
-                  ["arendenummer", "Ärendenummer"],
+                  ["arendenummerArtvise", "Ärendenummer"],
                   ["dataunderlag", "Dataunderlag"],
                   ["dataadministrator", "Dataadministratör"],
                   ["malgrupper", "Målgrupper"],
@@ -597,8 +598,8 @@ export default function FormsList() {
           </Alert>
           <Typography>
             Vill du ta bort posten med GID <strong>{deleteConfirm?.gid}</strong>
-            {deleteConfirm?.arendenummer ? (
-              <> (ärendenummer: {deleteConfirm.arendenummer})</>
+            {deleteConfirm?.arendenummerArtvise ? (
+              <> (ärendenummer: {deleteConfirm.arendenummerArtvise})</>
             ) : null}
             ?
           </Typography>

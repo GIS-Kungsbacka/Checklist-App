@@ -3,18 +3,18 @@ using FormApp.Api.Models;
 
 namespace FormApp.Api.Data;
 // Test data
-public class JsonBestallningsspecifikationRepository : IBestallningsspecifikationRepository
+public class JsonOrderSummaryRepository : IOrderSummaryRepository
 {
     private readonly string _jsonFilePath;
-    private readonly ILogger<JsonBestallningsspecifikationRepository> _logger;
+    private readonly ILogger<JsonOrderSummaryRepository> _logger;
     private readonly object _lock = new object();
 
-    public JsonBestallningsspecifikationRepository(ILogger<JsonBestallningsspecifikationRepository> logger, IWebHostEnvironment env)
+    public JsonOrderSummaryRepository(ILogger<JsonOrderSummaryRepository> logger, IWebHostEnvironment env)
     {
         _logger = logger;
-        _jsonFilePath = Path.Combine(env.ContentRootPath, "data", "bestallningsspecifikation.json");
+        _jsonFilePath = Path.Combine(env.ContentRootPath, "data", "orderSummary.json");
 
-        _logger.LogInformation("JSON Bestallningsspecifikation Repository initialized. File path: {Path}", _jsonFilePath);
+        _logger.LogInformation("JSON OrderSummary Repository initialized. File path: {Path}", _jsonFilePath);
 
         var directory = Path.GetDirectoryName(_jsonFilePath);
         if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
@@ -31,12 +31,12 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
 
     private void InitializeSampleData()
     {
-        var sample = new List<Bestallningsspecifikation>
+        var sample = new List<OrderSummary>
         {
-            new Bestallningsspecifikation
+            new OrderSummary
             {
-                BestallningGid = 1,
-                Arendenummer = "AR-2024-001",
+                ArendenummerArtvise = "2026XX1",
+                ArendenummerOpenE = "AR-2024-001",
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
@@ -46,7 +46,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 SistaDatum = "2024-04-30",
                 ForankradChef = true,
                 KansligInformation = false,
-                FrageformularGid = 1,
+                KansligInformationBeskrivning = "Hemlig1",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -60,10 +60,10 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
                 Handlaggare = "Test1"
             },
-             new Bestallningsspecifikation
+             new OrderSummary
             {
-                BestallningGid = 2,
-                Arendenummer = "AR-2024-002",
+                ArendenummerArtvise = "2026XX2",
+                ArendenummerOpenE = "AR-2024-002",
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
@@ -73,7 +73,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 SistaDatum = "2024-04-30",
                 ForankradChef = true,
                 KansligInformation = false,
-                FrageformularGid = 1,
+                KansligInformationBeskrivning = "Hemlig2",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -87,10 +87,10 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
                 Handlaggare = "Test2"
             },
-              new Bestallningsspecifikation
+              new OrderSummary
             {
-                BestallningGid = 3,
-                Arendenummer = "AR-2024-003",
+                ArendenummerArtvise = "2026XX3",
+                ArendenummerOpenE = "AR-2024-003",
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
@@ -100,7 +100,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 SistaDatum = "2024-04-30",
                 ForankradChef = true,
                 KansligInformation = false,
-                FrageformularGid = 1,
+                KansligInformationBeskrivning = "Hemlig3",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -114,10 +114,10 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
                 Handlaggare = "Test3"
             },
-               new Bestallningsspecifikation
+               new OrderSummary
             {
-                BestallningGid = 4,
-                Arendenummer = "AR-2024-004",
+                ArendenummerArtvise = "2026XX4",
+                ArendenummerOpenE = "AR-2024-004",
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
@@ -127,7 +127,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 SistaDatum = "2024-04-30",
                 ForankradChef = true,
                 KansligInformation = false,
-                FrageformularGid = 1,
+                KansligInformationBeskrivning = "Hemlig4",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -141,10 +141,10 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
                 Handlaggare = "Test4"
             },
-                new Bestallningsspecifikation
+                new OrderSummary
             {
-                BestallningGid = 1,
-                Arendenummer = "AR-2024-005",
+                ArendenummerArtvise = "2026XX5",
+                ArendenummerOpenE = "AR-2024-005",
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
@@ -154,7 +154,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 SistaDatum = "2024-04-30",
                 ForankradChef = true,
                 KansligInformation = false,
-                FrageformularGid = 1,
+                KansligInformationBeskrivning = "Hemlig5",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",
@@ -173,7 +173,7 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
         SaveData(sample);
     }
 
-    private List<Bestallningsspecifikation> LoadData()
+    private List<OrderSummary> LoadData()
     {
         lock (_lock)
         {
@@ -192,28 +192,28 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
                 }
 
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var data = JsonSerializer.Deserialize<List<Bestallningsspecifikation>>(json, options);
-                return data ?? new List<Bestallningsspecifikation>();
+                var data = JsonSerializer.Deserialize<List<OrderSummary>>(json, options);
+                return data ?? new List<OrderSummary>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading bestallningsspecifikation from {Path}", _jsonFilePath);
+                _logger.LogError(ex, "Error loading order summary from {Path}", _jsonFilePath);
                 try
                 {
                     InitializeSampleData();
                     var json = File.ReadAllText(_jsonFilePath);
-                    return JsonSerializer.Deserialize<List<Bestallningsspecifikation>>(json,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<Bestallningsspecifikation>();
+                    return JsonSerializer.Deserialize<List<OrderSummary>>(json,
+                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new List<OrderSummary>();
                 }
                 catch
                 {
-                    return new List<Bestallningsspecifikation>();
+                    return new List<OrderSummary>();
                 }
             }
         }
     }
 
-    private void SaveData(List<Bestallningsspecifikation> data)
+    private void SaveData(List<OrderSummary> data)
     {
         lock (_lock)
         {
@@ -222,15 +222,15 @@ public class JsonBestallningsspecifikationRepository : IBestallningsspecifikatio
         }
     }
 
-    public Task<IEnumerable<Bestallningsspecifikation>> GetAllAsync()
+    public Task<IEnumerable<OrderSummary>> GetAllAsync()
     {
         var data = LoadData();
-        return Task.FromResult<IEnumerable<Bestallningsspecifikation>>(data.OrderByDescending(x => x.BestallningGid));
+        return Task.FromResult<IEnumerable<OrderSummary>>(data.OrderByDescending(x => x.ArendenummerArtvise));
     }
 
-    public Task<Bestallningsspecifikation?> GetByIdAsync(int bestallningGid)
+    public Task<OrderSummary?> GetByIdAsync(string arendenummerArtvise)
     {
         var data = LoadData();
-        return Task.FromResult(data.FirstOrDefault(x => x.BestallningGid == bestallningGid));
+        return Task.FromResult(data.FirstOrDefault(x => x.ArendenummerArtvise == arendenummerArtvise));
     }
 }

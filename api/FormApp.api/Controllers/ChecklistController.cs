@@ -9,14 +9,14 @@ namespace FormApp.Api.Controllers;
 [ApiController]
 [Route("admin/checklist")]
 [Authorize(Policy = "AdminOnly")]
-public class BestallaUppdragFrageformularController : ControllerBase
+public class ChecklistController : ControllerBase
 {
-    private readonly IBestallaUppdragFrageformularRepository _repository;
-    private readonly ILogger<BestallaUppdragFrageformularController> _logger;
+    private readonly IChecklistRepository _repository;
+    private readonly ILogger<ChecklistController> _logger;
 
-    public BestallaUppdragFrageformularController(
-        IBestallaUppdragFrageformularRepository repository, 
-        ILogger<BestallaUppdragFrageformularController> logger)
+    public ChecklistController(
+        IChecklistRepository repository, 
+        ILogger<ChecklistController> logger)
     {
         _repository = repository;
         _logger = logger;
@@ -26,7 +26,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
     /// Get all records
     /// </summary>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<BestallaUppdragFrageformular>>> GetAll()
+    public async Task<ActionResult<IEnumerable<Checklist>>> GetAll()
     {
         try
         {
@@ -35,7 +35,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving bestalla uppdrag frageformular records");
+            _logger.LogError(ex, "Error retrieving checklist records");
             return StatusCode(500, new { error = "An error occurred while retrieving records", details = ex.Message });
         }
     }
@@ -44,7 +44,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
     /// Get a specific record by GID
     /// </summary>
     [HttpGet("{gid}")]
-    public async Task<ActionResult<BestallaUppdragFrageformular>> GetById(int gid)
+    public async Task<ActionResult<Checklist>> GetById(int gid)
     {
         try
         {
@@ -57,7 +57,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving bestalla uppdrag frageformular record with GID {Gid}", gid);
+            _logger.LogError(ex, "Error retrieving checklist record with GID {Gid}", gid);
             return StatusCode(500, new { error = "An error occurred while retrieving the record", details = ex.Message });
         }
     }
@@ -66,13 +66,13 @@ public class BestallaUppdragFrageformularController : ControllerBase
     /// Create a new record
     /// </summary>
     [HttpPost]
-    public async Task<ActionResult<BestallaUppdragFrageformular>> Create([FromBody] CreateBestallaUppdragFrageformularDto dto)
+    public async Task<ActionResult<Checklist>> Create([FromBody] CreateChecklistDto dto)
     {
         try
         {
-            var item = new BestallaUppdragFrageformular
+            var item = new Checklist
             {
-                Arendenummer = dto.Arendenummer,
+                ArendenummerArtvise = dto.ArendenummerArtvise,
                 Dataunderlag = dto.Dataunderlag,
                 Dataadministrator = dto.Dataadministrator,
                 Malgrupper = dto.Malgrupper,
@@ -90,12 +90,12 @@ public class BestallaUppdragFrageformularController : ControllerBase
             var createdItem = await _repository.CreateAsync(item);
 
             var username = User.Identity?.Name ?? "Unknown";
-            _logger.LogInformation("Bestalla uppdrag frageformular record {Gid} created by {User}", createdItem.Gid, username);
+            _logger.LogInformation("Checklist record {Gid} created by {User}", createdItem.Gid, username);
             return CreatedAtAction(nameof(GetById), new { gid = createdItem.Gid }, createdItem);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating bestalla uppdrag frageformular record");
+            _logger.LogError(ex, "Error creating checklist record");
             return StatusCode(500, new { error = "An error occurred while creating the record", details = ex.Message });
         }
     }
@@ -104,7 +104,7 @@ public class BestallaUppdragFrageformularController : ControllerBase
     /// Update an existing record
     /// </summary>
     [HttpPut("{gid}")]
-    public async Task<IActionResult> Update(int gid, [FromBody] UpdateBestallaUppdragFrageformularDto dto)
+    public async Task<IActionResult> Update(int gid, [FromBody] UpdateChecklistDto dto)
     {
         try
         {
@@ -114,10 +114,10 @@ public class BestallaUppdragFrageformularController : ControllerBase
                 return NotFound();
             }
 
-            var item = new BestallaUppdragFrageformular
+            var item = new Checklist
             {
                 Gid = gid,
-                Arendenummer = dto.Arendenummer,
+                ArendenummerArtvise = dto.ArendenummerArtvise,
                 Dataunderlag = dto.Dataunderlag,
                 Dataadministrator = dto.Dataadministrator,
                 Malgrupper = dto.Malgrupper,
@@ -139,12 +139,12 @@ public class BestallaUppdragFrageformularController : ControllerBase
             }
 
             var username = User.Identity?.Name ?? "Unknown";
-            _logger.LogInformation("Bestalla uppdrag frageformular record {Gid} updated by {User}", gid, username);
+            _logger.LogInformation("Checklist record {Gid} updated by {User}", gid, username);
             return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating bestalla uppdrag frageformular record {Gid}", gid);
+            _logger.LogError(ex, "Error updating checklist record {Gid}", gid);
             return StatusCode(500, new { error = "An error occurred while updating the record", details = ex.Message });
         }
     }
@@ -164,21 +164,21 @@ public class BestallaUppdragFrageformularController : ControllerBase
             }
 
             var username = User.Identity?.Name ?? "Unknown";
-            _logger.LogInformation("Bestalla uppdrag frageformular record {Gid} deleted by {User}", gid, username);
+            _logger.LogInformation("Checklist record {Gid} deleted by {User}", gid, username);
             return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting bestalla uppdrag frageformular record {Gid}", gid);
+            _logger.LogError(ex, "Error deleting checklist record {Gid}", gid);
             return StatusCode(500, new { error = "An error occurred while deleting the record", details = ex.Message });
         }
     }
 }
 
-public class CreateBestallaUppdragFrageformularDto
+public class CreateChecklistDto
 {
     [MaxLength(255)]
-    public string? Arendenummer { get; set; }
+    public string? ArendenummerArtvise { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }
@@ -217,10 +217,10 @@ public class CreateBestallaUppdragFrageformularDto
     public string? Handlaggare { get; set; }
 }
 
-public class UpdateBestallaUppdragFrageformularDto
+public class UpdateChecklistDto
 {
     [MaxLength(255)]
-    public string? Arendenummer { get; set; }
+    public string? ArendenummerArtvise { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }

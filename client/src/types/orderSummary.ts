@@ -1,6 +1,6 @@
-export interface Order {
-  bestallningGid: number;
-  arendenummer?: string;
+export interface OrderSummary {
+  arendenummerArtvise: string;
+  arendenummerOpenE?: string;
   bestallareEpost?: string;
   bestallareOrganisation?: string;
   bestallareTjanstetitel?: string;
@@ -10,7 +10,7 @@ export interface Order {
   sistaDatum?: string;
   forankradChef: boolean;
   kansligInformation: boolean;
-  frageformularGid?: number;
+  kansligInformationBeskrivning?: string;
   dataunderlag?: string;
   dataadministrator?: string;
   malgrupper?: string;

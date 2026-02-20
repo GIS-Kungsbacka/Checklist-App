@@ -5,12 +5,12 @@ namespace FormApp.Api.Models;
 /// <summary>
 /// Read-only model for the bestallningsspecifikation view.
 /// </summary>
-public class Bestallningsspecifikation
+public class OrderSummary
 {
-    public int BestallningGid { get; set; }
+    public string? ArendenummerArtvise { get; set; }
 
     [MaxLength(255)]
-    public string? Arendenummer { get; set; }
+    public string? ArendenummerOpenE { get; set; }
 
     [MaxLength(255)]
     public string? BestallareEpost { get; set; }
@@ -36,7 +36,7 @@ public class Bestallningsspecifikation
 
     public bool KansligInformation { get; set; }
 
-    public int? FrageformularGid { get; set; }
+    public string? KansligInformationBeskrivning { get; set; }
 
     [MaxLength(255)]
     public string? Dataunderlag { get; set; }

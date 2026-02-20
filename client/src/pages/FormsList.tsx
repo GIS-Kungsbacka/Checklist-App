@@ -64,23 +64,25 @@ export default function FormsList() {
 
   const filteredItems = useMemo(() => {
     let result = items;
-    
     // Filter by search query if provided
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
       result = items.filter(
         (item) =>
-          item.arendenummer?.toLowerCase().includes(q) ||
+          item.arendenummerArtvise?.toLowerCase().includes(q) ||
           item.beskrivning?.toLowerCase().includes(q) ||
           item.bestallareOrganisation?.toLowerCase().includes(q) ||
           item.dataadministrator?.toLowerCase().includes(q) ||
           item.kategori?.toLowerCase().includes(q) ||
-          item.bestallningGid.toString().includes(q),
+          item.arendenummerArtvise?.toString().includes(q),
       );
     }
-    
-    // Sort by GID in ascending order
-    return [...result].sort((a, b) => a.bestallningGid - b.bestallningGid);
+
+    return [...result].sort((a, b) =>
+      (a.arendenummerArtvise as string).localeCompare(
+        b.arendenummerArtvise as string,
+      ),
+    );
   }, [items, searchQuery]);
 
   const paginatedItems = useMemo(() => {
@@ -213,7 +215,7 @@ export default function FormsList() {
         <Box mb={3}>
           <TextField
             fullWidth
-            placeholder="Sök på ärendenummer, beskrivning, beställare, dataadministratör, kategori eller GID..."
+            placeholder="Sök på ärendenummer, beskrivning, beställare, dataadministratör, kategori eller ärendenummerArtvise..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -268,7 +270,7 @@ export default function FormsList() {
             >
               <Grid container spacing={2}>
                 {paginatedItems.map((item) => (
-                  <Grid size={6} key={item.bestallningGid}>
+                  <Grid size={6} key={item.arendenummerArtvise}>
                     <Card
                       sx={{
                         height: "100%",
@@ -282,7 +284,9 @@ export default function FormsList() {
                           boxShadow: 4,
                         },
                       }}
-                      onClick={() => navigate(`/form/${item.bestallningGid}`)}
+                      onClick={() =>
+                        navigate(`/form/${item.arendenummerArtvise}`)
+                      }
                     >
                       <CardContent sx={{ flexGrow: 1, p: 2 }}>
                         <Box
@@ -298,10 +302,11 @@ export default function FormsList() {
                             fontWeight={600}
                             sx={{ flex: 1, pr: 1 }}
                           >
-                            {item.arendenummer || `GID ${item.bestallningGid}`}
+                            {item.arendenummerArtvise ||
+                              `Ärendenummer Artvise ${item.arendenummerArtvise}`}
                           </Typography>
                           <Chip
-                            label={`GID ${item.bestallningGid}`}
+                            label={`Ärendenummer Artvise ${item.arendenummerArtvise}`}
                             size="small"
                             variant="outlined"
                           />
@@ -381,7 +386,7 @@ export default function FormsList() {
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/form/${item.bestallningGid}`);
+                            navigate(`/form/${item.arendenummerArtvise}`);
                           }}
                         >
                           Visa detaljer
@@ -432,14 +437,16 @@ export default function FormsList() {
                 <TableBody>
                   {paginatedItems.map((item) => (
                     <TableRow
-                      key={item.bestallningGid}
+                      key={item.arendenummerArtvise}
                       sx={{
                         cursor: "pointer",
                         "&:hover": { backgroundColor: "action.hover" },
                       }}
-                      onClick={() => navigate(`/form/${item.bestallningGid}`)}
+                      onClick={() =>
+                        navigate(`/form/${item.arendenummerArtvise}`)
+                      }
                     >
-                      <TableCell>{item.arendenummer ?? "-"}</TableCell>
+                      <TableCell>{item.arendenummerArtvise ?? "-"}</TableCell>
                       <TableCell>
                         <Box
                           sx={{
@@ -479,7 +486,7 @@ export default function FormsList() {
                           color="primary"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/form/${item.bestallningGid}`);
+                            navigate(`/form/${item.arendenummerArtvise}`);
                           }}
                         >
                           <ArrowForward fontSize="small" />
