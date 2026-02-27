@@ -8,8 +8,6 @@ export const useOrders = (): UseQueryResult<OrderSummary[]> => {
     queryFn: orderSummaryRequests.getAll,
     refetchInterval: () =>
       document.visibilityState === "visible" ? 10_000 : false,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 };
 
@@ -17,7 +15,5 @@ export const useOrderById = (id: string): UseQueryResult<OrderSummary> => {
   return useQuery({
     queryKey: ["orders", id],
     queryFn: () => orderSummaryRequests.getById(id),
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 };
