@@ -23,6 +23,13 @@ import {
   InputAdornment,
   Pagination,
   Grid,
+  useMediaQuery,
+  useTheme,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
 } from "@mui/material";
 import { Add, Edit, Delete, Search } from "@mui/icons-material";
 import { useState, useMemo } from "react";
@@ -37,7 +44,25 @@ import type { Checklist, CreateChecklistDto } from "../types/checklist";
 
 const ITEMS_PER_PAGE = 10;
 
+const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
+
+const getPrioritetChipColor = (
+  p: string | undefined,
+): "error" | "success" | "info" | "default" => {
+  if (p === "Hög") return "error";
+  if (p === "Medel") return "success";
+  if (p === "Låg") return "info";
+  return "default";
+};
+
 export default function FormsList() {
+  const theme = useTheme();
+  const isDownLg = useMediaQuery(theme.breakpoints.down("lg"));
+  const isDownSm = useMediaQuery(theme.breakpoints.down("sm"));
+  const showExtendedColumns = !isDownLg;
+  const showSecondaryColumns = !isDownSm;
+  const emptyStateColSpan =
+    4 + (showSecondaryColumns ? 2 : 0) + (showExtendedColumns ? 6 : 0);
   const { data: items = [], isLoading, error } = useChecklists();
   const createMutation = useCreateChecklist();
   const updateMutation = useUpdateChecklist();
@@ -205,10 +230,7 @@ export default function FormsList() {
         gap={2}
       >
         <Box>
-          <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
-            Beställa uppdrag – frågeformulär
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body1" sx={{ fontWeight: 600 }}>
             Skapa, redigera och ta bort poster
           </Typography>
         </Box>
@@ -291,23 +313,98 @@ export default function FormsList() {
       <TableContainer
         component={Paper}
         elevation={2}
-        sx={{ borderRadius: 2, overflowX: "auto" }}
+        sx={{
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          overflow: "hidden",
+          overflowX: "auto",
+        }}
       >
-        <Table size="small">
+        <Table
+          size={isDownSm ? "small" : "medium"}
+          sx={{
+            minWidth: showExtendedColumns
+              ? 1480
+              : showSecondaryColumns
+                ? 980
+                : 680,
+          }}
+        >
           <TableHead>
-            <TableRow sx={{ backgroundColor: "grey.50" }}>
-              <TableCell sx={{ fontWeight: 600 }}>GID</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Ärendenummer</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Dataunderlag</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Dataadministratör</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Målgrupper</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Nyttjande</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Leverans</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Kategori</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Prioritet</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Antagen</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Handlaggare</TableCell>
-              <TableCell align="right" sx={{ fontWeight: 600 }}>
+            <TableRow sx={{ backgroundColor: "grey.100" }}>
+              <TableCell
+                sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+              >
+                GID
+              </TableCell>
+              <TableCell
+                sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+              >
+                Ärendenummer
+              </TableCell>
+              {showExtendedColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Dataunderlag
+                </TableCell>
+              )}
+              <TableCell
+                sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+              >
+                Dataadministratör
+              </TableCell>
+              {showExtendedColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Målgrupper
+                </TableCell>
+              )}
+              {showExtendedColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Nyttjande
+                </TableCell>
+              )}
+              {showExtendedColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Leverans
+                </TableCell>
+              )}
+              {showSecondaryColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Kategori
+                </TableCell>
+              )}
+              {showSecondaryColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Prioritet
+                </TableCell>
+              )}
+              {showExtendedColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Antagen
+                </TableCell>
+              )}
+              {showExtendedColumns && (
+                <TableCell
+                  sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                >
+                  Handlaggare
+                </TableCell>
+              )}
+              <TableCell align="right" sx={{ fontWeight: 700, py: 1.5 }}>
                 Åtgärder
               </TableCell>
             </TableRow>
@@ -316,46 +413,78 @@ export default function FormsList() {
             {paginatedItems.map((item) => (
               <TableRow
                 key={item.gid}
-                sx={{ "&:hover": { backgroundColor: "action.hover" } }}
+                sx={{
+                  "& td": { py: 1.25 },
+                  "&:hover": { backgroundColor: "action.hover" },
+                }}
               >
-                <TableCell>{item.gid}</TableCell>
-                <TableCell>{item.arendenummerArtvise ?? "-"}</TableCell>
-                <TableCell
-                  sx={{
-                    maxWidth: 140,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {item.dataunderlag ?? "-"}
+                <TableCell sx={{ fontWeight: 500 }}>{item.gid}</TableCell>
+                <TableCell sx={{ fontWeight: 500 }}>
+                  {item.arendenummerArtvise ?? "-"}
                 </TableCell>
+                {showExtendedColumns && (
+                  <TableCell
+                    sx={{
+                      maxWidth: 180,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.dataunderlag ?? "-"}
+                  </TableCell>
+                )}
                 <TableCell>{item.dataadministrator ?? "-"}</TableCell>
-                <TableCell
-                  sx={{
-                    maxWidth: 120,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {item.malgrupper ?? "-"}
-                </TableCell>
-                <TableCell>{item.nyttjandeInterntExternt ?? "-"}</TableCell>
-                <TableCell
-                  sx={{
-                    maxWidth: 120,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {item.leverans ?? "-"}
-                </TableCell>
-                <TableCell>{item.kategori ?? "-"}</TableCell>
-                <TableCell>{item.prioritet ?? "-"}</TableCell>
-                <TableCell>{item.antagenJaNej ?? "-"}</TableCell>
-                <TableCell>{item.handlaggare ?? "-"}</TableCell>
+                {showExtendedColumns && (
+                  <TableCell
+                    sx={{
+                      maxWidth: 160,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.malgrupper ?? "-"}
+                  </TableCell>
+                )}
+                {showExtendedColumns && (
+                  <TableCell>{item.nyttjandeInterntExternt ?? "-"}</TableCell>
+                )}
+                {showExtendedColumns && (
+                  <TableCell
+                    sx={{
+                      maxWidth: 160,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {item.leverans ?? "-"}
+                  </TableCell>
+                )}
+                {showSecondaryColumns && (
+                  <TableCell>{item.kategori ?? "-"}</TableCell>
+                )}
+                {showSecondaryColumns && (
+                  <TableCell>
+                    {item.prioritet ? (
+                      <Chip
+                        label={item.prioritet}
+                        size="small"
+                        color={getPrioritetChipColor(item.prioritet)}
+                        variant="filled"
+                      />
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                )}
+                {showExtendedColumns && (
+                  <TableCell>{item.antagenJaNej ?? "-"}</TableCell>
+                )}
+                {showExtendedColumns && (
+                  <TableCell>{item.handlaggare ?? "-"}</TableCell>
+                )}
                 <TableCell align="right">
                   <Stack
                     direction="row"
@@ -382,7 +511,11 @@ export default function FormsList() {
             ))}
             {paginatedItems.length === 0 && (
               <TableRow>
-                <TableCell colSpan={11} align="center" sx={{ py: 6 }}>
+                <TableCell
+                  colSpan={emptyStateColSpan}
+                  align="center"
+                  sx={{ py: 6 }}
+                >
                   <Typography color="text.secondary">
                     {searchQuery
                       ? "Inga poster matchar sökningen"
@@ -449,39 +582,69 @@ export default function FormsList() {
                 ] as const
               ).map(([key, label]) => (
                 <Grid size={{ xs: 12, sm: 6 }} key={key}>
-                  <Controller
-                    name={key as keyof CreateChecklistDto}
-                    control={createControl}
-                    rules={
-                      key === "arendenummerArtvise"
-                        ? {
-                            validate: (value) => {
-                              if (!value || !value.trim()) return true; // Allow empty
-                              const duplicateExists = items.some(
-                                (item) =>
-                                  item.arendenummerArtvise
-                                    ?.toLowerCase()
-                                    .trim() === value.toLowerCase().trim(),
-                              );
-                              return duplicateExists
-                                ? "Ärendenummer finns redan"
-                                : true;
-                            },
-                          }
-                        : undefined
-                    }
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        {...field}
-                        fullWidth
-                        label={label}
-                        multiline={key === "antagenJaNejMotivering"}
-                        rows={key === "antagenJaNejMotivering" ? 2 : 1}
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                      />
-                    )}
-                  />
+                  {key === "prioritet" ? (
+                    <Controller
+                      name="prioritet"
+                      control={createControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="create-prioritet-label">
+                            Prioritet
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="create-prioritet-label"
+                            label="Prioritet"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj prioritet</em>
+                            </MenuItem>
+                            {PRIORITET_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  ) : (
+                    <Controller
+                      name={key as keyof CreateChecklistDto}
+                      control={createControl}
+                      rules={
+                        key === "arendenummerArtvise"
+                          ? {
+                              validate: (value) => {
+                                if (!value || !value.trim()) return true;
+                                const duplicateExists = items.some(
+                                  (item) =>
+                                    item.arendenummerArtvise
+                                      ?.toLowerCase()
+                                      .trim() ===
+                                    value.toLowerCase().trim(),
+                                );
+                                return duplicateExists
+                                  ? "Ärendenummer finns redan"
+                                  : true;
+                              },
+                            }
+                          : undefined
+                      }
+                      render={({ field, fieldState }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          label={label}
+                          multiline={key === "antagenJaNejMotivering"}
+                          rows={key === "antagenJaNejMotivering" ? 2 : 1}
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
+                    />
+                  )}
                 </Grid>
               ))}
             </Grid>
@@ -519,7 +682,9 @@ export default function FormsList() {
         fullWidth
       >
         <form onSubmit={handleEditSubmit(handleUpdate)}>
-          <DialogTitle>Redigera post {openEdit?.gid}</DialogTitle>
+          <DialogTitle>
+            Redigera GID {openEdit?.gid} - ({openEdit?.arendenummerArtvise})
+          </DialogTitle>
           <Divider />
           <DialogContent sx={{ pt: 3 }}>
             <Grid container spacing={2}>
@@ -541,19 +706,48 @@ export default function FormsList() {
                 ] as const
               ).map(([key, label]) => (
                 <Grid size={{ xs: 12, sm: 6 }} key={key}>
-                  <Controller
-                    name={key as keyof CreateChecklistDto}
-                    control={editControl}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        fullWidth
-                        label={label}
-                        multiline={key === "antagenJaNejMotivering"}
-                        rows={key === "antagenJaNejMotivering" ? 4 : 1}
-                      />
-                    )}
-                  />
+                  {key === "prioritet" ? (
+                    <Controller
+                      name="prioritet"
+                      control={editControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="edit-prioritet-label">
+                            Prioritet
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="edit-prioritet-label"
+                            label="Prioritet"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj prioritet</em>
+                            </MenuItem>
+                            {PRIORITET_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  ) : (
+                    <Controller
+                      name={key as keyof CreateChecklistDto}
+                      control={editControl}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          label={label}
+                          multiline={key === "antagenJaNejMotivering"}
+                          rows={key === "antagenJaNejMotivering" ? 4 : 1}
+                        />
+                      )}
+                    />
+                  )}
                 </Grid>
               ))}
             </Grid>

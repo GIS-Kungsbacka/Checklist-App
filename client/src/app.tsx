@@ -5,14 +5,11 @@ import FormsList from "./pages/FormsList";
 import FormView from "./pages/FormView";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { queryConfig } from "../lib/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
+  defaultOptions: queryConfig,
 });
 
 const theme = createTheme({
@@ -83,6 +80,7 @@ function App() {
           </Box>
         </BrowserRouter>
       </ThemeProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

@@ -16,7 +16,7 @@ export default function Header() {
           sx={{ flexGrow: 1, fontWeight: 600, cursor: "pointer" }}
           onClick={() => navigate("/")}
         >
-          Checklist App
+          Geodata - Stärka fabriken
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Button

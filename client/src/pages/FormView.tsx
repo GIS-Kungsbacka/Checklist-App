@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import { useOrderById } from "../hooks/useOrders";
+import { getPrioritetChipColor } from "./FormsList";
 
 const fieldLabels: Record<string, string> = {
   arendenummerArtvise: "Ärendenummer",
@@ -138,7 +139,7 @@ export default function FormView() {
                 `Beställning ${item.arendenummerArtvise}`}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              Beställningsspecifikation (endast visning)
+              Beställningsspecifikation
             </Typography>
             <Stack
               direction="row"
@@ -160,7 +161,13 @@ export default function FormView() {
                   variant="outlined"
                 />
               )}
-              {item.prioritet && <Chip label={item.prioritet} size="small" />}
+              {item.prioritet && (
+                <Chip
+                  color={getPrioritetChipColor(item.prioritet)}
+                  label={item.prioritet}
+                  size="small"
+                />
+              )}
             </Stack>
           </Box>
 

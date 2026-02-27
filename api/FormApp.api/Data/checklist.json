@@ -4,15 +4,15 @@
     "ArendenummerArtvise": "AR-2024-001",
     "Dataunderlag": "Kundregister och transaktionsdata",
     "Dataadministrator": "Anna",
-    "Malgrupper": "Marknadsföring, Försäljning",
+    "Malgrupper": "Marknadsf\u00F6ring, F\u00F6rs\u00E4ljning",
     "NyttjandeInterntExternt": "Internt",
     "Leverans": "Rapport i PDF-format",
     "LeveransArbetstimmar": "40 timmar",
     "Kategori": "Dataanalys",
     "KategoriTyp": "Standard",
-    "Prioritet": "Hög",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Projektet är välplanerat och har tillräcklig budget",
+    "AntagenJaNejMotivering": "Projektet \u00E4r v\u00E4lplanerat och har tillr\u00E4cklig budget",
     "Handlaggare": null
   },
   {
@@ -28,13 +28,13 @@
     "KategoriTyp": "Komplex",
     "Prioritet": "Medel",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Godkänd efter teknisk granskning",
+    "AntagenJaNejMotivering": "Godk\u00E4nd efter teknisk granskning",
     "Handlaggare": "Test3"
   },
   {
     "Gid": 3,
     "ArendenummerArtvise": "AR-2024-003",
-    "Dataunderlag": "Användardata och beteendeanalys",
+    "Dataunderlag": "Anv\u00E4ndardata och beteendeanalys",
     "Dataadministrator": "Maria",
     "Malgrupper": "IT, Utveckling",
     "NyttjandeInterntExternt": "Internt",
@@ -42,9 +42,9 @@
     "LeveransArbetstimmar": "80 timmar",
     "Kategori": "Business Intelligence",
     "KategoriTyp": "Avancerad",
-    "Prioritet": "Hög",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Nej",
-    "AntagenJaNejMotivering": "Projektet kräver ytterligare resurser som inte finns tillgängliga",
+    "AntagenJaNejMotivering": "Projektet kr\u00E4ver ytterligare resurser som inte finns tillg\u00E4ngliga",
     "Handlaggare": "Test2"
   },
   {
@@ -58,25 +58,25 @@
     "LeveransArbetstimmar": "20 timmar",
     "Kategori": "Rapportering",
     "KategoriTyp": "Standard",
-    "Prioritet": "Låg",
+    "Prioritet": "L\u00E5g",
     "AntagenJaNej": "Ja",
-    "AntagenJaNejMotivering": "Rutinuppdrag som kan genomföras snabbt",
+    "AntagenJaNejMotivering": "Rutinuppdrag som kan genomf\u00F6ras snabbt",
     "Handlaggare": "Test"
   },
   {
     "Gid": 5,
     "ArendenummerArtvise": "AR-2024-005",
-    "Dataunderlag": "Kundfeedback och nöjdhetsundersökningar",
+    "Dataunderlag": "Kundfeedback och n\u00F6jdhetsunders\u00F6kningar",
     "Dataadministrator": "Sara",
-    "Malgrupper": "Kundservice, Marknadsföring",
+    "Malgrupper": "Kundservice, Marknadsf\u00F6ring",
     "NyttjandeInterntExternt": "Externt",
     "Leverans": "Analysrapport med rekommendationer",
     "LeveransArbetstimmar": "30 timmar",
     "Kategori": "Kundanalys",
     "KategoriTyp": "Standard",
-    "Prioritet": "Medel",
-    "AntagenJaNej": null,
-    "AntagenJaNejMotivering": null,
-    "Handlaggare": null
+    "Prioritet": "H\u00F6g",
+    "AntagenJaNej": "",
+    "AntagenJaNejMotivering": "",
+    "Handlaggare": ""
   }
 ]

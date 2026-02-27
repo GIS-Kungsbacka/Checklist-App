@@ -11,7 +11,7 @@ export default function Header() {
           component="div"
           sx={{ flexGrow: 1, fontWeight: 600 }}
         >
-          Checklist Admin Panel
+          Admin
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography variant="body2" sx={{ opacity: 0.9 }}>

@@ -39,9 +39,9 @@ export const useUpdateChecklist = () => {
   return useMutation({
     mutationFn: ({ gid, data }: { gid: number; data: UpdateChecklistDto }) =>
       checklistRequests.update(gid, data),
-    onSuccess: (data, { gid }) => {
-      queryClient.setQueryData(["checklists", gid], data);
+    onSuccess: (_, { gid }) => {
       void queryClient.invalidateQueries({ queryKey: ["checklists"] });
+      void queryClient.invalidateQueries({ queryKey: ["checklists", gid] });
     },
     onError: (error) => {
       console.error(error);

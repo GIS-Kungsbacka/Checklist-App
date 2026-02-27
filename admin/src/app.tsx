@@ -6,14 +6,10 @@ import FormsList from "./pages/FormsList";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { queryConfig } from "../lib/react-query";
 
 const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
+  defaultOptions: queryConfig,
 });
 
 const theme = createTheme({

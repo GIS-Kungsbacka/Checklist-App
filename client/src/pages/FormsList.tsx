@@ -27,6 +27,10 @@ import {
   TextField,
   InputAdornment,
   Pagination,
+  useMediaQuery,
+  useTheme,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import {
   Description,
@@ -42,7 +46,18 @@ import { useOrders } from "../hooks/useOrders";
 type ViewMode = "cards" | "list";
 
 const STORAGE_KEY = "bestallningsspecifikationViewMode";
+const STORAGE_KEY_CARD_PAGINATION = "bestallningsspecifikationCardPagination";
 const ITEMS_PER_PAGE = 10;
+const CARD_ITEMS_PER_PAGE = 8;
+
+export const getPrioritetChipColor = (
+  p: string | undefined,
+): "error" | "success" | "info" | "default" => {
+  if (p === "Hög") return "error";
+  if (p === "Medel") return "success";
+  if (p === "Låg") return "info";
+  return "default";
+};
 
 const getInitialViewMode = (): ViewMode => {
   try {
@@ -54,11 +69,28 @@ const getInitialViewMode = (): ViewMode => {
   return "cards";
 };
 
+const getInitialCardPagination = (): boolean => {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY_CARD_PAGINATION);
+    if (saved === "true") return true;
+    if (saved === "false") return false;
+  } catch {
+    // ignore
+  }
+  return false;
+};
+
 export default function FormsList() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isDownMd = useMediaQuery(theme.breakpoints.down("md"));
+  const isDownSm = useMediaQuery(theme.breakpoints.down("sm"));
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [cardPaginationEnabled, setCardPaginationEnabled] = useState(
+    getInitialCardPagination,
+  );
 
   const { data: items = [], isLoading, error } = useOrders();
 
@@ -92,7 +124,17 @@ export default function FormsList() {
     );
   }, [filteredItems, page]);
 
+  const cardItems = useMemo(() => {
+    if (cardPaginationEnabled && viewMode === "cards") {
+      const start = (page - 1) * CARD_ITEMS_PER_PAGE;
+      return filteredItems.slice(start, start + CARD_ITEMS_PER_PAGE);
+    }
+    return filteredItems;
+  }, [filteredItems, page, cardPaginationEnabled, viewMode]);
+
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE) || 1;
+  const cardTotalPages =
+    Math.ceil(filteredItems.length / CARD_ITEMS_PER_PAGE) || 1;
 
   useEffect(() => {
     try {
@@ -101,6 +143,17 @@ export default function FormsList() {
       // ignore
     }
   }, [viewMode]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY_CARD_PAGINATION,
+        String(cardPaginationEnabled),
+      );
+    } catch {
+      // ignore
+    }
+  }, [cardPaginationEnabled]);
 
   const handleViewModeChange = (
     _event: React.MouseEvent<HTMLElement>,
@@ -169,47 +222,64 @@ export default function FormsList() {
           }}
         >
           <Box>
-            <Typography
-              variant="h3"
-              component="h1"
-              gutterBottom
-              fontWeight={700}
-            >
-              Beställningsspecifikationer
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              Visa tillgängliga beställningsspecifikationer (endast läsning)
+            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+              Varje objekt visar en sammanfattning av
+              beställningsspecifikationen. Klicka på objektet för att se fler
+              detaljer.
             </Typography>
           </Box>
-          <ToggleButtonGroup
-            value={viewMode}
-            exclusive
-            onChange={handleViewModeChange}
-            aria-label="view mode"
-            size="small"
-            sx={{
-              "& .MuiToggleButton-root": {
-                border: "1px solid",
-                borderColor: "divider",
-                "&.Mui-selected": {
-                  backgroundColor: "primary.main",
-                  color: "white",
-                  "&:hover": { backgroundColor: "primary.dark" },
-                },
-              },
-            }}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            flexWrap="wrap"
           >
-            <Tooltip title="Kortvy" arrow>
-              <ToggleButton value="cards" aria-label="card view">
-                <ViewModule />
-              </ToggleButton>
-            </Tooltip>
-            <Tooltip title="Listvy" arrow>
-              <ToggleButton value="list" aria-label="list view">
-                <ViewList />
-              </ToggleButton>
-            </Tooltip>
-          </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={viewMode}
+              exclusive
+              onChange={handleViewModeChange}
+              aria-label="view mode"
+              size="small"
+              sx={{
+                "& .MuiToggleButton-root": {
+                  border: "1px solid",
+                  borderColor: "divider",
+                  "&.Mui-selected": {
+                    backgroundColor: "primary.main",
+                    color: "white",
+                    "&:hover": { backgroundColor: "primary.dark" },
+                  },
+                },
+              }}
+            >
+              <Tooltip title="Kortvy" arrow>
+                <ToggleButton value="cards" aria-label="card view">
+                  <ViewModule />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title="Listvy" arrow>
+                <ToggleButton value="list" aria-label="list view">
+                  <ViewList />
+                </ToggleButton>
+              </Tooltip>
+            </ToggleButtonGroup>
+            {viewMode === "cards" &&
+              filteredItems.length > CARD_ITEMS_PER_PAGE && (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={cardPaginationEnabled}
+                      onChange={(e) => {
+                        setCardPaginationEnabled(e.target.checked);
+                        setPage(1);
+                      }}
+                      size="small"
+                    />
+                  }
+                  label="Paginering i kortvy"
+                />
+              )}
+          </Stack>
         </Box>
 
         <Box mb={3}>
@@ -269,8 +339,8 @@ export default function FormsList() {
               sx={{ p: 2, borderRadius: 2, flexGrow: 1, overflow: "auto" }}
             >
               <Grid container spacing={2}>
-                {paginatedItems.map((item) => (
-                  <Grid size={6} key={item.arendenummerArtvise}>
+                {cardItems.map((item) => (
+                  <Grid size={3} key={item.arendenummerArtvise}>
                     <Card
                       sx={{
                         height: "100%",
@@ -297,14 +367,6 @@ export default function FormsList() {
                             mb: 2,
                           }}
                         >
-                          <Typography
-                            variant="h6"
-                            fontWeight={600}
-                            sx={{ flex: 1, pr: 1 }}
-                          >
-                            {item.arendenummerArtvise ||
-                              `Ärendenummer Artvise ${item.arendenummerArtvise}`}
-                          </Typography>
                           <Chip
                             label={`Ärendenummer Artvise ${item.arendenummerArtvise}`}
                             size="small"
@@ -375,6 +437,15 @@ export default function FormsList() {
                               sx={{ alignSelf: "flex-start" }}
                             />
                           )}
+                          {item.prioritet && (
+                            <Chip
+                              label={item.prioritet}
+                              size="small"
+                              color={getPrioritetChipColor(item.prioritet)}
+                              variant="filled"
+                              sx={{ alignSelf: "flex-start" }}
+                            />
+                          )}
                         </Stack>
                       </CardContent>
                       <CardActions
@@ -397,39 +468,78 @@ export default function FormsList() {
                 ))}
               </Grid>
             </Paper>
-            {totalPages > 1 && (
-              <Box
-                sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
-              >
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={(_e, value) => setPage(value)}
-                  color="primary"
-                  size="large"
-                  showFirstButton
-                  showLastButton
-                />
-              </Box>
-            )}
+            {viewMode === "cards" &&
+              cardPaginationEnabled &&
+              filteredItems.length > CARD_ITEMS_PER_PAGE && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    mt: 4,
+                    mb: 2,
+                  }}
+                >
+                  <Pagination
+                    count={cardTotalPages}
+                    page={page}
+                    onChange={(_e, value) => setPage(value)}
+                    color="primary"
+                    size="large"
+                    showFirstButton
+                    showLastButton
+                  />
+                </Box>
+              )}
           </>
         ) : (
           <>
             <TableContainer
               component={Paper}
               elevation={2}
-              sx={{ borderRadius: 2 }}
+              sx={{
+                borderRadius: 3,
+                border: "1px solid",
+                borderColor: "divider",
+                overflow: "hidden",
+                overflowX: "auto",
+              }}
             >
-              <Table>
+              <Table
+                size={isDownSm ? "small" : "medium"}
+                sx={{ minWidth: isDownMd ? 640 : 760 }}
+              >
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: "grey.50" }}>
-                    <TableCell sx={{ fontWeight: 600 }}>Ärendenummer</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Beställare</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>
+                  <TableRow sx={{ backgroundColor: "grey.100" }}>
+                    <TableCell
+                      sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                    >
+                      Ärendenummer
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                    >
+                      Beställare
+                    </TableCell>
+                    <TableCell
+                      sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                    >
                       Datum inkommet
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Kategori</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600 }}>
+                    {!isDownSm && (
+                      <TableCell
+                        sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                      >
+                        Kategori
+                      </TableCell>
+                    )}
+                    {!isDownSm && (
+                      <TableCell
+                        sx={{ fontWeight: 700, py: 1.5, whiteSpace: "nowrap" }}
+                      >
+                        Prioritet
+                      </TableCell>
+                    )}
+                    <TableCell align="right" sx={{ fontWeight: 700, py: 1.5 }}>
                       Åtgärd
                     </TableCell>
                   </TableRow>
@@ -440,13 +550,16 @@ export default function FormsList() {
                       key={item.arendenummerArtvise}
                       sx={{
                         cursor: "pointer",
+                        "& td": { py: 1.25 },
                         "&:hover": { backgroundColor: "action.hover" },
                       }}
                       onClick={() =>
                         navigate(`/form/${item.arendenummerArtvise}`)
                       }
                     >
-                      <TableCell>{item.arendenummerArtvise ?? "-"}</TableCell>
+                      <TableCell sx={{ fontWeight: 500 }}>
+                        {item.arendenummerArtvise ?? "-"}
+                      </TableCell>
                       <TableCell>
                         <Box
                           sx={{
@@ -479,7 +592,23 @@ export default function FormsList() {
                           </Typography>
                         </Box>
                       </TableCell>
-                      <TableCell>{item.kategori ?? "-"}</TableCell>
+                      {!isDownSm && (
+                        <TableCell>{item.kategori ?? "-"}</TableCell>
+                      )}
+                      {!isDownSm && (
+                        <TableCell>
+                          {item.prioritet ? (
+                            <Chip
+                              label={item.prioritet}
+                              size="small"
+                              color={getPrioritetChipColor(item.prioritet)}
+                              variant="filled"
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell align="right">
                         <IconButton
                           size="small"
@@ -499,7 +628,12 @@ export default function FormsList() {
             </TableContainer>
             {filteredItems.length > 0 && (
               <Box
-                sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  mt: 5.5,
+                  mb: 2,
+                }}
               >
                 <Pagination
                   count={totalPages}

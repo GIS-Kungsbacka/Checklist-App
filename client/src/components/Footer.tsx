@@ -25,16 +25,16 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {currentYear} Checklist App. All rights reserved.
+            © {currentYear} Geodata - Stärka fabriken.
           </Typography>
-          <Box sx={{ display: "flex", gap: 3 }}>
+          <Box sx={{ display: "flex", gap: 4 }}>
             <Link
               href="#"
               color="text.secondary"
               underline="hover"
               sx={{ fontSize: "0.875rem" }}
             >
-              Privacy Policy
+              Information
             </Link>
             <Link
               href="#"
@@ -42,15 +42,7 @@ export default function Footer() {
               underline="hover"
               sx={{ fontSize: "0.875rem" }}
             >
-              Terms of Service
-            </Link>
-            <Link
-              href="#"
-              color="text.secondary"
-              underline="hover"
-              sx={{ fontSize: "0.875rem" }}
-            >
-              Contact
+              Kontakt
             </Link>
           </Box>
         </Box>
