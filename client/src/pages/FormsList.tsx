@@ -31,6 +31,9 @@ import {
   useTheme,
   Checkbox,
   FormControlLabel,
+  Popover,
+  Badge,
+  Divider,
 } from "@mui/material";
 import {
   Description,
@@ -40,6 +43,7 @@ import {
   ViewModule,
   ViewList,
   Search,
+  FilterList,
 } from "@mui/icons-material";
 import { useOrders } from "../hooks/useOrders";
 
@@ -49,6 +53,15 @@ const STORAGE_KEY = "bestallningsspecifikationViewMode";
 const STORAGE_KEY_CARD_PAGINATION = "bestallningsspecifikationCardPagination";
 const ITEMS_PER_PAGE = 10;
 const CARD_ITEMS_PER_PAGE = 8;
+
+const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
+
+const FILTER_COLUMNS = [
+  { key: "prioritet", label: "Prioritet", options: [...PRIORITET_OPTIONS] },
+  { key: "kategori", label: "Kategori" },
+  { key: "dataadministrator", label: "Dataadministratör" },
+  { key: "bestallareOrganisation", label: "Beställare" },
+] as const;
 
 export const getPrioritetChipColor = (
   p: string | undefined,
@@ -88,18 +101,43 @@ export default function FormsList() {
   const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
+    {},
+  );
   const [cardPaginationEnabled, setCardPaginationEnabled] = useState(
     getInitialCardPagination,
   );
 
   const { data: items = [], isLoading, error } = useOrders();
 
+  const uniqueValues = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const col of FILTER_COLUMNS) {
+      if ("options" in col && col.options) {
+        map[col.key] = [...col.options];
+      } else {
+        const seen = new Set<string>();
+        for (const item of items) {
+          const v = (item as unknown as Record<string, unknown>)[col.key];
+          if (v != null && String(v).trim()) seen.add(String(v).trim());
+        }
+        map[col.key] = [...seen].sort((a, b) => a.localeCompare(b));
+      }
+    }
+    return map;
+  }, [items]);
+
+  const activeFilterCount = Object.values(columnFilters).reduce(
+    (sum, arr) => sum + (arr?.length ?? 0),
+    0,
+  );
+
   const filteredItems = useMemo(() => {
     let result = items;
-    // Filter by search query if provided
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      result = items.filter(
+      result = result.filter(
         (item) =>
           item.arendenummerArtvise?.toLowerCase().includes(q) ||
           item.beskrivning?.toLowerCase().includes(q) ||
@@ -110,12 +148,42 @@ export default function FormsList() {
       );
     }
 
+    for (const col of FILTER_COLUMNS) {
+      const selected = columnFilters[col.key];
+      if (!selected?.length) continue;
+      const set = new Set(selected);
+      result = result.filter((item) => {
+        const v = (item as unknown as Record<string, unknown>)[col.key];
+        const str = v != null ? String(v).trim() : "";
+        return str && set.has(str);
+      });
+    }
+
     return [...result].sort((a, b) =>
       (a.arendenummerArtvise as string).localeCompare(
         b.arendenummerArtvise as string,
       ),
     );
-  }, [items, searchQuery]);
+  }, [items, searchQuery, columnFilters]);
+
+  const handleFilterToggle = (colKey: string, value: string) => {
+    setPage(1);
+    setColumnFilters((prev) => {
+      const arr = prev[colKey] ?? [];
+      const next = arr.includes(value)
+        ? arr.filter((x) => x !== value)
+        : [...arr, value];
+      const copy = { ...prev };
+      if (next.length) copy[colKey] = next;
+      else delete copy[colKey];
+      return copy;
+    });
+  };
+
+  const handleClearFilters = () => {
+    setColumnFilters({});
+    setPage(1);
+  };
 
   const paginatedItems = useMemo(() => {
     return filteredItems.slice(
@@ -282,31 +350,52 @@ export default function FormsList() {
           </Stack>
         </Box>
 
-        <Box mb={3}>
-          <TextField
-            fullWidth
-            placeholder="Sök på ärendenummer, beskrivning, beställare, dataadministratör, kategori eller ärendenummerArtvise..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search color="action" />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "background.paper",
-              },
-            }}
-          />
-          {searchQuery && (
+        <Box mb={3} display="flex" flexDirection="column" gap={1}>
+          <Box display="flex" gap={1} alignItems="flex-start">
+            <TextField
+              fullWidth
+              placeholder="Sök på ärendenummer, beskrivning, beställare, dataadministratör, kategori eller ärendenummerArtvise..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search color="action" />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "background.paper",
+                },
+              }}
+            />
+            <Tooltip title="Filtrera">
+              <IconButton
+                onClick={(e) => setFilterAnchor(e.currentTarget)}
+                sx={{
+                  mt: 0.5,
+                  backgroundColor: "background.paper",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  "&:hover": {
+                    backgroundColor: "action.hover",
+                  },
+                }}
+                aria-label="Öppna filter"
+              >
+                <Badge badgeContent={activeFilterCount} color="primary">
+                  <FilterList />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          </Box>
+          {(searchQuery || activeFilterCount > 0) && (
             <Typography
               variant="caption"
               color="text.secondary"
@@ -316,18 +405,118 @@ export default function FormsList() {
             </Typography>
           )}
         </Box>
+        <Popover
+          open={!!filterAnchor}
+          anchorEl={filterAnchor}
+          onClose={() => setFilterAnchor(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          transformOrigin={{ vertical: "top", horizontal: "right" }}
+          slotProps={{
+            paper: {
+              sx: {
+                mt: 1.5,
+                minWidth: 320,
+                maxWidth: 360,
+                maxHeight: 420,
+                borderRadius: 2,
+                boxShadow: 4,
+                overflow: "hidden",
+              },
+            },
+          }}
+        >
+          <Box sx={{ p: 2, pb: 1 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
+              <Typography variant="subtitle1" fontWeight={600}>
+                Filter
+              </Typography>
+              {activeFilterCount > 0 && (
+                <Button
+                  size="small"
+                  onClick={handleClearFilters}
+                  sx={{ textTransform: "none" }}
+                >
+                  Rensa alla
+                </Button>
+              )}
+            </Stack>
+            <Divider sx={{ mb: 2 }} />
+            <Stack spacing={2} sx={{ maxHeight: 320, overflowY: "auto" }}>
+              {FILTER_COLUMNS.map((col) => {
+                const values = uniqueValues[col.key] ?? [];
+                if (values.length === 0) return null;
+                const selected = columnFilters[col.key] ?? [];
+                return (
+                  <Box key={col.key}>
+                    <Typography
+                      variant="caption"
+                      fontWeight={600}
+                      color="text.secondary"
+                      sx={{
+                        display: "block",
+                        mb: 1,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {col.label}
+                    </Typography>
+                    <Stack
+                      direction="row"
+                      flexWrap="wrap"
+                      useFlexGap
+                      spacing={0.5}
+                    >
+                      {values.slice(0, 12).map((val) => (
+                        <Chip
+                          key={val}
+                          label={val}
+                          size="small"
+                          variant={
+                            selected.includes(val) ? "filled" : "outlined"
+                          }
+                          onClick={() => handleFilterToggle(col.key, val)}
+                          sx={{
+                            cursor: "pointer",
+                            "&.MuiChip-filled": {
+                              backgroundColor: "primary.main",
+                              color: "primary.contrastText",
+                            },
+                          }}
+                        />
+                      ))}
+                      {values.length > 12 && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ alignSelf: "center", ml: 0.5 }}
+                        >
+                          +{values.length - 12} fler
+                        </Typography>
+                      )}
+                    </Stack>
+                  </Box>
+                );
+              })}
+            </Stack>
+          </Box>
+        </Popover>
 
         {filteredItems.length === 0 ? (
           <Card elevation={2}>
             <Box sx={{ textAlign: "center", py: 8 }}>
               <Typography variant="h6" color="text.secondary" gutterBottom>
-                {searchQuery
-                  ? "Inga poster matchar sökningen"
+                {searchQuery || activeFilterCount > 0
+                  ? "Inga poster matchar sökningen eller filtren"
                   : "Inga beställningsspecifikationer tillgängliga."}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {searchQuery
-                  ? "Justera sökningen"
+                {searchQuery || activeFilterCount > 0
+                  ? "Justera sökningen eller filtren"
                   : "Kontakta administratören."}
               </Typography>
             </Box>
