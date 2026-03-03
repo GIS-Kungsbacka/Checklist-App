@@ -1,7 +1,10 @@
-import { AppBar, Toolbar, Typography, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography, Box, Avatar } from "@mui/material";
 import { AdminPanelSettings } from "@mui/icons-material";
+import { useAuth, getInitials } from "../hooks/useAuth";
 
 export default function Header() {
+  const { user, isAdmin } = useAuth();
+
   return (
     <AppBar position="static" elevation={2}>
       <Toolbar>
@@ -13,11 +16,17 @@ export default function Header() {
         >
           Admin
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="body2" sx={{ opacity: 0.9 }}>
-            Manage Forms & Responses
-          </Typography>
-        </Box>
+        {isAdmin && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Avatar
+              sx={{
+                bgcolor: "grey",
+              }}
+            >
+              {getInitials(user?.username ?? "")}
+            </Avatar>
+          </Box>
+        )}
       </Toolbar>
     </AppBar>
   );

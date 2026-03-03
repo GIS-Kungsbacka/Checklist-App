@@ -40,7 +40,7 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
-                DatumInkommet = new DateOnly(2024, 3, 15),
+                DatumInkommet = new DateOnly(2024, 1, 15),
                 Beskrivning = "Analys av kundregister för segmentering och målgruppsrapporter.",
                 Nytta = "Förbättrad målgruppsanpassad kommunikation.",
                 SistaDatum = "2024-04-30",
@@ -58,7 +58,7 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Hög",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
-                Handlaggare = "Test1"
+                Handlaggare = ""
             },
              new OrderSummary
             {
@@ -67,7 +67,7 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 BestallareEpost = "Test@hotmail.com",
                 BestallareOrganisation = "IT-avdelningen",
                 BestallareTjanstetitel = "Systemansvarig",
-                DatumInkommet = new DateOnly(2024, 3, 15),
+                DatumInkommet = new DateOnly(2022, 01, 15),
                 Beskrivning = "Analys av kundregister för segmentering och målgruppsrapporter.",
                 Nytta = "Förbättrad målgruppsanpassad kommunikation.",
                 SistaDatum = "2024-04-30",

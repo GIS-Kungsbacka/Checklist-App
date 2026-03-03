@@ -58,9 +58,6 @@ const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
 
 const FILTER_COLUMNS = [
   { key: "prioritet", label: "Prioritet", options: [...PRIORITET_OPTIONS] },
-  { key: "kategori", label: "Kategori" },
-  { key: "dataadministrator", label: "Dataadministratör" },
-  { key: "bestallareOrganisation", label: "Beställare" },
 ] as const;
 
 export const getPrioritetChipColor = (
@@ -105,6 +102,9 @@ export default function FormsList() {
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
     {},
   );
+  const [datumSortOrder, setDatumSortOrder] = useState<"asc" | "desc" | null>(
+    null,
+  );
   const [cardPaginationEnabled, setCardPaginationEnabled] = useState(
     getInitialCardPagination,
   );
@@ -128,10 +128,11 @@ export default function FormsList() {
     return map;
   }, [items]);
 
-  const activeFilterCount = Object.values(columnFilters).reduce(
-    (sum, arr) => sum + (arr?.length ?? 0),
-    0,
-  );
+  const activeFilterCount =
+    Object.values(columnFilters).reduce(
+      (sum, arr) => sum + (arr?.length ?? 0),
+      0,
+    ) + (datumSortOrder ? 1 : 0);
 
   const filteredItems = useMemo(() => {
     let result = items;
@@ -159,12 +160,23 @@ export default function FormsList() {
       });
     }
 
-    return [...result].sort((a, b) =>
-      (a.arendenummerArtvise as string).localeCompare(
-        b.arendenummerArtvise as string,
-      ),
-    );
-  }, [items, searchQuery, columnFilters]);
+    const sorted = [...result];
+    if (datumSortOrder) {
+      sorted.sort((a, b) => {
+        const da = a.datumInkommet || "";
+        const db = b.datumInkommet || "";
+        const cmp = da.localeCompare(db);
+        return datumSortOrder === "asc" ? cmp : -cmp;
+      });
+    } else {
+      sorted.sort((a, b) =>
+        (a.arendenummerArtvise as string).localeCompare(
+          b.arendenummerArtvise as string,
+        ),
+      );
+    }
+    return sorted;
+  }, [items, searchQuery, columnFilters, datumSortOrder]);
 
   const handleFilterToggle = (colKey: string, value: string) => {
     setPage(1);
@@ -182,7 +194,13 @@ export default function FormsList() {
 
   const handleClearFilters = () => {
     setColumnFilters({});
+    setDatumSortOrder(null);
     setPage(1);
+  };
+
+  const handleDatumSortToggle = (order: "asc" | "desc") => {
+    setPage(1);
+    setDatumSortOrder((prev) => (prev === order ? null : order));
   };
 
   const paginatedItems = useMemo(() => {
@@ -291,9 +309,10 @@ export default function FormsList() {
         >
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              Varje objekt visar en sammanfattning av
-              beställningsspecifikationen. Klicka på objektet för att se fler
-              detaljer.
+              Sammanfattning av beställningsspecifikationer.
+            </Typography>
+            <Typography variant="body2">
+              Klicka på objektet i listan för att se fler detaljer.
             </Typography>
           </Box>
           <Stack
@@ -502,6 +521,48 @@ export default function FormsList() {
                   </Box>
                 );
               })}
+              <Box>
+                <Typography
+                  variant="caption"
+                  fontWeight={600}
+                  color="text.secondary"
+                  sx={{
+                    display: "block",
+                    mb: 1,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Datum inkommet
+                </Typography>
+                <Stack direction="row" flexWrap="wrap" useFlexGap spacing={0.5}>
+                  <Chip
+                    label="Stigande"
+                    size="small"
+                    variant={datumSortOrder === "asc" ? "filled" : "outlined"}
+                    onClick={() => handleDatumSortToggle("asc")}
+                    sx={{
+                      cursor: "pointer",
+                      "&.MuiChip-filled": {
+                        backgroundColor: "primary.main",
+                        color: "primary.contrastText",
+                      },
+                    }}
+                  />
+                  <Chip
+                    label="Fallande"
+                    size="small"
+                    variant={datumSortOrder === "desc" ? "filled" : "outlined"}
+                    onClick={() => handleDatumSortToggle("desc")}
+                    sx={{
+                      cursor: "pointer",
+                      "&.MuiChip-filled": {
+                        backgroundColor: "primary.main",
+                        color: "primary.contrastText",
+                      },
+                    }}
+                  />
+                </Stack>
+              </Box>
             </Stack>
           </Box>
         </Popover>

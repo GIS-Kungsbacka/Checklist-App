@@ -1,7 +1,20 @@
-import { Box, Container, Typography, Link } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  Container,
+  Typography,
+  Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [openInfo, setOpenInfo] = useState(false);
+  const [openContact, setOpenContact] = useState(false);
 
   return (
     <Box
@@ -29,15 +42,18 @@ export default function Footer() {
           </Typography>
           <Box sx={{ display: "flex", gap: 4 }}>
             <Link
-              href="#"
+              component="button"
+              onClick={() => setOpenInfo(true)}
               color="text.secondary"
               underline="hover"
               sx={{ fontSize: "0.875rem" }}
             >
               Information
             </Link>
+
             <Link
-              href="#"
+              component="button"
+              onClick={() => setOpenContact(true)}
               color="text.secondary"
               underline="hover"
               sx={{ fontSize: "0.875rem" }}
@@ -47,6 +63,33 @@ export default function Footer() {
           </Box>
         </Box>
       </Container>
+      <Dialog open={openInfo} onClose={() => setOpenInfo(false)}>
+        <DialogTitle>Information</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Här kan du läsa mer om våra tjänster och våra verktyg.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenInfo(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={openContact} onClose={() => setOpenContact(false)}>
+        <DialogTitle>Kontakt</DialogTitle>
+        <DialogContent>
+          <Typography>Behöver du hjälp?</Typography>
+          <Typography>
+            Skicka in ett ärende till oss:{" "}
+            <a href="https://example.com">https://artvise-testlänk.com</a>
+          </Typography>
+          <br />
+          <Typography>E-mail: contact@example.com</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenContact(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

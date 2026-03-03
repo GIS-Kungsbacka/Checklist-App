@@ -52,8 +52,6 @@ const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
 const FILTER_COLUMNS = [
   { key: "prioritet", label: "Prioritet", options: [...PRIORITET_OPTIONS] },
   { key: "kategori", label: "Kategori" },
-  { key: "dataadministrator", label: "Dataadministratör" },
-  { key: "dataunderlag", label: "Dataunderlag" },
   { key: "antagenJaNej", label: "Antagen" },
   { key: "handlaggare", label: "Handläggare" },
 ] as const;
@@ -85,7 +83,9 @@ export default function FormsList() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
-  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>({});
+  const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
+    {},
+  );
 
   const {
     control: createControl,
@@ -314,46 +314,48 @@ export default function FormsList() {
 
       <Box mb={3} display="flex" flexDirection="column" gap={1}>
         <Box display="flex" gap={1} alignItems="flex-start">
-        <TextField
-          fullWidth
-          placeholder="Sök på ärendenummer, dataadministratör, kategori, dataunderlag eller GID..."
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPage(1);
-          }}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="action" />
-                </InputAdornment>
-              ),
-            },
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": { backgroundColor: "background.paper" },
-          }}
-        />
-        <Tooltip title="Filtrera">
-          <IconButton
-            onClick={(e) => setFilterAnchor(e.currentTarget)}
-            sx={{
-              mt: 0.5,
-              backgroundColor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              "&:hover": {
-                backgroundColor: "action.hover",
+          <TextField
+            fullWidth
+            placeholder="Sök på ärendenummer, dataadministratör, kategori, dataunderlag eller GID..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(1);
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="action" />
+                  </InputAdornment>
+                ),
               },
             }}
-            aria-label="Öppna filter"
-          >
-            <Badge badgeContent={activeFilterCount} color="primary">
-              <FilterList />
-            </Badge>
-          </IconButton>
-        </Tooltip>
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "background.paper",
+              },
+            }}
+          />
+          <Tooltip title="Filtrera">
+            <IconButton
+              onClick={(e) => setFilterAnchor(e.currentTarget)}
+              sx={{
+                mt: 0.5,
+                backgroundColor: "background.paper",
+                border: "1px solid",
+                borderColor: "divider",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
+              aria-label="Öppna filter"
+            >
+              <Badge badgeContent={activeFilterCount} color="primary">
+                <FilterList />
+              </Badge>
+            </IconButton>
+          </Tooltip>
         </Box>
         {(searchQuery || activeFilterCount > 0) && (
           <Typography
@@ -610,7 +612,19 @@ export default function FormsList() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {item.dataunderlag ?? "-"}
+                    <Tooltip title={item.dataunderlag ?? "-"}>
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "block",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {item.dataunderlag ?? "-"}
+                      </Box>
+                    </Tooltip>
                   </TableCell>
                 )}
                 <TableCell>{item.dataadministrator ?? "-"}</TableCell>
@@ -623,7 +637,19 @@ export default function FormsList() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {item.malgrupper ?? "-"}
+                    <Tooltip title={item.malgrupper ?? "-"}>
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "block",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {item.malgrupper ?? "-"}
+                      </Box>
+                    </Tooltip>
                   </TableCell>
                 )}
                 {showExtendedColumns && (
@@ -638,7 +664,19 @@ export default function FormsList() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {item.leverans ?? "-"}
+                    <Tooltip title={item.leverans ?? "-"}>
+                      <Box
+                        component="span"
+                        sx={{
+                          display: "block",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {item.leverans ?? "-"}
+                      </Box>
+                    </Tooltip>
                   </TableCell>
                 )}
                 {showSecondaryColumns && (

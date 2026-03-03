@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return (
       <Container>
         <Box sx={{ mt: 4, textAlign: "center" }}>
-          <Typography>Loading...</Typography>
+          <Typography>Laddar...</Typography>
         </Box>
       </Container>
     );
@@ -34,11 +34,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         >
           <LockOutlined sx={{ fontSize: 64, color: "error.main" }} />
           <Typography variant="h4" component="h1" gutterBottom>
-            Access Denied
+            Åtkomst nekad
           </Typography>
           <Alert severity="error" sx={{ width: "100%" }}>
-            You don't have permission to enter this site. Please contact your
-            administrator if you believe this is an error.
+            Du har inte tillgång till denna sida. Kontakta administratören för
+            vidare hjälp.
           </Alert>
         </Box>
       </Container>

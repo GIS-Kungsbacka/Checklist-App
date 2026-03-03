@@ -1,7 +1,6 @@
-import { AppBar, Toolbar, Typography, Box } from "@mui/material";
+import { AppBar, Toolbar, Typography } from "@mui/material";
 import { Checklist } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@mui/material";
 
 export default function Header() {
   const navigate = useNavigate();
@@ -18,15 +17,6 @@ export default function Header() {
         >
           Geodata - Stärka fabriken
         </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Button
-            color="inherit"
-            onClick={() => navigate("/")}
-            sx={{ textTransform: "none" }}
-          >
-            Forms
-          </Button>
-        </Box>
       </Toolbar>
     </AppBar>
   );

@@ -148,11 +148,6 @@ export default function FormView() {
               flexWrap="wrap"
               useFlexGap
             >
-              <Chip
-                label={`Ärendenummer Artvise ${item.arendenummerArtvise}`}
-                size="small"
-                variant="outlined"
-              />
               {item.kategori && (
                 <Chip
                   label={item.kategori}
@@ -179,7 +174,7 @@ export default function FormView() {
               const label = fieldLabels[key];
               if (label === undefined) return null;
               const display = formatValue(value);
-              if (display === "–" && key !== "arendenummerArtvise") return null; // optionally hide empty fields
+              if (display === "–" && key !== "arendenummerArtvise") return null;
               return (
                 <Grid size={{ xs: 12, sm: 6 }} key={key}>
                   <Typography
@@ -190,7 +185,7 @@ export default function FormView() {
                     {label}
                   </Typography>
                   <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
-                    {display}
+                    {display === "" ? "-" : display}
                   </Typography>
                 </Grid>
               );

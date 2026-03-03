@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Link } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -25,34 +25,8 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {currentYear} Checklist App. All rights reserved.
+            © {currentYear} Geodata - Stärka fabriken.
           </Typography>
-          <Box sx={{ display: "flex", gap: 3 }}>
-            <Link
-              href="#"
-              color="text.secondary"
-              underline="hover"
-              sx={{ fontSize: "0.875rem" }}
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="#"
-              color="text.secondary"
-              underline="hover"
-              sx={{ fontSize: "0.875rem" }}
-            >
-              Terms of Service
-            </Link>
-            <Link
-              href="#"
-              color="text.secondary"
-              underline="hover"
-              sx={{ fontSize: "0.875rem" }}
-            >
-              Support
-            </Link>
-          </Box>
         </Box>
       </Container>
     </Box>
