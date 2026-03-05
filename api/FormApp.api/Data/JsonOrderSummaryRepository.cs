@@ -276,6 +276,61 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
                 Handlaggare = "Test5"
             },
+                            new OrderSummary
+            {
+                ArendenummerArtvise = "2026XX10",
+                ArendenummerOpenE = "AR-2024-005",
+                BestallareEpost = "Test@hotmail.com",
+                BestallareOrganisation = "IT-avdelningen",
+                BestallareTjanstetitel = "Systemansvarig",
+                DatumInkommet = new DateOnly(2024, 3, 15),
+                Beskrivning = "Analys av kundregister för segmentering och målgruppsrapporter.",
+                Nytta = "Förbättrad målgruppsanpassad kommunikation.",
+                SistaDatum = "2024-04-30",
+                ForankradChef = true,
+                KansligInformation = false,
+                KansligInformationBeskrivning = "Hemlig5",
+                Dataunderlag = "Kundregister och transaktionsdata",
+                Dataadministrator = "Anna",
+                Malgrupper = "Marknadsföring, Försäljning",
+                NyttjandeInterntExternt = "Internt",
+                Leverans = "Rapport i PDF-format",
+                LeveransArbetstimmar = "40 timmar",
+                Kategori = "Dataanalys",
+                KategoriTyp = "Standard",
+                Prioritet = "Medel",
+                AntagenJaNej = "Ja",
+                AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
+                Handlaggare = "Test5"
+            },
+                                  new OrderSummary
+            {
+                ArendenummerArtvise = "2026X11",
+                ArendenummerOpenE = "AR-2024-005",
+                BestallareEpost = "Test@hotmail.com",
+                BestallareOrganisation = "IT-avdelningen",
+                BestallareTjanstetitel = "Systemansvarig",
+                DatumInkommet = new DateOnly(2024, 3, 15),
+                Beskrivning = "Analys av kundregister för segmentering och målgruppsrapporter.",
+                Nytta = "Förbättrad målgruppsanpassad kommunikation.",
+                SistaDatum = "2024-04-30",
+                ForankradChef = true,
+                KansligInformation = false,
+                KansligInformationBeskrivning = "Hemlig5",
+                Dataunderlag = "Kundregister och transaktionsdata",
+                Dataadministrator = "Anna",
+                Malgrupper = "Marknadsföring, Försäljning",
+                NyttjandeInterntExternt = "Internt",
+                Leverans = "Rapport i PDF-format",
+                LeveransArbetstimmar = "40 timmar",
+                Kategori = "Dataanalys",
+                KategoriTyp = "Standard",
+                Prioritet = "Medel",
+                AntagenJaNej = "Ja",
+                AntagenJaNejMotivering = "Projektet är välplanerat och har tillräcklig budget.",
+                Handlaggare = "Test5"
+            },
+
         };
 
         SaveData(sample);

@@ -6,8 +6,12 @@ export const useOrders = (): UseQueryResult<OrderSummary[]> => {
   return useQuery({
     queryKey: ["orders"],
     queryFn: orderSummaryRequests.getAll,
-    refetchInterval: () =>
-      document.visibilityState === "visible" ? 10_000 : false,
+    retry: 3,                 
+    retryDelay: 1000,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10_000,
+    staleTime: 0,
   });
 };
 

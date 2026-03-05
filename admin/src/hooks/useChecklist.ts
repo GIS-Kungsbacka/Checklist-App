@@ -11,6 +11,12 @@ export const useChecklists = (): UseQueryResult<Checklist[]> => {
   return useQuery({
     queryKey: ["checklists"],
     queryFn: checklistRequests.getAll,
+    retry: 3,                 
+    retryDelay: 1000,
+    refetchOnReconnect: true,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10_000,
+    staleTime: 0,
   });
 };
 

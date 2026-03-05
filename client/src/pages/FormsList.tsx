@@ -34,6 +34,7 @@ import {
   Popover,
   Badge,
   Divider,
+  keyframes,
 } from "@mui/material";
 import {
   Description,
@@ -109,7 +110,14 @@ export default function FormsList() {
     getInitialCardPagination,
   );
 
-  const { data: items = [], isLoading, error } = useOrders();
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    failureCount,
+    isRefetchError,
+    isFetching,
+  } = useOrders();
 
   const uniqueValues = useMemo(() => {
     const map: Record<string, string[]> = {};
@@ -265,17 +273,36 @@ export default function FormsList() {
     );
   }
 
-  if (error) {
+  const showApiDown = failureCount > 0 || isRefetchError || isError;
+  const dots = keyframes`
+  0% { content: ""; }
+  33% { content: "."; }
+  66% { content: ".."; }
+  100% { content: "..."; }
+`;
+  if (showApiDown) {
     return (
-      <Container maxWidth="lg">
-        <Box sx={{ mt: 4 }}>
-          <Alert severity="error" sx={{ borderRadius: 2 }}>
-            {error instanceof Error
-              ? error.message
-              : "Kunde inte ladda beställningsspecifikationer. Försök igen senare."}
-          </Alert>
-        </Box>
-      </Container>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Kunde inte ladda listan. Försöker igen
+          <Box
+            component="span"
+            sx={{
+              "&::after": {
+                content: '""',
+                animation: `${dots} 1.5s steps(3, end) infinite`,
+              },
+            }}
+          />
+        </Alert>
+      </Box>
     );
   }
 
@@ -373,7 +400,7 @@ export default function FormsList() {
           <Box display="flex" gap={1} alignItems="flex-start">
             <TextField
               fullWidth
-              placeholder="Sök på ärendenummer, beskrivning, beställare, dataadministratör, kategori eller ärendenummerArtvise..."
+              placeholder="Sök på ärendenummer, beskrivning, beställare, dataadministratör, eller kategori..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);

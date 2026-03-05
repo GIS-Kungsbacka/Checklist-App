@@ -44,7 +44,7 @@ public class JsonChecklistRepository : IChecklistRepository
             new Checklist
             {
                 Gid = 1,
-                ArendenummerArtvise = "AR-2024-001",
+                ArendenummerArtvise = "2026XX1",
                 Dataunderlag = "Kundregister och transaktionsdata",
                 Dataadministrator = "Anna",
                 Malgrupper = "Marknadsföring, Försäljning",

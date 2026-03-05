@@ -13,7 +13,16 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (isLoading) {
     return (
       <Container>
-        <Box sx={{ mt: 4, textAlign: "center" }}>
+        <Box
+          sx={{
+            mt: 4,
+            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
           <Typography>Laddar...</Typography>
         </Box>
       </Container>

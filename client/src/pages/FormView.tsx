@@ -45,7 +45,7 @@ const fieldLabels: Record<string, string> = {
 };
 
 function formatValue(value: unknown): string {
-  if (value === null || value === undefined) return "–";
+  if (value === null || value === undefined) return "-";
   if (typeof value === "boolean") return value ? "Ja" : "Nej";
   return String(value);
 }
@@ -116,6 +116,48 @@ export default function FormView() {
 
   const displayKeys = Object.keys(fieldLabels) as (keyof typeof item)[];
 
+  const checklistKeys: (keyof typeof item)[] = [
+    "dataunderlag",
+    "dataadministrator",
+    "malgrupper",
+    "nyttjandeInterntExternt",
+    "leverans",
+    "leveransArbetstimmar",
+    "kategori",
+    "kategoriTyp",
+    "prioritet",
+    "antagenJaNej",
+    "antagenJaNejMotivering",
+    "handlaggare",
+  ];
+
+  const orderSummaryKeys = displayKeys.filter(
+    (key) => !checklistKeys.includes(key)
+  );
+
+  const renderField = (key: keyof typeof item) => {
+    const label = fieldLabels[key];
+    if (label === undefined) return null;
+
+    const value = item[key];
+    const display = formatValue(value);
+
+    return (
+      <Grid size={{ xs: 12, sm: 6 }} key={key}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+        >
+          {label}
+        </Typography>
+        <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
+          {display || "-"}
+        </Typography>
+      </Grid>
+    );
+  };
+
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Button
@@ -123,7 +165,7 @@ export default function FormView() {
         onClick={() => navigate("/")}
         sx={{ mb: 3 }}
       >
-        Tillbaka till beställningsspecifikationer
+        Tillbaka till listan
       </Button>
 
       <Card elevation={3}>
@@ -137,9 +179,6 @@ export default function FormView() {
             >
               {item.arendenummerArtvise ||
                 `Beställning ${item.arendenummerArtvise}`}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
-              Beställningsspecifikation
             </Typography>
             <Stack
               direction="row"
@@ -164,32 +203,27 @@ export default function FormView() {
                 />
               )}
             </Stack>
+            
           </Box>
-
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 1.5 }} />
+          <Typography variant="body1" sx={{ mt: 2, mb:2, fontSize: 17, fontWeight: 600 }}>
+              Beställningsunderlag
+            </Typography>
+          
 
           <Grid container spacing={2}>
-            {displayKeys.map((key) => {
-              const value = item[key];
-              const label = fieldLabels[key];
-              if (label === undefined) return null;
-              const display = formatValue(value);
-              if (display === "–" && key !== "arendenummerArtvise") return null;
-              return (
-                <Grid size={{ xs: 12, sm: 6 }} key={key}>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    display="block"
-                  >
-                    {label}
-                  </Typography>
-                  <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
-                    {display === "" ? "-" : display}
-                  </Typography>
-                </Grid>
-              );
-            })}
+            {orderSummaryKeys.map((key) => renderField(key))}
+          </Grid>
+          <Divider sx={{ my: 2, mt:4 }} />
+          <Typography
+            variant="body1"
+            sx={{ mt: 3, mb: 2, fontSize: 17, fontWeight: 600 }}
+          >
+            Checklista
+          </Typography>
+
+          <Grid container spacing={2}>
+            {checklistKeys.map((key) => renderField(key))}
           </Grid>
         </CardContent>
       </Card>

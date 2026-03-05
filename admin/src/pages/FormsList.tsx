@@ -33,6 +33,7 @@ import {
   Popover,
   Badge,
   Tooltip,
+  Autocomplete,
 } from "@mui/material";
 import { Add, Edit, Delete, Search, FilterList } from "@mui/icons-material";
 import { useState, useMemo } from "react";
@@ -43,6 +44,8 @@ import {
   useUpdateChecklist,
   useDeleteChecklist,
 } from "../hooks/useChecklist";
+import { useOrderSummaries } from "../hooks/useOrderSummary";
+import type { OrderSummary } from "../types/orderSummary";
 import type { Checklist, CreateChecklistDto } from "../types/checklist";
 
 const ITEMS_PER_PAGE = 10;
@@ -73,7 +76,7 @@ export default function FormsList() {
   const showSecondaryColumns = !isDownSm;
   const emptyStateColSpan =
     4 + (showSecondaryColumns ? 2 : 0) + (showExtendedColumns ? 6 : 0);
-  const { data: items = [], isLoading, error } = useChecklists();
+  const { data: items = [], isLoading, isError, failureCount, isRefetchError, isFetching } = useChecklists();
   const createMutation = useCreateChecklist();
   const updateMutation = useUpdateChecklist();
   const deleteMutation = useDeleteChecklist();
@@ -117,6 +120,22 @@ export default function FormsList() {
     reset: resetEditForm,
     formState: { isSubmitting: isUpdating },
   } = useForm<CreateChecklistDto>();
+  const {
+    data: orderSummaries = [],
+    isLoading: isLoadingOrderSummaries,
+    error: orderSummaryError,
+  } = useOrderSummaries();
+
+  const availableOrderSummariesForCreate = useMemo(() => {
+    const used = new Set(
+      items
+        .map((c) => c.arendenummerArtvise?.toLowerCase().trim())
+        .filter((v): v is string => !!v),
+    );
+    return orderSummaries.filter(
+      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim()),
+    );
+  }, [items, orderSummaries]);
 
   const uniqueValues = useMemo(() => {
     const map: Record<string, string[]> = {};
@@ -265,7 +284,6 @@ export default function FormsList() {
       });
     }
   };
-
   if (isLoading) {
     return (
       <Container maxWidth="xl">
@@ -283,6 +301,17 @@ export default function FormsList() {
     );
   }
 
+  const showApiDown = failureCount > 0 || isRefetchError || isError;
+
+  if(showApiDown){
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+       <Alert severity="error" sx={{ borderRadius: 2}}>
+       Kunde inte ladda listan. (API nere) – {isFetching} försöker igen…
+       </Alert>
+      </Box>
+  )}
+  
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
       <Box
@@ -462,13 +491,6 @@ export default function FormsList() {
         </Box>
       </Popover>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-          {error instanceof Error
-            ? error.message
-            : "Kunde inte ladda data. Försök igen senare."}
-        </Alert>
-      )}
       {createMutation.isError && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
           {createMutation.error instanceof Error
@@ -780,6 +802,13 @@ export default function FormsList() {
           <DialogTitle>Skapa ny post</DialogTitle>
           <Divider />
           <DialogContent sx={{ pt: 3 }}>
+            {!!orderSummaryError && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {"message" in orderSummaryError
+                  ? (orderSummaryError as Error).message
+                  : "Kunde inte ladda ärendenummer från beställningsunderlag."}
+              </Alert>
+            )}
             <Grid container spacing={2}>
               {(
                 [
@@ -826,28 +855,69 @@ export default function FormsList() {
                         </FormControl>
                       )}
                     />
+                  ) : key === "arendenummerArtvise" ? (
+                    <Controller
+                      name="arendenummerArtvise"
+                      control={createControl}
+                      rules={{
+                        required: "Ärendenummer är obligatoriskt",
+                      }}
+                      render={({ field, fieldState }) => (
+                        <Autocomplete
+                          fullWidth
+                          options={availableOrderSummariesForCreate}
+                          getOptionLabel={(option) =>
+                            option.arendenummerArtvise ?? ""
+                          }
+                          loading={isLoadingOrderSummaries}
+                          value={
+                            availableOrderSummariesForCreate.find(
+                              (o) =>
+                                o.arendenummerArtvise === field.value,
+                            ) ?? null
+                          }
+                          onChange={(_e, value) => {
+                            field.onChange(
+                              value?.arendenummerArtvise ?? "",
+                            );
+                          }}
+                          isOptionEqualToValue={(option, value) =>
+                            option.arendenummerArtvise ===
+                            value.arendenummerArtvise
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label={label}
+                              required
+                              error={!!fieldState.error}
+                              helperText={fieldState.error?.message}
+                              slotProps={{
+                                input:{
+                                  ...params.InputProps,
+                                endAdornment: (
+                                  <>
+                                    {isLoadingOrderSummaries ? (
+                                      <CircularProgress
+                                        color="inherit"
+                                        size={20}
+                                      />
+                                    ) : null}
+                                    {params.InputProps.endAdornment}
+                                  </>
+                                ),
+                                },
+                               
+                              }}
+                            />
+                          )}
+                        />
+                      )}
+                    />
                   ) : (
                     <Controller
                       name={key as keyof CreateChecklistDto}
                       control={createControl}
-                      rules={
-                        key === "arendenummerArtvise"
-                          ? {
-                              validate: (value) => {
-                                if (!value || !value.trim()) return true;
-                                const duplicateExists = items.some(
-                                  (item) =>
-                                    item.arendenummerArtvise
-                                      ?.toLowerCase()
-                                      .trim() === value.toLowerCase().trim(),
-                                );
-                                return duplicateExists
-                                  ? "Ärendenummer finns redan"
-                                  : true;
-                              },
-                            }
-                          : undefined
-                      }
                       render={({ field, fieldState }) => (
                         <TextField
                           {...field}
@@ -948,6 +1018,93 @@ export default function FormsList() {
                           </Select>
                         </FormControl>
                       )}
+                    />
+                  ) : key === "arendenummerArtvise" ? (
+                    <Controller
+                      name="arendenummerArtvise"
+                      control={editControl}
+                      rules={{
+                        required: "Ärendenummer är obligatoriskt",
+                      }}
+                      render={({ field, fieldState }) => {
+                        const usedByOthers = new Set(
+                          items
+                            .filter(
+                              (c) => c.gid !== openEdit?.gid,
+                            )
+                            .map((c) =>
+                              c.arendenummerArtvise?.toLowerCase().trim(),
+                            )
+                            .filter((v): v is string => !!v),
+                        );
+                        const options = orderSummaries.filter(
+                          (o) =>
+                            !usedByOthers.has(
+                              o.arendenummerArtvise
+                                .toLowerCase()
+                                .trim(),
+                            ),
+                        );
+                        const currentValue =
+                          field.value ?? openEdit?.arendenummerArtvise ?? "";
+                        const currentOption =
+                          options.find(
+                            (o) =>
+                              o.arendenummerArtvise === currentValue,
+                          ) ??
+                          (currentValue
+                            ? ({
+                                arendenummerArtvise: currentValue,
+                              } as OrderSummary)
+                            : null);
+
+                        return (
+                          <Autocomplete
+                            fullWidth
+                            options={options}
+                            getOptionLabel={(option) =>
+                              option.arendenummerArtvise ?? ""
+                            }
+                            loading={isLoadingOrderSummaries}
+                            value={currentOption}
+                            onChange={(_e, value) => {
+                              field.onChange(
+                                value?.arendenummerArtvise ?? "",
+                              );
+                            }}
+                            isOptionEqualToValue={(option, value) =>
+                              option.arendenummerArtvise ===
+                              value.arendenummerArtvise
+                            }
+                            ListboxProps={{
+                              sx: { maxHeight: 8 * 48, overflowY: "auto" },
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label={label}
+                                required
+                                error={!!fieldState.error}
+                                helperText={fieldState.error?.message}
+                                InputProps={{
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <>
+                                      {isLoadingOrderSummaries ? (
+                                        <CircularProgress
+                                          color="inherit"
+                                          size={20}
+                                        />
+                                      ) : null}
+                                      {params.InputProps.endAdornment}
+                                    </>
+                                  ),
+                                }}
+                              />
+                            )}
+                          />
+                        );
+                      }}
                     />
                   ) : (
                     <Controller

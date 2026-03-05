@@ -7,29 +7,22 @@ namespace FormApp.Api.Models;
 /// </summary>
 public class OrderSummary
 {
-    public string? ArendenummerArtvise { get; set; }
+    public required string ArendenummerArtvise { get; set; }
 
-    [MaxLength(255)]
     public string? ArendenummerOpenE { get; set; }
 
-    [MaxLength(255)]
     public string? BestallareEpost { get; set; }
 
-    [MaxLength(255)]
     public string? BestallareOrganisation { get; set; }
 
-    [MaxLength(255)]
     public string? BestallareTjanstetitel { get; set; }
 
     public DateOnly? DatumInkommet { get; set; }
 
-    [MaxLength(2000)]
     public string? Beskrivning { get; set; }
 
-    [MaxLength(2000)]
     public string? Nytta { get; set; }
 
-    [MaxLength(255)]
     public string? SistaDatum { get; set; }
 
     public bool ForankradChef { get; set; }
@@ -38,39 +31,27 @@ public class OrderSummary
 
     public string? KansligInformationBeskrivning { get; set; }
 
-    [MaxLength(255)]
     public string? Dataunderlag { get; set; }
 
-    [MaxLength(255)]
     public string? Dataadministrator { get; set; }
 
-    [MaxLength(255)]
     public string? Malgrupper { get; set; }
 
-    [MaxLength(255)]
     public string? NyttjandeInterntExternt { get; set; }
 
-    [MaxLength(255)]
     public string? Leverans { get; set; }
 
-    [MaxLength(255)]
     public string? LeveransArbetstimmar { get; set; }
 
-    [MaxLength(255)]
     public string? Kategori { get; set; }
 
-    [MaxLength(255)]
     public string? KategoriTyp { get; set; }
 
-    [MaxLength(255)]
     public string? Prioritet { get; set; }
 
-    [MaxLength(255)]
     public string? AntagenJaNej { get; set; }
 
-    [MaxLength(2000)]
     public string? AntagenJaNejMotivering { get; set; }
 
-    [MaxLength(255)]
     public string? Handlaggare { get; set; }
 }

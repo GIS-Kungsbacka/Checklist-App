@@ -71,7 +71,7 @@ export default function Footer() {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenInfo(false)}>Close</Button>
+          <Button onClick={() => setOpenInfo(false)}>Stäng</Button>
         </DialogActions>
       </Dialog>
 
@@ -87,7 +87,7 @@ export default function Footer() {
           <Typography>E-mail: contact@example.com</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenContact(false)}>Close</Button>
+          <Button onClick={() => setOpenContact(false)}>Stäng</Button>
         </DialogActions>
       </Dialog>
     </Box>
