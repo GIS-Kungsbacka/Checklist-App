@@ -62,7 +62,7 @@ const FILTER_COLUMNS = [
 ] as const;
 
 export const getPrioritetChipColor = (
-  p: string | undefined,
+  p: string | undefined
 ): "error" | "success" | "info" | "default" => {
   if (p === "Hög") return "error";
   if (p === "Medel") return "success";
@@ -101,13 +101,13 @@ export default function FormsList() {
   const [page, setPage] = useState(1);
   const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
   const [columnFilters, setColumnFilters] = useState<Record<string, string[]>>(
-    {},
+    {}
   );
   const [datumSortOrder, setDatumSortOrder] = useState<"asc" | "desc" | null>(
-    null,
+    null
   );
   const [cardPaginationEnabled, setCardPaginationEnabled] = useState(
-    getInitialCardPagination,
+    getInitialCardPagination
   );
 
   const {
@@ -116,7 +116,6 @@ export default function FormsList() {
     isError,
     failureCount,
     isRefetchError,
-    isFetching,
   } = useOrders();
 
   const uniqueValues = useMemo(() => {
@@ -139,7 +138,7 @@ export default function FormsList() {
   const activeFilterCount =
     Object.values(columnFilters).reduce(
       (sum, arr) => sum + (arr?.length ?? 0),
-      0,
+      0
     ) + (datumSortOrder ? 1 : 0);
 
   const filteredItems = useMemo(() => {
@@ -153,7 +152,7 @@ export default function FormsList() {
           item.bestallareOrganisation?.toLowerCase().includes(q) ||
           item.dataadministrator?.toLowerCase().includes(q) ||
           item.kategori?.toLowerCase().includes(q) ||
-          item.arendenummerArtvise?.toString().includes(q),
+          item.arendenummerArtvise?.toString().includes(q)
       );
     }
 
@@ -179,8 +178,8 @@ export default function FormsList() {
     } else {
       sorted.sort((a, b) =>
         (a.arendenummerArtvise as string).localeCompare(
-          b.arendenummerArtvise as string,
-        ),
+          b.arendenummerArtvise as string
+        )
       );
     }
     return sorted;
@@ -214,7 +213,7 @@ export default function FormsList() {
   const paginatedItems = useMemo(() => {
     return filteredItems.slice(
       (page - 1) * ITEMS_PER_PAGE,
-      page * ITEMS_PER_PAGE,
+      page * ITEMS_PER_PAGE
     );
   }, [filteredItems, page]);
 
@@ -242,7 +241,7 @@ export default function FormsList() {
     try {
       localStorage.setItem(
         STORAGE_KEY_CARD_PAGINATION,
-        String(cardPaginationEnabled),
+        String(cardPaginationEnabled)
       );
     } catch {
       // ignore
@@ -251,7 +250,7 @@ export default function FormsList() {
 
   const handleViewModeChange = (
     _event: React.MouseEvent<HTMLElement>,
-    newMode: ViewMode | null,
+    newMode: ViewMode | null
   ) => {
     if (newMode !== null) setViewMode(newMode);
   };

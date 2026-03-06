@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
 import FormsList from "./pages/FormsList";
+import FormsListGrid from "./pages/checklist-data-grid";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -73,7 +74,7 @@ function App() {
                   path="/"
                   element={
                     <ProtectedRoute>
-                      <FormsList />
+                      <FormsListGrid />
                     </ProtectedRoute>
                   }
                 />

@@ -76,7 +76,14 @@ export default function FormsList() {
   const showSecondaryColumns = !isDownSm;
   const emptyStateColSpan =
     4 + (showSecondaryColumns ? 2 : 0) + (showExtendedColumns ? 6 : 0);
-  const { data: items = [], isLoading, isError, failureCount, isRefetchError, isFetching } = useChecklists();
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    failureCount,
+    isRefetchError,
+    isFetching,
+  } = useChecklists();
   const createMutation = useCreateChecklist();
   const updateMutation = useUpdateChecklist();
   const deleteMutation = useDeleteChecklist();
@@ -303,15 +310,23 @@ export default function FormsList() {
 
   const showApiDown = failureCount > 0 || isRefetchError || isError;
 
-  if(showApiDown){
+  if (showApiDown) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
-       <Alert severity="error" sx={{ borderRadius: 2}}>
-       Kunde inte ladda listan. (API nere) – {isFetching} försöker igen…
-       </Alert>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <Alert severity="error" sx={{ borderRadius: 2 }}>
+          Kunde inte ladda listan. (API nere) – {isFetching} försöker igen…
+        </Alert>
       </Box>
-  )}
-  
+    );
+  }
+
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
       <Box
@@ -872,14 +887,11 @@ export default function FormsList() {
                           loading={isLoadingOrderSummaries}
                           value={
                             availableOrderSummariesForCreate.find(
-                              (o) =>
-                                o.arendenummerArtvise === field.value,
+                              (o) => o.arendenummerArtvise === field.value,
                             ) ?? null
                           }
                           onChange={(_e, value) => {
-                            field.onChange(
-                              value?.arendenummerArtvise ?? "",
-                            );
+                            field.onChange(value?.arendenummerArtvise ?? "");
                           }}
                           isOptionEqualToValue={(option, value) =>
                             option.arendenummerArtvise ===
@@ -893,21 +905,20 @@ export default function FormsList() {
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                               slotProps={{
-                                input:{
+                                input: {
                                   ...params.InputProps,
-                                endAdornment: (
-                                  <>
-                                    {isLoadingOrderSummaries ? (
-                                      <CircularProgress
-                                        color="inherit"
-                                        size={20}
-                                      />
-                                    ) : null}
-                                    {params.InputProps.endAdornment}
-                                  </>
-                                ),
+                                  endAdornment: (
+                                    <>
+                                      {isLoadingOrderSummaries ? (
+                                        <CircularProgress
+                                          color="inherit"
+                                          size={20}
+                                        />
+                                      ) : null}
+                                      {params.InputProps.endAdornment}
+                                    </>
+                                  ),
                                 },
-                               
                               }}
                             />
                           )}
@@ -1029,9 +1040,7 @@ export default function FormsList() {
                       render={({ field, fieldState }) => {
                         const usedByOthers = new Set(
                           items
-                            .filter(
-                              (c) => c.gid !== openEdit?.gid,
-                            )
+                            .filter((c) => c.gid !== openEdit?.gid)
                             .map((c) =>
                               c.arendenummerArtvise?.toLowerCase().trim(),
                             )
@@ -1040,17 +1049,14 @@ export default function FormsList() {
                         const options = orderSummaries.filter(
                           (o) =>
                             !usedByOthers.has(
-                              o.arendenummerArtvise
-                                .toLowerCase()
-                                .trim(),
+                              o.arendenummerArtvise.toLowerCase().trim(),
                             ),
                         );
                         const currentValue =
                           field.value ?? openEdit?.arendenummerArtvise ?? "";
                         const currentOption =
                           options.find(
-                            (o) =>
-                              o.arendenummerArtvise === currentValue,
+                            (o) => o.arendenummerArtvise === currentValue,
                           ) ??
                           (currentValue
                             ? ({
@@ -1068,9 +1074,7 @@ export default function FormsList() {
                             loading={isLoadingOrderSummaries}
                             value={currentOption}
                             onChange={(_e, value) => {
-                              field.onChange(
-                                value?.arendenummerArtvise ?? "",
-                              );
+                              field.onChange(value?.arendenummerArtvise ?? "");
                             }}
                             isOptionEqualToValue={(option, value) =>
                               option.arendenummerArtvise ===
