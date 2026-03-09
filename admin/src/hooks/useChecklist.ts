@@ -6,12 +6,13 @@ import {
 } from "@tanstack/react-query";
 import { checklistRequests } from "../api/checkListRequests";
 import type { Checklist, UpdateChecklistDto } from "../types/checklist";
+import { broadcastQueryInvalidation } from "../../lib/broadcastChannel";
 
 export const useChecklists = (): UseQueryResult<Checklist[]> => {
   return useQuery({
     queryKey: ["checklists"],
     queryFn: checklistRequests.getAll,
-    retry: 3,                 
+    retry: 3,
     retryDelay: 1000,
     refetchOnReconnect: true,
     refetchOnWindowFocus: true,
@@ -33,6 +34,9 @@ export const useCreateChecklist = () => {
     mutationFn: checklistRequests.create,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["checklists"] });
+      // Broadcast to other windows/tabs
+      broadcastQueryInvalidation(["checklists"]);
+      broadcastQueryInvalidation(["orders"]);
     },
     onError: (error) => {
       console.error(error);
@@ -48,6 +52,10 @@ export const useUpdateChecklist = () => {
     onSuccess: (_, { gid }) => {
       void queryClient.invalidateQueries({ queryKey: ["checklists"] });
       void queryClient.invalidateQueries({ queryKey: ["checklists", gid] });
+      // Broadcast to other windows/tabs
+      broadcastQueryInvalidation(["checklists"]);
+      broadcastQueryInvalidation(["checklists", gid.toString()]);
+      broadcastQueryInvalidation(["orders"]);
     },
     onError: (error) => {
       console.error(error);
@@ -61,6 +69,9 @@ export const useDeleteChecklist = () => {
     mutationFn: (gid: number) => checklistRequests.delete(gid),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["checklists"] });
+      // Broadcast to other windows/tabs
+      broadcastQueryInvalidation(["checklists"]);
+      broadcastQueryInvalidation(["orders"]);
     },
     onError: (error) => {
       console.error(error);

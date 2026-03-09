@@ -7,9 +7,7 @@ export default function Idebanken() {
         <Typography variant="h4" component="h1" gutterBottom>
           idebanken
         </Typography>
-        <Typography variant="body1">
-          Denna sida är under utveckling.
-        </Typography>
+        <Typography variant="body1">Denna sida är under utveckling.</Typography>
       </Box>
     </Container>
   );

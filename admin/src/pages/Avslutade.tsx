@@ -7,9 +7,7 @@ export default function Avslutade() {
         <Typography variant="h4" component="h1" gutterBottom>
           avslutade
         </Typography>
-        <Typography variant="body1">
-          Denna sida är under utveckling.
-        </Typography>
+        <Typography variant="body1">Denna sida är under utveckling.</Typography>
       </Box>
     </Container>
   );

@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { queryConfig } from "../lib/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { useBroadcastSync } from "../lib/useBroadcastSync";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -56,30 +57,38 @@ const theme = createTheme({
   },
 });
 
+function AppContent() {
+  useBroadcastSync();
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            minHeight: "100vh",
+          }}
+        >
+          <Header />
+          <Box sx={{ flexGrow: 1 }}>
+            <Routes>
+              <Route path="/" element={<OrderSummaryDataGrid />} />
+              <Route path="/form/:id" element={<FormView />} />
+            </Routes>
+          </Box>
+          <Footer />
+        </Box>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter basename={import.meta.env.BASE_URL}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              minHeight: "100vh",
-            }}
-          >
-            <Header />
-            <Box sx={{ flexGrow: 1 }}>
-              <Routes>
-                <Route path="/" element={<OrderSummaryDataGrid />} />
-                <Route path="/form/:id" element={<FormView />} />
-              </Routes>
-            </Box>
-            <Footer />
-          </Box>
-        </BrowserRouter>
-      </ThemeProvider>
+      <AppContent />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );

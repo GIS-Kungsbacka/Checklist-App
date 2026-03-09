@@ -110,7 +110,7 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
 
   const displayKeys = Object.keys(fieldLabels) as (keyof OrderSummary)[];
   const orderSummaryKeys = displayKeys.filter(
-    (key) => !checklistKeys.includes(key),
+    (key) => !checklistKeys.includes(key)
   );
 
   addText("Beställningsunderlag", 14, true);
@@ -227,7 +227,7 @@ export default function FormView() {
   ];
 
   const orderSummaryKeys = displayKeys.filter(
-    (key) => !checklistKeys.includes(key),
+    (key) => !checklistKeys.includes(key)
   );
 
   const renderField = (key: keyof typeof item) => {
