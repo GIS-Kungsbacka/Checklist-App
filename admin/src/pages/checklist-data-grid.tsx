@@ -23,6 +23,7 @@ import {
   InputLabel,
   Select,
   Autocomplete,
+  keyframes,
 } from "@mui/material";
 
 import {
@@ -65,7 +66,7 @@ import type { Checklist, CreateChecklistDto } from "../types/checklist";
 import type { OrderSummary } from "../types/orderSummary";
 
 const getPrioritetChipColor = (
-  p: string | undefined
+  p: string | undefined,
 ): "error" | "success" | "info" | "default" => {
   if (p === "Hög") return "error";
   if (p === "Medel") return "success";
@@ -92,18 +93,17 @@ const defaultColumnVisibility = {
   malgrupper: false,
   leverans: false,
 };
-const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
-  props,
-  _ref
-) {
-  return (
-    <Tooltip title="Kolumner">
-      <ToolbarButton aria-label="Columns" {...props}>
-        <ViewColumnOutlinedIcon fontSize="small" />
-      </ToolbarButton>
-    </Tooltip>
-  );
-});
+const ColumnsToolbarButton = React.forwardRef(
+  function ColumnsToolbarButton(props, _ref) {
+    return (
+      <Tooltip title="Kolumner">
+        <ToolbarButton aria-label="Columns" {...props}>
+          <ViewColumnOutlinedIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+    );
+  },
+);
 
 function ScreenshotToolbar({
   density,
@@ -113,12 +113,12 @@ function ScreenshotToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
 
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -177,12 +177,12 @@ function ScreenshotToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -310,7 +310,7 @@ function ScreenshotToolbar({
   );
 }
 
-export default function FormsListGrid() {
+export default function ChecklistGrid() {
   const {
     data: items = [],
     isLoading,
@@ -326,7 +326,7 @@ export default function FormsListGrid() {
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState<Checklist | null>(null);
   const [deleteConfirm, setDeleteConfirm] = React.useState<Checklist | null>(
-    null
+    null,
   );
 
   const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
@@ -337,14 +337,14 @@ export default function FormsListGrid() {
       } catch {
         return defaultColumnVisibility;
       }
-    }
+    },
   );
 
   React.useEffect(() => {
     try {
       localStorage.setItem(
         COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel)
+        JSON.stringify(columnVisibilityModel),
       );
     } catch {}
   }, [COLUMN_VISIBILITY_STORAGE_KEY, columnVisibilityModel]);
@@ -391,10 +391,10 @@ export default function FormsListGrid() {
     const used = new Set(
       items
         .map((c) => c.arendenummerArtvise?.toLowerCase().trim())
-        .filter((v): v is string => !!v)
+        .filter((v): v is string => !!v),
     );
     return orderSummaries.filter(
-      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim())
+      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim()),
     );
   }, [items, orderSummaries]);
 
@@ -423,7 +423,7 @@ export default function FormsListGrid() {
       const duplicateExists = items.some(
         (item) =>
           item.arendenummerArtvise?.toLowerCase().trim() ===
-          arendenummerArtvise.toLowerCase().trim()
+          arendenummerArtvise.toLowerCase().trim(),
       );
 
       if (duplicateExists) {
@@ -452,7 +452,7 @@ export default function FormsListGrid() {
         (item) =>
           item.gid !== openEdit.gid &&
           item.arendenummerArtvise?.toLowerCase().trim() ===
-            arendenummerArtvise.toLowerCase().trim()
+            arendenummerArtvise.toLowerCase().trim(),
       );
 
       if (duplicateExists) {
@@ -470,7 +470,7 @@ export default function FormsListGrid() {
         onSuccess: () => {
           setOpenEdit(null);
         },
-      }
+      },
     );
   };
 
@@ -504,7 +504,12 @@ export default function FormsListGrid() {
   }
 
   const showApiDown = failureCount > 0 || isRefetchError || isError;
-
+  const dots = keyframes`
+  0% { content: ""; }
+  33% { content: "."; }
+  66% { content: ".."; }
+  100% { content: "..."; }
+`;
   if (showApiDown) {
     return (
       <Box
@@ -515,8 +520,17 @@ export default function FormsListGrid() {
           minHeight: "60vh",
         }}
       >
-        <Alert severity="error" sx={{ borderRadius: 2 }}>
-          Kunde inte ladda listan. (API nere) – försöker igen…
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Kunde inte ladda listan. Försöker igen
+          <Box
+            component="span"
+            sx={{
+              "&::after": {
+                content: '""',
+                animation: `${dots} 1.5s steps(3, end) infinite`,
+              },
+            }}
+          />
         </Alert>
       </Box>
     );
@@ -836,7 +850,7 @@ export default function FormsListGrid() {
                           loading={isLoadingOrderSummaries}
                           value={
                             availableOrderSummariesForCreate.find(
-                              (o) => o.arendenummerArtvise === field.value
+                              (o) => o.arendenummerArtvise === field.value,
                             ) ?? null
                           }
                           onChange={(_e, value) => {
@@ -991,21 +1005,21 @@ export default function FormsListGrid() {
                           items
                             .filter((c) => c.gid !== openEdit?.gid)
                             .map((c) =>
-                              c.arendenummerArtvise?.toLowerCase().trim()
+                              c.arendenummerArtvise?.toLowerCase().trim(),
                             )
-                            .filter((v): v is string => !!v)
+                            .filter((v): v is string => !!v),
                         );
                         const options = orderSummaries.filter(
                           (o) =>
                             !usedByOthers.has(
-                              o.arendenummerArtvise.toLowerCase().trim()
-                            )
+                              o.arendenummerArtvise.toLowerCase().trim(),
+                            ),
                         );
                         const currentValue =
                           field.value ?? openEdit?.arendenummerArtvise ?? "";
                         const currentOption =
                           options.find(
-                            (o) => o.arendenummerArtvise === currentValue
+                            (o) => o.arendenummerArtvise === currentValue,
                           ) ??
                           (currentValue
                             ? ({

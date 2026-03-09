@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
-import FormsList from "./pages/FormsList";
 import FormView from "./pages/FormView";
+import OrderSummaryDataGrid from "./pages/orderSummary-data-grid";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { queryConfig } from "../lib/react-query";
@@ -72,7 +72,7 @@ function App() {
             <Header />
             <Box sx={{ flexGrow: 1 }}>
               <Routes>
-                <Route path="/" element={<FormsList />} />
+                <Route path="/" element={<OrderSummaryDataGrid />} />
                 <Route path="/form/:id" element={<FormView />} />
               </Routes>
             </Box>

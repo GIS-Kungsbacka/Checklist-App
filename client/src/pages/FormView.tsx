@@ -12,10 +12,14 @@ import {
   Stack,
   Grid,
   Chip,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import { ArrowBack } from "@mui/icons-material";
+import { ArrowBack, Download } from "@mui/icons-material";
 import { useOrderById } from "../hooks/useOrders";
-import { getPrioritetChipColor } from "./FormsList";
+import type { OrderSummary } from "../types/orderSummary";
+import jsPDF from "jspdf";
+import { getPrioritetChipColor } from "./orderSummary-data-grid";
 
 const fieldLabels: Record<string, string> = {
   arendenummerArtvise: "Ärendenummer",
@@ -48,6 +52,97 @@ function formatValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
   if (typeof value === "boolean") return value ? "Ja" : "Nej";
   return String(value);
+}
+
+function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 20;
+  const maxWidth = pageWidth - 2 * margin;
+  let yPosition = margin;
+
+  // Helper function to add text with word wrapping
+  const addText = (text: string, fontSize: number, isBold = false) => {
+    doc.setFontSize(fontSize);
+    doc.setFont("helvetica", isBold ? "bold" : "normal");
+    const lines = doc.splitTextToSize(text, maxWidth);
+    doc.text(lines, margin, yPosition);
+    yPosition += lines.length * (fontSize * 0.4) + 5;
+
+    // Check if we need a new page
+    if (yPosition > doc.internal.pageSize.getHeight() - margin) {
+      doc.addPage();
+      yPosition = margin;
+    }
+  };
+
+  // Title
+  const title = item.arendenummerArtvise || "Beställningsspecifikation";
+  addText(title, 18, true);
+  yPosition += 5;
+
+  // Add chips info if available
+  const chipsInfo: string[] = [];
+  if (item.kategori) chipsInfo.push(`Kategori: ${item.kategori}`);
+  if (item.prioritet) chipsInfo.push(`Prioritet: ${item.prioritet}`);
+  if (chipsInfo.length > 0) {
+    addText(chipsInfo.join(" | "), 12);
+    yPosition += 5;
+  }
+
+  yPosition += 5;
+
+  // Beställningsunderlag section
+  const checklistKeys: (keyof OrderSummary)[] = [
+    "dataunderlag",
+    "dataadministrator",
+    "malgrupper",
+    "nyttjandeInterntExternt",
+    "leverans",
+    "leveransArbetstimmar",
+    "kategori",
+    "kategoriTyp",
+    "prioritet",
+    "antagenJaNej",
+    "antagenJaNejMotivering",
+    "handlaggare",
+  ];
+
+  const displayKeys = Object.keys(fieldLabels) as (keyof OrderSummary)[];
+  const orderSummaryKeys = displayKeys.filter(
+    (key) => !checklistKeys.includes(key),
+  );
+
+  addText("Beställningsunderlag", 14, true);
+  yPosition += 3;
+
+  orderSummaryKeys.forEach((key) => {
+    const label = fieldLabels[key];
+    if (label) {
+      const value = formatValue(item[key]);
+      addText(`${label}: ${value}`, 11);
+    }
+  });
+
+  yPosition += 5;
+  addText("Checklista", 14, true);
+  yPosition += 3;
+
+  checklistKeys.forEach((key) => {
+    const label = fieldLabels[key];
+    if (label) {
+      const value = formatValue(item[key]);
+      addText(`${label}: ${value}`, 11);
+    }
+  });
+
+  // Generate filename
+  const filename = `${title.replace(/[^a-z0-9]/gi, "_")}_${
+    new Date().toISOString().split("T")[0]
+  }.pdf`;
+
+  // Save the PDF
+  doc.save(filename);
 }
 
 export default function FormView() {
@@ -132,7 +227,7 @@ export default function FormView() {
   ];
 
   const orderSummaryKeys = displayKeys.filter(
-    (key) => !checklistKeys.includes(key)
+    (key) => !checklistKeys.includes(key),
   );
 
   const renderField = (key: keyof typeof item) => {
@@ -144,11 +239,7 @@ export default function FormView() {
 
     return (
       <Grid size={{ xs: 12, sm: 6 }} key={key}>
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          display="block"
-        >
+        <Typography variant="caption" color="text.secondary" display="block">
           {label}
         </Typography>
         <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
@@ -170,7 +261,14 @@ export default function FormView() {
 
       <Card elevation={3}>
         <CardContent sx={{ p: 4 }}>
-          <Box sx={{ mb: 3 }}>
+          <Box
+            sx={{
+              mb: 3,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+            }}
+          >
             <Typography
               variant="h4"
               component="h1"
@@ -180,41 +278,51 @@ export default function FormView() {
               {item.arendenummerArtvise ||
                 `Beställning ${item.arendenummerArtvise}`}
             </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ mt: 2 }}
-              flexWrap="wrap"
-              useFlexGap
-            >
-              {item.kategori && (
-                <Chip
-                  label={item.kategori}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {item.prioritet && (
-                <Chip
-                  color={getPrioritetChipColor(item.prioritet)}
-                  label={item.prioritet}
-                  size="small"
-                />
-              )}
-            </Stack>
-            
+            <Tooltip title="Ladda ner som PDF">
+              <IconButton
+                onClick={() => generatePDF(item, fieldLabels)}
+                color="primary"
+                sx={{ ml: 2 }}
+              >
+                <Download />
+              </IconButton>
+            </Tooltip>
           </Box>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ mt: 2 }}
+            flexWrap="wrap"
+            useFlexGap
+          >
+            {item.kategori && (
+              <Chip
+                label={item.kategori}
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            )}
+            {item.prioritet && (
+              <Chip
+                color={getPrioritetChipColor(item.prioritet)}
+                label={item.prioritet}
+                size="small"
+              />
+            )}
+          </Stack>
           <Divider sx={{ my: 1.5 }} />
-          <Typography variant="body1" sx={{ mt: 2, mb:2, fontSize: 17, fontWeight: 600 }}>
-              Beställningsunderlag
-            </Typography>
-          
+          <Typography
+            variant="body1"
+            sx={{ mt: 2, mb: 2, fontSize: 17, fontWeight: 600 }}
+          >
+            Beställningsunderlag
+          </Typography>
 
           <Grid container spacing={2}>
             {orderSummaryKeys.map((key) => renderField(key))}
           </Grid>
-          <Divider sx={{ my: 2, mt:4 }} />
+          <Divider sx={{ my: 2, mt: 4 }} />
           <Typography
             variant="body1"
             sx={{ mt: 3, mb: 2, fontSize: 17, fontWeight: 600 }}

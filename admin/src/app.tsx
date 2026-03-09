@@ -2,8 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
-import FormsList from "./pages/FormsList";
-import FormsListGrid from "./pages/checklist-data-grid";
+import ChecklistGrid from "./pages/checklist-data-grid";
+import Idebanken from "./pages/Idebanken";
+import Avslutade from "./pages/Avslutade";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -74,7 +75,31 @@ function App() {
                   path="/"
                   element={
                     <ProtectedRoute>
-                      <FormsListGrid />
+                      <ChecklistGrid />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bestallningslistan"
+                  element={
+                    <ProtectedRoute>
+                      <ChecklistGrid />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/idebanken"
+                  element={
+                    <ProtectedRoute>
+                      <Idebanken />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/avslutade"
+                  element={
+                    <ProtectedRoute>
+                      <Avslutade />
                     </ProtectedRoute>
                   }
                 />
