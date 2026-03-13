@@ -31,4 +31,22 @@ public class Checklist
     public string? AntagenJaNejMotivering { get; set; }
 
     public string? Handlaggare {  get; set; }
+
+    public string? Tabell { get; set; }
+
+    public string? Wms { get; set; }
+
+    public string? Fme { get; set; }
+
+    public string? Redigering { get; set; }
+
+    public bool? Kopiering { get; set; }
+
+    public string? Information { get; set; }
+
+    public string? Kommentar { get; set; }
+
+    public string? VerksamhetsKritiskData { get; set; }
+
+    public bool? Levererad { get; set; }
 }

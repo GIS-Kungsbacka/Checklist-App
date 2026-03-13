@@ -103,6 +103,15 @@ const defaultColumnVisibility = {
   nyttjandeInterntExternt: false,
   leverans: false,
   handlaggare: false,
+  tabell: false,
+  wms: false,
+  fme: false,
+  redigering: false,
+  kopiering: false,
+  information: false,
+  verksamhetsKritiskData: false,
+  kommentar: false,
+  levererad: false,
 };
 
 const getInitialViewMode = (): ViewMode => {
@@ -112,7 +121,7 @@ const getInitialViewMode = (): ViewMode => {
   } catch {
     // ignore
   }
-  return "cards";
+  return "list";
 };
 
 const getInitialCardPagination = (): boolean => {
@@ -585,7 +594,7 @@ export default function OrderSummaryDataGrid() {
     {
       field: "arendenummerArtvise",
       headerName: "Ärendenummer",
-      minWidth: 100,
+      minWidth: 160,
       flex: 1.2,
       hideable: false,
       renderCell: (params: GridRenderCellParams) => (
@@ -608,7 +617,7 @@ export default function OrderSummaryDataGrid() {
     {
       field: "ärendenummerOpenE",
       headerName: "Ärendenummer OpenE",
-      minWidth: 250,
+      minWidth: 190,
       flex: 1.5,
     },
     {
@@ -658,12 +667,18 @@ export default function OrderSummaryDataGrid() {
       headerName: "Förankrad chef",
       minWidth: 150,
       flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
     },
     {
       field: "kansligInformation",
       headerName: "Känslig information",
       minWidth: 150,
       flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
     },
     {
       field: "kansligInformationBeskrivning",
@@ -687,6 +702,51 @@ export default function OrderSummaryDataGrid() {
         ) : (
           "-"
         ),
+    },
+    { field: "tabell", headerName: "Tabell", minWidth: 150, flex: 0.8 },
+    { field: "wms", headerName: "WMS", minWidth: 150, flex: 0.8 },
+    { field: "fme", headerName: "FME", minWidth: 150, flex: 0.8 },
+    {
+      field: "redigering",
+      headerName: "Redigering",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "kopiering",
+      headerName: "Kopiering",
+      minWidth: 150,
+      flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "information",
+      headerName: "Information",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "verksamhetsKritiskData",
+      headerName: "Verksamhetskritisk data",
+      minWidth: 200,
+      flex: 1,
+    },
+    {
+      field: "kommentar",
+      headerName: "Kommentar",
+      minWidth: 200,
+      flex: 1,
+    },
+    {
+      field: "levererad",
+      headerName: "Levererad",
+      minWidth: 150,
+      flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
     },
   ];
 

@@ -52,6 +52,15 @@ public class DbContextChecklistRepository : IChecklistRepository
         existing.AntagenJaNej = item.AntagenJaNej;
         existing.AntagenJaNejMotivering = item.AntagenJaNejMotivering;
         existing.Handlaggare = item.Handlaggare;
+        existing.Tabell = item.Tabell;
+        existing.Wms = item.Wms;
+        existing.Fme = item.Fme;
+        existing.Redigering = item.Redigering;
+        existing.Kopiering = item.Kopiering;
+        existing.Information = item.Information;
+        existing.Kommentar = item.Kommentar;
+        existing.VerksamhetsKritiskData = item.VerksamhetsKritiskData;
+        existing.Levererad = item.Levererad;
 
         await _context.SaveChangesAsync();
         return existing;

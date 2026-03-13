@@ -23,6 +23,8 @@ import {
   InputLabel,
   Select,
   Autocomplete,
+  Checkbox,
+  FormControlLabel,
   keyframes,
 } from "@mui/material";
 
@@ -65,8 +67,8 @@ import { useOrderSummaries } from "../hooks/useOrderSummary";
 import type { Checklist, CreateChecklistDto } from "../types/checklist";
 import type { OrderSummary } from "../types/orderSummary";
 
-const getPrioritetChipColor = (
-  p: string | undefined,
+export const getPrioritetChipColor = (
+  p: string | undefined
 ): "error" | "success" | "info" | "default" => {
   if (p === "Hög") return "error";
   if (p === "Medel") return "success";
@@ -75,6 +77,16 @@ const getPrioritetChipColor = (
 };
 
 const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
+const KATEGORI_OPTIONS = [
+  "lager i kartportalen",
+  "FME-script",
+  "FME-app",
+  "lagring av data",
+  "analys",
+  "övrigt",
+] as const;
+const KATEGORI_TYP_OPTIONS = ["ny", "förändring"] as const;
+const ANTAGEN_OPTIONS = ["ja", "nej"] as const;
 const COLUMN_VISIBILITY_STORAGE_KEY = "checklist-column-visibility";
 
 const defaultColumnVisibility = {
@@ -92,18 +104,28 @@ const defaultColumnVisibility = {
   handlaggare: true,
   malgrupper: false,
   leverans: false,
+  tabell: false,
+  wms: false,
+  fme: false,
+  redigering: false,
+  kopiering: false,
+  information: false,
+  kommentar: false,
+  verksamhetskritiskData: true,
+  levererad: false,
 };
-const ColumnsToolbarButton = React.forwardRef(
-  function ColumnsToolbarButton(props, _ref) {
-    return (
-      <Tooltip title="Kolumner">
-        <ToolbarButton aria-label="Columns" {...props}>
-          <ViewColumnOutlinedIcon fontSize="small" />
-        </ToolbarButton>
-      </Tooltip>
-    );
-  },
-);
+const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
+  props,
+  _ref
+) {
+  return (
+    <Tooltip title="Kolumner">
+      <ToolbarButton aria-label="Columns" {...props}>
+        <ViewColumnOutlinedIcon fontSize="small" />
+      </ToolbarButton>
+    </Tooltip>
+  );
+});
 
 function ScreenshotToolbar({
   density,
@@ -113,12 +135,12 @@ function ScreenshotToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null,
+    null
   );
   const exportOpen = Boolean(exportAnchor);
 
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null,
+    null
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -177,12 +199,12 @@ function ScreenshotToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                        ? "Standard"
-                        : "Komfortabelt"
+                      ? "Standard"
+                      : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            ),
+            )
           )}
         </Menu>
 
@@ -312,12 +334,22 @@ function ScreenshotToolbar({
 
 export default function ChecklistGrid() {
   const {
-    data: items = [],
+    data: allItems = [],
     isLoading,
     isError,
     failureCount,
     isRefetchError,
   } = useChecklists();
+
+  // Filter out items that should be on other pages
+  const items = React.useMemo(
+    () =>
+      allItems.filter(
+        (item) =>
+          item.levererad !== true && item.antagenJaNej?.toLowerCase() !== "nej"
+      ),
+    [allItems]
+  );
 
   const createMutation = useCreateChecklist();
   const updateMutation = useUpdateChecklist();
@@ -326,7 +358,7 @@ export default function ChecklistGrid() {
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState<Checklist | null>(null);
   const [deleteConfirm, setDeleteConfirm] = React.useState<Checklist | null>(
-    null,
+    null
   );
 
   const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
@@ -337,14 +369,14 @@ export default function ChecklistGrid() {
       } catch {
         return defaultColumnVisibility;
       }
-    },
+    }
   );
 
   React.useEffect(() => {
     try {
       localStorage.setItem(
         COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel),
+        JSON.stringify(columnVisibilityModel)
       );
     } catch {}
   }, [COLUMN_VISIBILITY_STORAGE_KEY, columnVisibilityModel]);
@@ -370,6 +402,15 @@ export default function ChecklistGrid() {
       antagenJaNej: "",
       antagenJaNejMotivering: "",
       handlaggare: "",
+      tabell: "",
+      wms: "",
+      fme: "",
+      redigering: "",
+      kopiering: false,
+      information: "",
+      kommentar: "",
+      verksamhetskritiskData: "",
+      levererad: false,
     },
   });
 
@@ -391,10 +432,10 @@ export default function ChecklistGrid() {
     const used = new Set(
       items
         .map((c) => c.arendenummerArtvise?.toLowerCase().trim())
-        .filter((v): v is string => !!v),
+        .filter((v): v is string => !!v)
     );
     return orderSummaries.filter(
-      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim()),
+      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim())
     );
   }, [items, orderSummaries]);
 
@@ -414,7 +455,34 @@ export default function ChecklistGrid() {
       antagenJaNej: item.antagenJaNej ?? "",
       antagenJaNejMotivering: item.antagenJaNejMotivering ?? "",
       handlaggare: item.handlaggare ?? "",
+      tabell: item.tabell ?? "",
+      wms: item.wms ?? "",
+      fme: item.fme ?? "",
+      redigering: item.redigering ?? "",
+      kopiering: item.kopiering ?? false,
+      information: item.information ?? "",
+      kommentar: item.kommentar ?? "",
+      verksamhetskritiskData: item.verksamhetskritiskData ?? "",
+      levererad: item.levererad ?? false,
     });
+  };
+
+  // Helper to clean form data: convert empty strings to undefined, preserve booleans
+  const cleanFormData = (data: CreateChecklistDto): CreateChecklistDto => {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(data)) {
+      if (typeof value === "boolean") {
+        cleaned[key] = value;
+      } else if (value === "" || value === null) {
+        cleaned[key] = undefined;
+      } else if (typeof value === "string") {
+        const trimmed = value.trim();
+        cleaned[key] = trimmed === "" ? undefined : trimmed;
+      } else {
+        cleaned[key] = value;
+      }
+    }
+    return cleaned as CreateChecklistDto;
   };
 
   const handleCreate = (data: CreateChecklistDto) => {
@@ -423,7 +491,7 @@ export default function ChecklistGrid() {
       const duplicateExists = items.some(
         (item) =>
           item.arendenummerArtvise?.toLowerCase().trim() ===
-          arendenummerArtvise.toLowerCase().trim(),
+          arendenummerArtvise.toLowerCase().trim()
       );
 
       if (duplicateExists) {
@@ -435,7 +503,8 @@ export default function ChecklistGrid() {
       }
     }
 
-    createMutation.mutate(data, {
+    const cleanedData = cleanFormData(data);
+    createMutation.mutate(cleanedData, {
       onSuccess: () => {
         setOpenCreate(false);
         resetCreateForm();
@@ -452,7 +521,7 @@ export default function ChecklistGrid() {
         (item) =>
           item.gid !== openEdit.gid &&
           item.arendenummerArtvise?.toLowerCase().trim() ===
-            arendenummerArtvise.toLowerCase().trim(),
+            arendenummerArtvise.toLowerCase().trim()
       );
 
       if (duplicateExists) {
@@ -464,13 +533,14 @@ export default function ChecklistGrid() {
       }
     }
 
+    const cleanedData = cleanFormData(data);
     updateMutation.mutate(
-      { gid: openEdit.gid, data },
+      { gid: openEdit.gid, data: cleanedData },
       {
         onSuccess: () => {
           setOpenEdit(null);
         },
-      },
+      }
     );
   };
 
@@ -596,6 +666,51 @@ export default function ChecklistGrid() {
       minWidth: 150,
       flex: 0.8,
     },
+    { field: "tabell", headerName: "Tabell", minWidth: 150, flex: 0.8 },
+    { field: "wms", headerName: "WMS", minWidth: 150, flex: 0.8 },
+    { field: "fme", headerName: "FME", minWidth: 150, flex: 0.8 },
+    {
+      field: "redigering",
+      headerName: "Redigering",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "kopiering",
+      headerName: "Kopiering",
+      minWidth: 150,
+      flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "information",
+      headerName: "Information",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "verksamhetskritiskData",
+      headerName: "Verksamhetskritisk data",
+      minWidth: 200,
+      flex: 1,
+    },
+    {
+      field: "kommentar",
+      headerName: "Kommentar",
+      minWidth: 200,
+      flex: 1,
+    },
+    {
+      field: "levererad",
+      headerName: "Levererad",
+      minWidth: 150,
+      flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
     {
       field: "åtgärder",
       headerName: "Åtgärder",
@@ -709,12 +824,6 @@ export default function ChecklistGrid() {
             sorting: {
               sortModel: [{ field: "gid", sort: "asc" }],
             },
-            columns: {
-              columnVisibilityModel: {
-                malgrupper: false,
-                leverans: false,
-              },
-            },
           }}
           showToolbar
           slots={{
@@ -800,12 +909,22 @@ export default function ChecklistGrid() {
                   ["kategori", "Kategori"],
                   ["kategoriTyp", "Kategori typ"],
                   ["prioritet", "Prioritet"],
-                  ["antagenJaNej", "Antagen ja/nej"],
-                  ["handlaggare", "Handlaggare"],
+                  ["handlaggare", "Handläggare"],
+                  ["tabell", "Tabell"],
+                  ["wms", "WMS"],
+                  ["fme", "FME"],
+                  ["redigering", "Redigering"],
+                  ["information", "Information"],
+                  ["verksamhetskritiskData", "Verksamhetskritisk data"],
+                  ["antagenJaNej", "Antagen"],
+                  ["kommentar", "Kommentar"],
                   ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
                 ] as const
               ).map(([key, label]) => (
-                <Grid size={6} key={key}>
+                <Grid
+                  size={key === "antagenJaNejMotivering" ? 12 : 6}
+                  key={key}
+                >
                   {key === "prioritet" ? (
                     <Controller
                       name="prioritet"
@@ -833,6 +952,87 @@ export default function ChecklistGrid() {
                         </FormControl>
                       )}
                     />
+                  ) : key === "kategori" ? (
+                    <Controller
+                      name="kategori"
+                      control={createControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="create-kategori-label">
+                            Kategori
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="create-kategori-label"
+                            label="Kategori"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj kategori</em>
+                            </MenuItem>
+                            {KATEGORI_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  ) : key === "kategoriTyp" ? (
+                    <Controller
+                      name="kategoriTyp"
+                      control={createControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="create-kategoriTyp-label">
+                            Kategori typ
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="create-kategoriTyp-label"
+                            label="Kategori typ"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj kategori typ</em>
+                            </MenuItem>
+                            {KATEGORI_TYP_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  ) : key === "antagenJaNej" ? (
+                    <Controller
+                      name="antagenJaNej"
+                      control={createControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="create-antagenJaNej-label">
+                            Antagen
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="create-antagenJaNej-label"
+                            label="Antagen"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj</em>
+                            </MenuItem>
+                            {ANTAGEN_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
                   ) : key === "arendenummerArtvise" ? (
                     <Controller
                       name="arendenummerArtvise"
@@ -850,7 +1050,7 @@ export default function ChecklistGrid() {
                           loading={isLoadingOrderSummaries}
                           value={
                             availableOrderSummariesForCreate.find(
-                              (o) => o.arendenummerArtvise === field.value,
+                              (o) => o.arendenummerArtvise === field.value
                             ) ?? null
                           }
                           onChange={(_e, value) => {
@@ -897,8 +1097,16 @@ export default function ChecklistGrid() {
                           {...field}
                           fullWidth
                           label={label}
-                          multiline={key === "antagenJaNejMotivering"}
-                          rows={key === "antagenJaNejMotivering" ? 2 : 1}
+                          multiline={
+                            key === "antagenJaNejMotivering" ||
+                            key === "kommentar"
+                          }
+                          rows={
+                            key === "antagenJaNejMotivering" ||
+                            key === "kommentar"
+                              ? 2
+                              : 1
+                          }
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
                         />
@@ -908,6 +1116,46 @@ export default function ChecklistGrid() {
                 </Grid>
               ))}
             </Grid>
+            <Divider sx={{ my: 3 }} />
+            <Box
+              sx={{
+                display: "flex",
+                gap: 4,
+                alignItems: "center",
+                px: 1,
+              }}
+            >
+              <Controller
+                name="kopiering"
+                control={createControl}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Kopiering"
+                  />
+                )}
+              />
+              <Controller
+                name="levererad"
+                control={createControl}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Levererad"
+                  />
+                )}
+              />
+            </Box>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2.5 }}>
@@ -960,12 +1208,22 @@ export default function ChecklistGrid() {
                   ["kategori", "Kategori"],
                   ["kategoriTyp", "Kategori typ"],
                   ["prioritet", "Prioritet"],
-                  ["antagenJaNej", "Antagen ja/nej"],
                   ["handlaggare", "Handläggare"],
+                  ["tabell", "Tabell"],
+                  ["wms", "WMS"],
+                  ["fme", "FME"],
+                  ["redigering", "Redigering"],
+                  ["information", "Information"],
+                  ["verksamhetskritiskData", "Verksamhetskritisk data"],
+                  ["antagenJaNej", "Antagen"],
+                  ["kommentar", "Kommentar"],
                   ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
                 ] as const
               ).map(([key, label]) => (
-                <Grid size={6} key={key}>
+                <Grid
+                  size={key === "antagenJaNejMotivering" ? 12 : 6}
+                  key={key}
+                >
                   {key === "prioritet" ? (
                     <Controller
                       name="prioritet"
@@ -993,6 +1251,87 @@ export default function ChecklistGrid() {
                         </FormControl>
                       )}
                     />
+                  ) : key === "kategori" ? (
+                    <Controller
+                      name="kategori"
+                      control={editControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="edit-kategori-label">
+                            Kategori
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="edit-kategori-label"
+                            label="Kategori"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj kategori</em>
+                            </MenuItem>
+                            {KATEGORI_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  ) : key === "kategoriTyp" ? (
+                    <Controller
+                      name="kategoriTyp"
+                      control={editControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="edit-kategoriTyp-label">
+                            Kategori typ
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="edit-kategoriTyp-label"
+                            label="Kategori typ"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj kategori typ</em>
+                            </MenuItem>
+                            {KATEGORI_TYP_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  ) : key === "antagenJaNej" ? (
+                    <Controller
+                      name="antagenJaNej"
+                      control={editControl}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <InputLabel id="edit-antagenJaNej-label">
+                            Antagen
+                          </InputLabel>
+                          <Select
+                            {...field}
+                            labelId="edit-antagenJaNej-label"
+                            label="Antagen"
+                            value={field.value ?? ""}
+                          >
+                            <MenuItem value="">
+                              <em>Välj</em>
+                            </MenuItem>
+                            {ANTAGEN_OPTIONS.map((opt) => (
+                              <MenuItem key={opt} value={opt}>
+                                {opt}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
                   ) : key === "arendenummerArtvise" ? (
                     <Controller
                       name="arendenummerArtvise"
@@ -1005,21 +1344,21 @@ export default function ChecklistGrid() {
                           items
                             .filter((c) => c.gid !== openEdit?.gid)
                             .map((c) =>
-                              c.arendenummerArtvise?.toLowerCase().trim(),
+                              c.arendenummerArtvise?.toLowerCase().trim()
                             )
-                            .filter((v): v is string => !!v),
+                            .filter((v): v is string => !!v)
                         );
                         const options = orderSummaries.filter(
                           (o) =>
                             !usedByOthers.has(
-                              o.arendenummerArtvise.toLowerCase().trim(),
-                            ),
+                              o.arendenummerArtvise.toLowerCase().trim()
+                            )
                         );
                         const currentValue =
                           field.value ?? openEdit?.arendenummerArtvise ?? "";
                         const currentOption =
                           options.find(
-                            (o) => o.arendenummerArtvise === currentValue,
+                            (o) => o.arendenummerArtvise === currentValue
                           ) ??
                           (currentValue
                             ? ({
@@ -1081,8 +1420,16 @@ export default function ChecklistGrid() {
                           {...field}
                           fullWidth
                           label={label}
-                          multiline={key === "antagenJaNejMotivering"}
-                          rows={key === "antagenJaNejMotivering" ? 4 : 1}
+                          multiline={
+                            key === "antagenJaNejMotivering" ||
+                            key === "kommentar"
+                          }
+                          rows={
+                            key === "antagenJaNejMotivering" ||
+                            key === "kommentar"
+                              ? 2
+                              : 1
+                          }
                         />
                       )}
                     />
@@ -1090,6 +1437,46 @@ export default function ChecklistGrid() {
                 </Grid>
               ))}
             </Grid>
+            <Divider sx={{ my: 3 }} />
+            <Box
+              sx={{
+                display: "flex",
+                gap: 4,
+                alignItems: "center",
+                px: 1,
+              }}
+            >
+              <Controller
+                name="kopiering"
+                control={editControl}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Kopiering"
+                  />
+                )}
+              />
+              <Controller
+                name="levererad"
+                control={editControl}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Levererad"
+                  />
+                )}
+              />
+            </Box>
           </DialogContent>
           <Divider />
           <DialogActions sx={{ p: 2.5 }}>

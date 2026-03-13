@@ -65,6 +65,33 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Checklist>()
            .Property(x => x.Handlaggare)
            .HasColumnName("handlaggare");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Tabell)
+            .HasColumnName("tabell");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Wms)
+            .HasColumnName("wms");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Fme)
+            .HasColumnName("fme");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Redigering)
+            .HasColumnName("redigering");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Kopiering)
+            .HasColumnName("kopiering");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Information)
+            .HasColumnName("information");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Kommentar)
+            .HasColumnName("kommentar");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.Levererad)
+            .HasColumnName("levererad");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.VerksamhetsKritiskData)
+            .HasColumnName("verksamhetskritisk_data");
 
         // Read-only view: orderSummary
         modelBuilder.Entity<OrderSummary>()
@@ -118,5 +145,23 @@ public class AppDbContext : DbContext
             .Property(x => x.AntagenJaNejMotivering).HasColumnName("antagen_ja_nej_motivering");
         modelBuilder.Entity<OrderSummary>()
             .Property(x => x.Handlaggare).HasColumnName("handlaggare");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Tabell).HasColumnName("tabell");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Wms).HasColumnName("wms");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Fme).HasColumnName("fme");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Redigering).HasColumnName("redigering");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Kopiering).HasColumnName("kopiering");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Information).HasColumnName("information");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.VerksamhetsKritiskData).HasColumnName("verksamhetskritisk_data");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Kommentar).HasColumnName("kommentar");
+        modelBuilder.Entity<OrderSummary>()
+            .Property(x => x.Levererad).HasColumnName("levererad");
     }
 }

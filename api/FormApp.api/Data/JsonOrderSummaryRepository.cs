@@ -58,7 +58,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Hög",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Hog verksamhetsnytta och tydlig bestallning.",
-                Handlaggare = "Test1"
+                Handlaggare = "Test1",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -85,7 +94,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Hög",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Kopplad till strategiskt mal for vardtillganglighet.",
-                Handlaggare = "Test2"
+                Handlaggare = "Test2",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -112,7 +130,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Medel",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Begransat scope och snabb leveransmojlighet.",
-                Handlaggare = "Test3"
+                Handlaggare = "Test3",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -139,7 +166,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Medel",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Datatillgang och ansvarsfordelning ar tydlig.",
-                Handlaggare = "Test4"
+                Handlaggare = "Test4",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -166,7 +202,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Låg",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Bra forbattringspotential men ej akut.",
-                Handlaggare = "Test5"
+                Handlaggare = "Test5",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -193,7 +238,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Låg",
                 AntagenJaNej = "Nej",
                 AntagenJaNejMotivering = "Bestallningen behover forankras hos chef innan start.",
-                Handlaggare = ""
+                Handlaggare = "",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -220,7 +274,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Hög",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Kritisk fraga i verksamhetsplanen.",
-                Handlaggare = "Test6"
+                Handlaggare = "Test6",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -247,7 +310,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Medel",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Underlag behovs infor tidtabellsskifte.",
-                Handlaggare = "Test7"
+                Handlaggare = "Test7",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -274,7 +346,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Medel",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Lag teknisk risk och tydlig bestallning.",
-                Handlaggare = "Test8"
+                Handlaggare = "Test8",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -301,7 +382,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Låg",
                 AntagenJaNej = "Nej",
                 AntagenJaNejMotivering = "Behov av komplettering av datakvalitet innan start.",
-                Handlaggare = ""
+                Handlaggare = "",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
             new OrderSummary
             {
@@ -328,7 +418,16 @@ public class JsonOrderSummaryRepository : IOrderSummaryRepository
                 Prioritet = "Hög",
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Prioriterad i arbetsmiljoplanen.",
-                Handlaggare = "Test9"
+                Handlaggare = "Test9",
+                Tabell = null,
+                Wms = null,
+                Fme = null,
+                Redigering = null,
+                Kopiering = null,
+                Information = null,
+                VerksamhetsKritiskData = null,
+                Kommentar = null,
+                Levererad = null
             },
         };
 

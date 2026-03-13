@@ -46,6 +46,15 @@ const fieldLabels: Record<string, string> = {
   antagenJaNej: "Antagen ja/nej",
   antagenJaNejMotivering: "Antagen ja/nej motivering",
   handlaggare: "Handläggare",
+  tabell: "Tabell",
+  wms: "WMS",
+  fme: "FME",
+  redigering: "Redigering",
+  kopiering: "Kopiering",
+  information: "Information",
+  verksamhetsKritiskData: "Verksamhetskritisk data",
+  kommentar: "Kommentar",
+  levererad: "Levererad",
 };
 
 function formatValue(value: unknown): string {
@@ -106,6 +115,15 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
     "antagenJaNej",
     "antagenJaNejMotivering",
     "handlaggare",
+    "tabell",
+    "wms",
+    "fme",
+    "redigering",
+    "kopiering",
+    "information",
+    "verksamhetsKritiskData",
+    "kommentar",
+    "levererad",
   ];
 
   const displayKeys = Object.keys(fieldLabels) as (keyof OrderSummary)[];
@@ -224,6 +242,15 @@ export default function FormView() {
     "antagenJaNej",
     "antagenJaNejMotivering",
     "handlaggare",
+    "tabell",
+    "wms",
+    "fme",
+    "redigering",
+    "kopiering",
+    "information",
+    "verksamhetsKritiskData",
+    "kommentar",
+    "levererad",
   ];
 
   const orderSummaryKeys = displayKeys.filter(

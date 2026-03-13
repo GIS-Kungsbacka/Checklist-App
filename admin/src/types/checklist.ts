@@ -13,6 +13,15 @@ export interface Checklist {
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
   handlaggare?: string;
+  tabell?: string;
+  wms?: string;
+  fme?: string;
+  redigering?: string;
+  kopiering?: boolean;
+  information?: string;
+  kommentar?: string;
+  levererad?: boolean;
+  verksamhetskritiskData?: string;
 }
 
 export interface CreateChecklistDto {
@@ -29,6 +38,15 @@ export interface CreateChecklistDto {
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
   handlaggare?: string;
+  tabell?: string;
+  wms?: string;
+  fme?: string;
+  redigering?: string;
+  kopiering?: boolean;
+  information?: string;
+  kommentar?: string;
+  levererad?: boolean;
+  verksamhetskritiskData?: string;
 }
 
 export interface UpdateChecklistDto {
@@ -45,4 +63,13 @@ export interface UpdateChecklistDto {
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
   handlaggare?: string;
+  tabell?: string;
+  wms?: string;
+  fme?: string;
+  redigering?: string;
+  kopiering?: boolean;
+  information?: string;
+  kommentar?: string;
+  levererad?: boolean;
+  verksamhetskritiskData?: string;
 }

@@ -85,6 +85,15 @@ public class ChecklistController : ControllerBase
                 AntagenJaNej = dto.AntagenJaNej,
                 AntagenJaNejMotivering = dto.AntagenJaNejMotivering,
                 Handlaggare = dto.Handlaggare,
+                Tabell = dto.Tabell,
+                Wms = dto.Wms,
+                Fme = dto.Fme,
+                Redigering = dto.Redigering,
+                Kopiering = dto.Kopiering,
+                Information = dto.Information,
+                Kommentar = dto.Kommentar,
+                Levererad = dto.Levererad,
+                VerksamhetsKritiskData = dto.VerksamhetskritiskData,
             };
 
             var createdItem = await _repository.CreateAsync(item);
@@ -130,6 +139,15 @@ public class ChecklistController : ControllerBase
                 AntagenJaNej = dto.AntagenJaNej,
                 AntagenJaNejMotivering = dto.AntagenJaNejMotivering,
                 Handlaggare = dto.Handlaggare,
+                Tabell = dto.Tabell,
+                Wms = dto.Wms,
+                Fme = dto.Fme,
+                Redigering = dto.Redigering,
+                Kopiering = dto.Kopiering,
+                Information = dto.Information,
+                Kommentar = dto.Kommentar,
+                Levererad = dto.Levererad,
+                VerksamhetsKritiskData = dto.VerksamhetskritiskData,
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -215,6 +233,31 @@ public class CreateChecklistDto
 
     [MaxLength(255)]
     public string? Handlaggare { get; set; }
+
+    [MaxLength(255)]
+    public string? Tabell { get; set; }
+
+    [MaxLength(255)]
+    public string? Wms { get; set; }
+
+    [MaxLength(255)]
+    public string? Fme { get; set; }
+
+    [MaxLength(255)]
+    public string? Redigering { get; set; }
+
+    public bool? Kopiering { get; set; }
+
+    [MaxLength(255)]
+    public string? Information { get; set; }
+
+    [MaxLength(255)]
+    public string? Kommentar { get; set; }
+
+    public bool? Levererad { get; set; }
+
+    [MaxLength(255)]
+    public string? VerksamhetskritiskData { get; set; }
 }
 
 public class UpdateChecklistDto
@@ -257,4 +300,29 @@ public class UpdateChecklistDto
 
     [MaxLength(255)]
     public string? Handlaggare { get; set; }
+
+    [MaxLength(255)]
+    public string? Tabell { get; set; }
+
+    [MaxLength(255)]
+    public string? Wms { get; set; }
+
+    [MaxLength(255)]
+    public string? Fme { get; set; }
+
+    [MaxLength(255)]
+    public string? Redigering { get; set; }
+
+    public bool? Kopiering { get; set; }
+
+    [MaxLength(255)]
+    public string? Information { get; set; }
+
+    [MaxLength(255)]
+    public string? Kommentar { get; set; }
+
+    public bool? Levererad { get; set; }
+
+    [MaxLength(255)]
+    public string? VerksamhetskritiskData { get; set; }
 }

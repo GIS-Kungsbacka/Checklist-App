@@ -10,10 +10,19 @@
     "LeveransArbetstimmar": "55 timmar",
     "Kategori": "Utbildningsanalys",
     "KategoriTyp": "Avancerad",
-    "Prioritet": "Hög",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Ja",
     "AntagenJaNejMotivering": "Hog verksamhetsnytta och tydlig bestallning",
-    "Handlaggare": "Test1"
+    "Handlaggare": "Test1",
+    "Tabell": null,
+    "Wms": null,
+    "Fme": null,
+    "Redigering": null,
+    "Kopiering": false,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": true
   },
   {
     "Gid": 2,
@@ -26,10 +35,19 @@
     "LeveransArbetstimmar": "62 timmar",
     "Kategori": "Vardanalys",
     "KategoriTyp": "Komplex",
-    "Prioritet": "Hög",
+    "Prioritet": "H\u00F6g",
     "AntagenJaNej": "Ja",
     "AntagenJaNejMotivering": "Kopplad till strategiskt mal for vardtillganglighet",
-    "Handlaggare": "Test2"
+    "Handlaggare": "Test2",
+    "Tabell": null,
+    "Wms": null,
+    "Fme": null,
+    "Redigering": null,
+    "Kopiering": null,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": null
   },
   {
     "Gid": 3,
@@ -45,7 +63,16 @@
     "Prioritet": "Medel",
     "AntagenJaNej": "Ja",
     "AntagenJaNejMotivering": "Begransat scope och snabb leveransmojlighet",
-    "Handlaggare": "Test3"
+    "Handlaggare": "Test3",
+    "Tabell": null,
+    "Wms": null,
+    "Fme": null,
+    "Redigering": null,
+    "Kopiering": null,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": null
   },
   {
     "Gid": 4,
@@ -61,7 +88,16 @@
     "Prioritet": "Medel",
     "AntagenJaNej": "Ja",
     "AntagenJaNejMotivering": "Datatillgang och ansvarsfordelning ar tydlig",
-    "Handlaggare": "Test4"
+    "Handlaggare": "Test4",
+    "Tabell": null,
+    "Wms": null,
+    "Fme": null,
+    "Redigering": null,
+    "Kopiering": null,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": null
   },
   {
     "Gid": 5,
@@ -74,9 +110,18 @@
     "LeveransArbetstimmar": "47 timmar",
     "Kategori": "Energianalys",
     "KategoriTyp": "Standard",
-    "Prioritet": "Låg",
+    "Prioritet": "L\u00E5g",
     "AntagenJaNej": "Ja",
     "AntagenJaNejMotivering": "Bra forbattringspotential men ej akut",
-    "Handlaggare": "Test5"
+    "Handlaggare": "Test5",
+    "Tabell": null,
+    "Wms": null,
+    "Fme": null,
+    "Redigering": null,
+    "Kopiering": null,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": null
   }
 ]

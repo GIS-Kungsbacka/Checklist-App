@@ -23,4 +23,13 @@ export interface OrderSummary {
   antagenJaNej?: string;
   antagenJaNejMotivering?: string;
   handlaggare?: string;
+  tabell?: string;
+  wms?: string;
+  fme?: string;
+  redigering?: string;
+  kopiering?: boolean;
+  information?: string;
+  verksamhetsKritiskData?: string;
+  kommentar?: string;
+  levererad?: boolean;
 }
