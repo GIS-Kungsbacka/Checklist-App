@@ -10,6 +10,8 @@ public class AppDbContext : DbContext
   
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<OrderSummary> OrderSummaries => Set<OrderSummary>();
+    public DbSet<Metadata> Metadatas => Set<Metadata>();
+    public DbSet<ManagementPlan> ManagementPlans => Set<ManagementPlan>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

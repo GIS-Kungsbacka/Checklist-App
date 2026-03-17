@@ -195,134 +195,52 @@ public class ChecklistController : ControllerBase
 
 public class CreateChecklistDto
 {
-    [MaxLength(255)]
     public string? ArendenummerArtvise { get; set; }
-
-    [MaxLength(255)]
     public string? Dataunderlag { get; set; }
-
-    [MaxLength(255)]
     public string? Dataadministrator { get; set; }
-
-    [MaxLength(255)]
     public string? Malgrupper { get; set; }
-
-    [MaxLength(255)]
     public string? NyttjandeInterntExternt { get; set; }
-
-    [MaxLength(255)]
     public string? Leverans { get; set; }
-
-    [MaxLength(255)]
     public string? LeveransArbetstimmar { get; set; }
-
-    [MaxLength(255)]
     public string? Kategori { get; set; }
-
-    [MaxLength(255)]
     public string? KategoriTyp { get; set; }
-
-    [MaxLength(255)]
     public string? Prioritet { get; set; }
-
-    [MaxLength(255)]
     public string? AntagenJaNej { get; set; }
-
-    [MaxLength(255)]
     public string? AntagenJaNejMotivering { get; set; }
-
-    [MaxLength(255)]
     public string? Handlaggare { get; set; }
-
-    [MaxLength(255)]
     public string? Tabell { get; set; }
-
-    [MaxLength(255)]
     public string? Wms { get; set; }
-
-    [MaxLength(255)]
     public string? Fme { get; set; }
-
-    [MaxLength(255)]
     public string? Redigering { get; set; }
-
     public bool? Kopiering { get; set; }
-
-    [MaxLength(255)]
     public string? Information { get; set; }
-
-    [MaxLength(255)]
     public string? Kommentar { get; set; }
-
     public bool? Levererad { get; set; }
-
-    [MaxLength(255)]
     public string? VerksamhetskritiskData { get; set; }
 }
 
 public class UpdateChecklistDto
 {
-    [MaxLength(255)]
     public string? ArendenummerArtvise { get; set; }
-
-    [MaxLength(255)]
     public string? Dataunderlag { get; set; }
-
-    [MaxLength(255)]
     public string? Dataadministrator { get; set; }
-
-    [MaxLength(255)]
     public string? Malgrupper { get; set; }
-
-    [MaxLength(255)]
     public string? NyttjandeInterntExternt { get; set; }
-
-    [MaxLength(255)]
     public string? Leverans { get; set; }
-
-    [MaxLength(255)]
     public string? LeveransArbetstimmar { get; set; }
-
-    [MaxLength(255)]
     public string? Kategori { get; set; }
-
-    [MaxLength(255)]
     public string? KategoriTyp { get; set; }
-
-    [MaxLength(255)]
     public string? Prioritet { get; set; }
-
-    [MaxLength(255)]
     public string? AntagenJaNej { get; set; }
-
-    [MaxLength(255)]
     public string? AntagenJaNejMotivering { get; set; }
-
-    [MaxLength(255)]
     public string? Handlaggare { get; set; }
-
-    [MaxLength(255)]
     public string? Tabell { get; set; }
-
-    [MaxLength(255)]
     public string? Wms { get; set; }
-
-    [MaxLength(255)]
     public string? Fme { get; set; }
-
-    [MaxLength(255)]
     public string? Redigering { get; set; }
-
     public bool? Kopiering { get; set; }
-
-    [MaxLength(255)]
     public string? Information { get; set; }
-
-    [MaxLength(255)]
     public string? Kommentar { get; set; }
-
     public bool? Levererad { get; set; }
-
-    [MaxLength(255)]
     public string? VerksamhetskritiskData { get; set; }
 }

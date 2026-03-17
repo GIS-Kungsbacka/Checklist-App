@@ -51,6 +51,8 @@ else
     );
     builder.Services.AddScoped<IChecklistRepository, DbContextChecklistRepository>();
     builder.Services.AddScoped<IOrderSummaryRepository, DbContextOrderSummaryRepository>();
+    builder.Services.AddScoped<IManagementPlanRepository, DbContextManagementPlanRepository>();
+    builder.Services.AddScoped<IMetadataRepository, DbContextMetadataRepository>();
     Console.WriteLine("INFO: Using Postgres database for forms data");
 }
 

@@ -1,4 +1,4 @@
-﻿namespace FormApp.api.Models
+﻿namespace FormApp.Api.Models
 {
     public class Metadata
     {
