@@ -16,8 +16,8 @@ import {
   Tooltip,
 } from "@mui/material";
 import { ArrowBack, Download } from "@mui/icons-material";
-import { useOrderById } from "../hooks/useOrders";
-import type { OrderSummary } from "../types/orderSummary";
+import { useOrderById } from "../../hooks/useOrders";
+import type { OrderSummary } from "../../types/orderSummary";
 import jsPDF from "jspdf";
 import { getPrioritetChipColor } from "./orderSummary-data-grid";
 

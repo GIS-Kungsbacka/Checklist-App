@@ -47,7 +47,7 @@ import {
   ExportPrint,
 } from "@mui/x-data-grid";
 
-import { GRID_DEFAULT_LOCALE_TEXT } from "../../constants/sv";
+import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
@@ -64,8 +64,8 @@ import {
   FilterList,
 } from "@mui/icons-material";
 
-import { useOrders } from "../hooks/useOrders";
-import type { OrderSummary } from "../types/orderSummary";
+import { useOrders } from "../../hooks/useOrders";
+import type { OrderSummary } from "../../types/orderSummary";
 import { useNavigate } from "react-router-dom";
 
 type ViewMode = "cards" | "list";

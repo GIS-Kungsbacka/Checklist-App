@@ -36,18 +36,18 @@
     "Kategori": "Vardanalys",
     "KategoriTyp": "Komplex",
     "Prioritet": "H\u00F6g",
-    "AntagenJaNej": "Ja",
+    "AntagenJaNej": "nej",
     "AntagenJaNejMotivering": "Kopplad till strategiskt mal for vardtillganglighet",
     "Handlaggare": "Test2",
     "Tabell": null,
     "Wms": null,
     "Fme": null,
     "Redigering": null,
-    "Kopiering": null,
+    "Kopiering": false,
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": null
+    "Levererad": false
   },
   {
     "Gid": 3,

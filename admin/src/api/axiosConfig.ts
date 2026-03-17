@@ -38,11 +38,11 @@ api.interceptors.response.use(
       // Request was made but no response received
       throw new ApiError(
         "Ingen anslutning till servern. Kontrollera din internetanslutning.",
-        0,
+        0
       );
     } else {
       // Something else happened
       throw new ApiError(error.message || "Ett oväntat fel uppstod");
     }
-  },
+  }
 );

@@ -14,8 +14,8 @@ import {
   Stack,
 } from "@mui/material";
 import { Undo } from "@mui/icons-material";
-import { useChecklists, useUpdateChecklist } from "../hooks/useChecklist";
-import type { Checklist, UpdateChecklistDto } from "../types/checklist";
+import { useChecklists, useUpdateChecklist } from "../../hooks/useChecklist";
+import type { Checklist, UpdateChecklistDto } from "../../types/checklist";
 import { getPrioritetChipColor } from "./checklist-data-grid";
 
 export default function Avslutade() {

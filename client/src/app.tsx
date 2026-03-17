@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
-import FormView from "./pages/FormView";
-import OrderSummaryDataGrid from "./pages/orderSummary-data-grid";
+import FormView from "./pages/orderSummary/FormView";
+import OrderSummaryDataGrid from "./pages/orderSummary/orderSummary-data-grid";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { queryConfig } from "../lib/react-query";

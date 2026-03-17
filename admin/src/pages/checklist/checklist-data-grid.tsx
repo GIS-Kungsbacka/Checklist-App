@@ -45,7 +45,7 @@ import {
   type GridDensity,
 } from "@mui/x-data-grid";
 
-import { GRID_DEFAULT_LOCALE_TEXT } from "../../constants/sv";
+import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
@@ -62,10 +62,10 @@ import {
   useCreateChecklist,
   useUpdateChecklist,
   useDeleteChecklist,
-} from "../hooks/useChecklist";
-import { useOrderSummaries } from "../hooks/useOrderSummary";
-import type { Checklist, CreateChecklistDto } from "../types/checklist";
-import type { OrderSummary } from "../types/orderSummary";
+} from "../../hooks/useChecklist";
+import { useOrderSummaries } from "../../hooks/useOrderSummary";
+import type { Checklist, CreateChecklistDto } from "../../types/checklist";
+import type { OrderSummary } from "../../types/orderSummary";
 
 export const getPrioritetChipColor = (
   p: string | undefined
@@ -88,6 +88,25 @@ const KATEGORI_OPTIONS = [
 const KATEGORI_TYP_OPTIONS = ["ny", "förändring"] as const;
 const ANTAGEN_OPTIONS = ["ja", "nej"] as const;
 const COLUMN_VISIBILITY_STORAGE_KEY = "checklist-column-visibility";
+
+function normalizeAntagenJaNej(value: string | undefined): string {
+  const v = (value ?? "").trim();
+  if (!v) return "";
+  if (v.toLowerCase() === "ja") return "ja";
+  if (v.toLowerCase() === "nej") return "nej";
+  return v;
+}
+
+function addUnknownOption<T extends readonly string[]>(
+  options: T,
+  currentValue: string | undefined
+): string[] {
+  const v = (currentValue ?? "").trim();
+  if (!v) return [...options];
+  return options.includes(v as (typeof options)[number])
+    ? [...options]
+    : [v, ...options];
+}
 
 const defaultColumnVisibility = {
   gid: true,
@@ -452,7 +471,7 @@ export default function ChecklistGrid() {
       kategori: item.kategori ?? "",
       kategoriTyp: item.kategoriTyp ?? "",
       prioritet: item.prioritet ?? "",
-      antagenJaNej: item.antagenJaNej ?? "",
+      antagenJaNej: normalizeAntagenJaNej(item.antagenJaNej),
       antagenJaNejMotivering: item.antagenJaNejMotivering ?? "",
       handlaggare: item.handlaggare ?? "",
       tabell: item.tabell ?? "",
@@ -1228,109 +1247,141 @@ export default function ChecklistGrid() {
                     <Controller
                       name="prioritet"
                       control={editControl}
-                      render={({ field }) => (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-prioritet-label">
-                            Prioritet
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-prioritet-label"
-                            label="Prioritet"
-                            value={field.value ?? ""}
-                          >
-                            <MenuItem value="">
-                              <em>Välj prioritet</em>
-                            </MenuItem>
-                            {PRIORITET_OPTIONS.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
+                      render={({ field }) => {
+                        const options = addUnknownOption(
+                          PRIORITET_OPTIONS,
+                          field.value ?? openEdit?.prioritet
+                        );
+                        return (
+                          <FormControl fullWidth>
+                            <InputLabel id="edit-prioritet-label">
+                              Prioritet
+                            </InputLabel>
+                            <Select
+                              {...field}
+                              labelId="edit-prioritet-label"
+                              label="Prioritet"
+                              value={field.value ?? ""}
+                            >
+                              <MenuItem value="">
+                                <em>Välj prioritet</em>
                               </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
+                              {options.map((opt) => (
+                                <MenuItem key={opt} value={opt}>
+                                  {opt}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        );
+                      }}
                     />
                   ) : key === "kategori" ? (
                     <Controller
                       name="kategori"
                       control={editControl}
-                      render={({ field }) => (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-kategori-label">
-                            Kategori
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-kategori-label"
-                            label="Kategori"
-                            value={field.value ?? ""}
-                          >
-                            <MenuItem value="">
-                              <em>Välj kategori</em>
-                            </MenuItem>
-                            {KATEGORI_OPTIONS.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
+                      render={({ field }) => {
+                        const options = addUnknownOption(
+                          KATEGORI_OPTIONS,
+                          field.value ?? openEdit?.kategori
+                        );
+                        return (
+                          <FormControl fullWidth>
+                            <InputLabel id="edit-kategori-label">
+                              Kategori
+                            </InputLabel>
+                            <Select
+                              {...field}
+                              labelId="edit-kategori-label"
+                              label="Kategori"
+                              value={field.value ?? ""}
+                            >
+                              <MenuItem value="">
+                                <em>Välj kategori</em>
                               </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
+                              {options.map((opt) => (
+                                <MenuItem key={opt} value={opt}>
+                                  {opt}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        );
+                      }}
                     />
                   ) : key === "kategoriTyp" ? (
                     <Controller
                       name="kategoriTyp"
                       control={editControl}
-                      render={({ field }) => (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-kategoriTyp-label">
-                            Kategori typ
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-kategoriTyp-label"
-                            label="Kategori typ"
-                            value={field.value ?? ""}
-                          >
-                            <MenuItem value="">
-                              <em>Välj kategori typ</em>
-                            </MenuItem>
-                            {KATEGORI_TYP_OPTIONS.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
+                      render={({ field }) => {
+                        const options = addUnknownOption(
+                          KATEGORI_TYP_OPTIONS,
+                          field.value ?? openEdit?.kategoriTyp
+                        );
+                        return (
+                          <FormControl fullWidth>
+                            <InputLabel id="edit-kategoriTyp-label">
+                              Kategori typ
+                            </InputLabel>
+                            <Select
+                              {...field}
+                              labelId="edit-kategoriTyp-label"
+                              label="Kategori typ"
+                              value={field.value ?? ""}
+                            >
+                              <MenuItem value="">
+                                <em>Välj kategori typ</em>
                               </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
+                              {options.map((opt) => (
+                                <MenuItem key={opt} value={opt}>
+                                  {opt}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        );
+                      }}
                     />
                   ) : key === "antagenJaNej" ? (
                     <Controller
                       name="antagenJaNej"
                       control={editControl}
-                      render={({ field }) => (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-antagenJaNej-label">
-                            Antagen
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-antagenJaNej-label"
-                            label="Antagen"
-                            value={field.value ?? ""}
-                          >
-                            <MenuItem value="">
-                              <em>Välj</em>
-                            </MenuItem>
-                            {ANTAGEN_OPTIONS.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
+                      render={({ field }) => {
+                        const normalizedValue = normalizeAntagenJaNej(
+                          field.value ?? openEdit?.antagenJaNej
+                        );
+                        const options = addUnknownOption(
+                          ANTAGEN_OPTIONS,
+                          normalizedValue
+                        );
+                        return (
+                          <FormControl fullWidth>
+                            <InputLabel id="edit-antagenJaNej-label">
+                              Antagen
+                            </InputLabel>
+                            <Select
+                              {...field}
+                              labelId="edit-antagenJaNej-label"
+                              label="Antagen"
+                              value={normalizedValue}
+                              onChange={(e) =>
+                                field.onChange(
+                                  normalizeAntagenJaNej(String(e.target.value))
+                                )
+                              }
+                            >
+                              <MenuItem value="">
+                                <em>Välj</em>
                               </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
+                              {options.map((opt) => (
+                                <MenuItem key={opt} value={opt}>
+                                  {opt}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        );
+                      }}
                     />
                   ) : key === "arendenummerArtvise" ? (
                     <Controller
