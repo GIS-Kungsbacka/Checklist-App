@@ -757,7 +757,7 @@ export default function ChecklistGrid() {
   const rows = items.map((item) => ({ ...item, id: item.gid }));
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
+    <Container maxWidth="xl" sx={{ mt: { xs: 1, md: 4 }, mb: 6 }}>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -767,10 +767,7 @@ export default function ChecklistGrid() {
         gap={2}
       >
         <Box>
-          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-            Checklista
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
             Sök, filtrera, visa/dölj kolumner, exportera listan och hantera
             poster.
           </Typography>
@@ -812,7 +809,7 @@ export default function ChecklistGrid() {
       <Paper
         elevation={0}
         sx={{
-          height: 560,
+          height: { xs: 300, md: 400, lg: 500, xl: 700 },
           width: "100%",
           borderRadius: 3,
           border: "1px solid",
@@ -858,7 +855,7 @@ export default function ChecklistGrid() {
             border: 0,
 
             "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "grey.100",
+              backgroundColor: "background.paper",
               borderBottom: "1px solid",
               borderColor: "divider",
             },

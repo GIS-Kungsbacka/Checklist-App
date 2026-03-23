@@ -22,7 +22,7 @@ export default function Footer() {
       sx={{
         mt: "auto",
         py: 3,
-        backgroundColor: "grey.100",
+        backgroundColor: "background.paper",
         borderTop: 1,
         borderColor: "divider",
       }}

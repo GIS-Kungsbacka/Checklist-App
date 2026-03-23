@@ -1267,7 +1267,7 @@ export default function OrderSummaryDataGrid() {
               border: 0,
 
               "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: "grey.100",
+                backgroundColor: "background.paper",
                 borderBottom: "1px solid",
                 borderColor: "divider",
               },

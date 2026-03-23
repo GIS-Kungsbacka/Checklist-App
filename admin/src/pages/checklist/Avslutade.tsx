@@ -12,21 +12,43 @@ import {
   Alert,
   Chip,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
 } from "@mui/material";
 import { Undo } from "@mui/icons-material";
 import { useChecklists, useUpdateChecklist } from "../../hooks/useChecklist";
 import type { Checklist, UpdateChecklistDto } from "../../types/checklist";
 import { getPrioritetChipColor } from "./checklist-data-grid";
+import { useNavigate } from "react-router-dom";
 
 export default function Avslutade() {
   const { data: allItems = [], isLoading, isError } = useChecklists();
   const updateMutation = useUpdateChecklist();
+  const navigate = useNavigate();
 
   // Filter items where levererad is true
   const items = React.useMemo(
-    () => allItems.filter((item) => item.levererad === true),
+    () =>
+      allItems
+        .filter((item) => item.levererad === true)
+        .sort((a, b) => a.gid - b.gid),
     [allItems]
   );
+
+  const pageSize = 10;
+  const [page, setPage] = React.useState(0);
+  React.useEffect(() => setPage(0), [items.length]);
+  const pagedItems = items.slice(page * pageSize, page * pageSize + pageSize);
+  const showTable = true;
+
+  const handleView = (item: Checklist) => {
+    navigate(`/avslutade/${item.gid}`);
+  };
 
   const handleUndo = (item: Checklist) => {
     // Restore full item data with levererad changed to false
@@ -94,12 +116,9 @@ export default function Avslutade() {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
+    <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
       <Box mb={3}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Avslutade
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body2" fontWeight={600}>
           Poster med levererad markerad. Klicka på ångra för att flytta tillbaka
           till checklistan.
         </Typography>
@@ -117,13 +136,83 @@ export default function Avslutade() {
             Inga avslutade poster.
           </Typography>
         </Paper>
+      ) : showTable ? (
+        <Paper elevation={2}>
+          <TableContainer>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 600 }}>GID</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Ärendenummer</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Prioritet</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Data</TableCell>
+                  <TableCell sx={{ fontWeight: 600, width: 140 }}>
+                    Åtgärder
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {pagedItems.map((item) => (
+                  <TableRow
+                    key={item.gid}
+                    hover
+                    onClick={() => handleView(item)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <TableCell>{item.gid}</TableCell>
+                    <TableCell>{item.arendenummerArtvise ?? "-"}</TableCell>
+                    <TableCell>
+                      {item.prioritet ? (
+                        <Chip
+                          label={item.prioritet}
+                          size="small"
+                          color={getPrioritetChipColor(item.prioritet)}
+                          variant="filled"
+                        />
+                      ) : (
+                        "-"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {item.dataadministrator ?? "-"}
+                      {item.kategori ? ` • ${item.kategori}` : ""}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        startIcon={<Undo />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUndo(item);
+                        }}
+                        disabled={updateMutation.isPending}
+                      >
+                        Ångra
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={items.length}
+            page={page}
+            onPageChange={(_e, nextPage) => setPage(nextPage)}
+            rowsPerPage={pageSize}
+            rowsPerPageOptions={[pageSize]}
+          />
+        </Paper>
       ) : (
         <Paper elevation={2}>
           <List>
             {items.map((item, index) => (
               <React.Fragment key={item.gid}>
                 <ListItem
+                  onClick={() => handleView(item)}
                   sx={{
+                    cursor: "pointer",
                     flexDirection: "column",
                     alignItems: "flex-start",
                     py: 2,
@@ -163,7 +252,7 @@ export default function Avslutade() {
                         )}
                       </Stack>
                       <ListItemText
-                        primary={item.arendenummerArtvise || `GID: ${item.gid}`}
+                        primary=""
                         secondary={
                           <Box component="span">
                             {item.dataadministrator && (
@@ -182,7 +271,10 @@ export default function Avslutade() {
                     <Button
                       variant="outlined"
                       startIcon={<Undo />}
-                      onClick={() => handleUndo(item)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUndo(item);
+                      }}
                       disabled={updateMutation.isPending}
                       sx={{ ml: 2 }}
                     >

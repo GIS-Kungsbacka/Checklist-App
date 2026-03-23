@@ -20,6 +20,7 @@ import { useOrderById } from "../../hooks/useOrders";
 import type { OrderSummary } from "../../types/orderSummary";
 import jsPDF from "jspdf";
 import { getPrioritetChipColor } from "./orderSummary-data-grid";
+import { useAuth } from "../../hooks/useAuth";
 
 const fieldLabels: Record<string, string> = {
   arendenummerArtvise: "Ärendenummer",
@@ -169,6 +170,7 @@ export default function FormView() {
 
   const orderId = id ? id : "";
   const { data: item, isLoading, error } = useOrderById(orderId);
+  const { isAdmin } = useAuth();
 
   if (isLoading) {
     return (
@@ -196,13 +198,15 @@ export default function FormView() {
               ? error.message
               : "Kunde inte ladda beställningsspecifikationen. Försök igen senare."}
           </Alert>
-          <Button
-            startIcon={<ArrowBack />}
-            onClick={() => navigate("/")}
-            sx={{ mt: 2 }}
-          >
-            Tillbaka till listan
-          </Button>
+          {isAdmin && (
+            <Button
+              startIcon={<ArrowBack />}
+              onClick={() => navigate("/")}
+              sx={{ mt: 2 }}
+            >
+              Tillbaka till listan
+            </Button>
+          )}
         </Box>
       </Container>
     );
@@ -215,13 +219,15 @@ export default function FormView() {
           <Alert severity="info">
             Beställningsspecifikationen hittades inte.
           </Alert>
-          <Button
-            startIcon={<ArrowBack />}
-            onClick={() => navigate("/")}
-            sx={{ mt: 2 }}
-          >
-            Tillbaka till listan
-          </Button>
+          {isAdmin && (
+            <Button
+              startIcon={<ArrowBack />}
+              onClick={() => navigate("/")}
+              sx={{ mt: 2 }}
+            >
+              Tillbaka till listan
+            </Button>
+          )}
         </Box>
       </Container>
     );
@@ -278,14 +284,15 @@ export default function FormView() {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Button
-        startIcon={<ArrowBack />}
-        onClick={() => navigate("/")}
-        sx={{ mb: 3 }}
-      >
-        Tillbaka till listan
-      </Button>
-
+      {isAdmin && (
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => navigate("/")}
+          sx={{ mb: 3 }}
+        >
+          Tillbaka till listan
+        </Button>
+      )}
       <Card elevation={3}>
         <CardContent sx={{ p: 4 }}>
           <Box
