@@ -6,6 +6,8 @@ import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
 import ChecklistGrid from "./pages/checklist/checklist-data-grid";
 import Idebanken from "./pages/checklist/Idebanken";
 import Avslutade from "./pages/checklist/Avslutade";
+import MetadataPage from "./pages/metadata";
+import ManagementPlanPage from "./pages/management-plan";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import ChecklistItemViewer from "./pages/checklist/ChecklistItemViewer";
@@ -152,6 +154,22 @@ function AppContent() {
                 element={
                   <ProtectedRoute>
                     <ChecklistItemViewer />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/metadata"
+                element={
+                  <ProtectedRoute>
+                    <MetadataPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/management-plan"
+                element={
+                  <ProtectedRoute>
+                    <ManagementPlanPage />
                   </ProtectedRoute>
                 }
               />

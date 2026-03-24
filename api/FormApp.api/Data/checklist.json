@@ -22,7 +22,7 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": true
+    "Levererad": false
   },
   {
     "Gid": 2,
@@ -61,18 +61,18 @@
     "Kategori": "Driftuppfoljning",
     "KategoriTyp": "Standard",
     "Prioritet": "Medel",
-    "AntagenJaNej": "Ja",
+    "AntagenJaNej": "ja",
     "AntagenJaNejMotivering": "Begransat scope och snabb leveransmojlighet",
     "Handlaggare": "Test3",
     "Tabell": null,
     "Wms": null,
     "Fme": null,
     "Redigering": null,
-    "Kopiering": null,
+    "Kopiering": false,
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": null
+    "Levererad": true
   },
   {
     "Gid": 4,
@@ -111,17 +111,17 @@
     "Kategori": "Energianalys",
     "KategoriTyp": "Standard",
     "Prioritet": "L\u00E5g",
-    "AntagenJaNej": "Ja",
+    "AntagenJaNej": "nej",
     "AntagenJaNejMotivering": "Bra forbattringspotential men ej akut",
     "Handlaggare": "Test5",
     "Tabell": null,
     "Wms": null,
     "Fme": null,
     "Redigering": null,
-    "Kopiering": null,
+    "Kopiering": false,
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": null
+    "Levererad": false
   }
 ]

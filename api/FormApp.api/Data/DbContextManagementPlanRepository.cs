@@ -1,4 +1,5 @@
 using FormApp.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FormApp.Api.Data;
 
@@ -9,6 +10,18 @@ public class DbContextManagementPlanRepository : IManagementPlanRepository
     public DbContextManagementPlanRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<IEnumerable<ManagementPlan>> GetAllAsync()
+    {
+        return await _context.ManagementPlans
+            .OrderBy(x => x.Gid)
+            .ToListAsync();
+    }
+
+    public async Task<ManagementPlan?> GetByIdAsync(int gid)
+    {
+        return await _context.ManagementPlans.FindAsync(gid);
     }
 
     public async Task<ManagementPlan> CreateAsync(ManagementPlan item)

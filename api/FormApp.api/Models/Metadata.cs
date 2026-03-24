@@ -10,7 +10,7 @@
         public string? SakerhetsKlass { get; set; }
         public string? DataKallaTyp { get; set; }
         public string? Schema { get; set; }
-        public string? Name { get; set; }
+        public string? Namn { get; set; }
         public string? Beskrivning { get; set; }
         public string? Syfte { get; set; }
         public string[]? Datakalla { get; set; }

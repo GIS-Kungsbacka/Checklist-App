@@ -168,7 +168,7 @@ public class AppDbContext : DbContext
 
         // Configure Metadata entity
         modelBuilder.Entity<Metadata>()
-            .ToTable("metadata", "idebank")
+            .ToTable("etjanst_metadataklassifikation", "metadata")
             .HasKey(x => x.Gid);
         modelBuilder.Entity<Metadata>()
             .Property(x => x.Gid).HasColumnName("gid");
@@ -187,7 +187,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Metadata>()
             .Property(x => x.Schema).HasColumnName("schema");
         modelBuilder.Entity<Metadata>()
-            .Property(x => x.Name).HasColumnName("name");
+            .Property(x => x.Namn).HasColumnName("namn");
         modelBuilder.Entity<Metadata>()
             .Property(x => x.Beskrivning).HasColumnName("beskrivning");
         modelBuilder.Entity<Metadata>()
@@ -237,12 +237,12 @@ public class AppDbContext : DbContext
 
         // Configure ManagementPlan entity
         modelBuilder.Entity<ManagementPlan>()
-            .ToTable("forvaltningsplan", "idebank")
+            .ToTable("etjanst_forvaltningsplan", "metadata")
             .HasKey(x => x.Gid);
         modelBuilder.Entity<ManagementPlan>()
             .Property(x => x.Gid).HasColumnName("gid");
         modelBuilder.Entity<ManagementPlan>()
-            .Property(x => x.ArendeNummer).HasColumnName("arende_nummer");
+            .Property(x => x.ArendeNummer).HasColumnName("arendenummer");
         modelBuilder.Entity<ManagementPlan>()
             .Property(x => x.BestallareNamn).HasColumnName("bestallare_namn");
         modelBuilder.Entity<ManagementPlan>()

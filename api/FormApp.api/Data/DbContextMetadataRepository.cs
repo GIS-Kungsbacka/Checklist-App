@@ -1,4 +1,5 @@
 using FormApp.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FormApp.Api.Data;
 
@@ -9,6 +10,18 @@ public class DbContextMetadataRepository : IMetadataRepository
     public DbContextMetadataRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public async Task<IEnumerable<Metadata>> GetAllAsync()
+    {
+        return await _context.Metadatas
+            .OrderBy(x => x.Gid)
+            .ToListAsync();
+    }
+
+    public async Task<Metadata?> GetByIdAsync(int gid)
+    {
+        return await _context.Metadatas.FindAsync(gid);
     }
 
     public async Task<Metadata> CreateAsync(Metadata item)
@@ -33,7 +46,7 @@ public class DbContextMetadataRepository : IMetadataRepository
         existing.SakerhetsKlass = item.SakerhetsKlass;
         existing.DataKallaTyp = item.DataKallaTyp;
         existing.Schema = item.Schema;
-        existing.Name = item.Name;
+        existing.Namn = item.Namn;
         existing.Beskrivning = item.Beskrivning;
         existing.Syfte = item.Syfte;
         existing.Datakalla = item.Datakalla;

@@ -101,7 +101,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
           <List component="nav" disablePadding>
             <ListItemButton onClick={handleToggleChecklistor}>
               <ListItemText
-                primary="Checklistor"
+                primary="Checklista"
                 slotProps={{ primary: { fontWeight: 600 } }}
               />
               {openChecklistor ? <ExpandLess /> : <ExpandMore />}
@@ -208,6 +208,9 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
             <Collapse in={openMetadatakatalog} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ px: 1, pt: 1 }}>
                 <ListItemButton
+                  component={Link}
+                  to="/metadata"
+                  selected={location.pathname === "/metadata"}
                   sx={{
                     pl: 4,
                     mb: 1,
@@ -221,7 +224,15 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                     },
                   }}
                 >
-                  <ListItemText primary="listan" />
+                  <ListItemText
+                    primary="Översikt (datagrid)"
+                    slotProps={{
+                      primary: {
+                        fontWeight:
+                          location.pathname === "/metadata" ? 700 : 400,
+                      },
+                    }}
+                  />
                 </ListItemButton>
               </List>
             </Collapse>
@@ -236,6 +247,9 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
             <Collapse in={openForvaltningsplan} timeout="auto" unmountOnExit>
               <List component="div" disablePadding sx={{ px: 1, pt: 1 }}>
                 <ListItemButton
+                  component={Link}
+                  to="/management-plan"
+                  selected={location.pathname === "/management-plan"}
                   sx={{
                     pl: 4,
                     mb: 1,
@@ -249,7 +263,15 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                     },
                   }}
                 >
-                  <ListItemText primary="listan" />
+                  <ListItemText
+                    primary="Översikt (datagrid)"
+                    slotProps={{
+                      primary: {
+                        fontWeight:
+                          location.pathname === "/management-plan" ? 700 : 400,
+                      },
+                    }}
+                  />
                 </ListItemButton>
               </List>
             </Collapse>
