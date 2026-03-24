@@ -903,6 +903,16 @@ export default function ChecklistGrid() {
       >
         <form onSubmit={handleCreateSubmit(handleCreate)}>
           <DialogTitle>Skapa ny post</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2">
+              Värdet 'Ja' i fältet 'Antagen' skickar automatiskt objektet till
+              idebanken.
+            </Typography>
+            <Typography variant="body2">
+              Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt
+              objektet till Avslutad.
+            </Typography>
+          </DialogContent>
           <Divider />
           <DialogContent sx={{ pt: 3 }}>
             {!!orderSummaryError && (
@@ -1209,6 +1219,16 @@ export default function ChecklistGrid() {
           <DialogTitle>
             Redigera GID {openEdit?.gid} - ({openEdit?.arendenummerArtvise})
           </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2">
+              Värdet 'Ja' i fältet 'Antagen' skickar automatiskt objektet till
+              idebanken.
+            </Typography>
+            <Typography variant="body2">
+              Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt
+              objektet till Avslutad.
+            </Typography>
+          </DialogContent>
           <Divider />
           <DialogContent sx={{ pt: 3 }}>
             <Grid container spacing={2}>
@@ -1569,7 +1589,6 @@ export default function ChecklistGrid() {
             {deleteConfirm?.arendenummerArtvise ? (
               <> (ärendenummer: {deleteConfirm.arendenummerArtvise})</>
             ) : null}
-            ?
           </Typography>
         </DialogContent>
         <Divider />

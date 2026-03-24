@@ -64,7 +64,7 @@ export default function Footer() {
         </Box>
       </Container>
       <Dialog open={openInfo} onClose={() => setOpenInfo(false)}>
-        <DialogTitle>Information</DialogTitle>
+        <DialogTitle>Information (under utveckling)</DialogTitle>
         <DialogContent>
           <Typography>
             Här kan du läsa mer om våra tjänster och våra verktyg.
@@ -76,15 +76,17 @@ export default function Footer() {
       </Dialog>
 
       <Dialog open={openContact} onClose={() => setOpenContact(false)}>
-        <DialogTitle>Kontakt</DialogTitle>
+        <DialogTitle>Kontakt (under utveckling)</DialogTitle>
         <DialogContent>
           <Typography>Behöver du hjälp?</Typography>
           <Typography>
             Skicka in ett ärende till oss:{" "}
-            <a href="https://example.com">https://artvise-testlänk.com</a>
+            <a href="https://example.com">Artvise</a>
           </Typography>
           <br />
-          <Typography>E-mail: contact@example.com</Typography>
+          <Typography>
+            E-mail: <a href="mailto:contact@example.com">contact@example.com</a>
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenContact(false)}>Stäng</Button>

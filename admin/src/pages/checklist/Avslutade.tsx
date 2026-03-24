@@ -19,6 +19,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TextField,
 } from "@mui/material";
 import { Undo } from "@mui/icons-material";
 import { useChecklists, useUpdateChecklist } from "../../hooks/useChecklist";
@@ -41,9 +42,28 @@ export default function Avslutade() {
   );
 
   const pageSize = 10;
+  const [search, setSearch] = React.useState("");
+  const filteredItems = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((item) =>
+      [
+        String(item.gid),
+        item.arendenummerArtvise,
+        item.prioritet,
+        item.dataadministrator,
+        item.kategori,
+      ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(q))
+    );
+  }, [items, search]);
   const [page, setPage] = React.useState(0);
-  React.useEffect(() => setPage(0), [items.length]);
-  const pagedItems = items.slice(page * pageSize, page * pageSize + pageSize);
+  React.useEffect(() => setPage(0), [filteredItems.length, search]);
+  const pagedItems = filteredItems.slice(
+    page * pageSize,
+    page * pageSize + pageSize
+  );
   const showTable = true;
 
   const handleView = (item: Checklist) => {
@@ -123,6 +143,15 @@ export default function Avslutade() {
           till checklistan.
         </Typography>
       </Box>
+      <Box display="flex" justifyContent="flex-end" mb={2}>
+        <TextField
+          size="small"
+          placeholder="Sök i tabellen..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          sx={{ width: { xs: "100%", sm: 300 } }}
+        />
+      </Box>
 
       {updateMutation.isError && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -130,10 +159,10 @@ export default function Avslutade() {
         </Alert>
       )}
 
-      {items.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <Paper elevation={2} sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary">
-            Inga avslutade poster.
+            Inga poster matchar din sökning.
           </Typography>
         </Paper>
       ) : showTable ? (
@@ -197,7 +226,7 @@ export default function Avslutade() {
           </TableContainer>
           <TablePagination
             component="div"
-            count={items.length}
+            count={filteredItems.length}
             page={page}
             onPageChange={(_e, nextPage) => setPage(nextPage)}
             rowsPerPage={pageSize}

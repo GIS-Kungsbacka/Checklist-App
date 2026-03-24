@@ -10,18 +10,39 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControlLabel,
+  ListItemText,
+  Menu,
+  MenuItem,
   Paper,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import {
+  ColumnsPanelTrigger,
   DataGrid,
+  ExportCsv,
+  ExportPrint,
+  FilterPanelTrigger,
   GridActionsCellItem,
+  type GridDensity,
   type GridColDef,
+  type GridRenderCellParams,
+  QuickFilter,
+  QuickFilterClear,
+  QuickFilterControl,
+  Toolbar,
+  ToolbarButton,
 } from "@mui/x-data-grid";
+import CancelIcon from "@mui/icons-material/Cancel";
+import DensityMediumOutlinedIcon from "@mui/icons-material/DensityMediumOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
+import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
   useMetadatas,
@@ -40,6 +61,198 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
+const COLUMN_VISIBILITY_STORAGE_KEY = "metadata-column-visibility";
+const defaultColumnVisibility = {
+  gid: true,
+  namn: true,
+  arendeNummer: true,
+  bestallareNamn: true,
+  bestallareEpost: false,
+  sakerhetsKlassDokument: false,
+  sakerhetsKlass: false,
+  dataKallaTyp: false,
+  schema: false,
+  beskrivning: false,
+  syfte: false,
+  datakalla: false,
+  metod: false,
+  projekt: false,
+  geografiskBegransning: false,
+  uppdateringsFrekvens: false,
+  fullstandighet: false,
+  skalnivå: false,
+  nyckelOrd: false,
+  kategori: true,
+  tidsperiod: false,
+  tidsperiodStartdatum: false,
+  tidsperiodSlutdatum: false,
+  tidsUpplosning: false,
+  skapelseDatum: false,
+  anvandarBegransningLicens: false,
+  anvandarBegransningLicensText: false,
+  relateradeResurser: false,
+  status: true,
+  handlaggare: true,
+  metaDataVersion: false,
+  skapadTidPunkt: false,
+  actions: true,
+};
+
+const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
+  props,
+  _ref
+) {
+  return (
+    <Tooltip title="Kolumner">
+      <ToolbarButton aria-label="Columns" {...props}>
+        <ViewColumnOutlinedIcon fontSize="small" />
+      </ToolbarButton>
+    </Tooltip>
+  );
+});
+
+function GridToolbar({
+  density,
+  onDensityChange,
+}: {
+  density: GridDensity;
+  onDensityChange: (d: GridDensity) => void;
+}) {
+  const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
+  const exportOpen = Boolean(exportAnchor);
+  const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
+  const densityOpen = Boolean(densityAnchor);
+
+  return (
+    <Toolbar aria-label="Grid toolbar">
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 0.5,
+          px: 1.5,
+          py: 1,
+          minHeight: 52,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Tooltip title="Täthet">
+          <ToolbarButton
+            aria-label="Density"
+            onClick={(e) => setDensityAnchor(e.currentTarget)}
+          >
+            <DensityMediumOutlinedIcon fontSize="small" />
+          </ToolbarButton>
+        </Tooltip>
+        <Menu
+          anchorEl={densityAnchor}
+          open={densityOpen}
+          onClose={() => setDensityAnchor(null)}
+        >
+          {(["compact", "standard", "comfortable"] as GridDensity[]).map(
+            (d) => (
+              <MenuItem
+                key={d}
+                selected={density === d}
+                onClick={() => {
+                  onDensityChange(d);
+                  setDensityAnchor(null);
+                }}
+              >
+                <ListItemText
+                  primary={
+                    d === "compact"
+                      ? "Kompakt"
+                      : d === "standard"
+                      ? "Standard"
+                      : "Komfortabelt"
+                  }
+                />
+              </MenuItem>
+            )
+          )}
+        </Menu>
+
+        <ColumnsPanelTrigger render={<ColumnsToolbarButton />} />
+        <FilterPanelTrigger
+          render={(props) => (
+            <Tooltip title="Filtrera">
+              <ToolbarButton aria-label="Filter" {...props}>
+                <FilterAltOutlinedIcon fontSize="small" />
+              </ToolbarButton>
+            </Tooltip>
+          )}
+        />
+
+        <Tooltip title="Exportera">
+          <ToolbarButton
+            aria-label="Export"
+            onClick={(e) => setExportAnchor(e.currentTarget)}
+          >
+            <DownloadOutlinedIcon fontSize="small" />
+          </ToolbarButton>
+        </Tooltip>
+        <Menu
+          anchorEl={exportAnchor}
+          open={exportOpen}
+          onClose={() => setExportAnchor(null)}
+        >
+          <MenuItem onClick={() => setExportAnchor(null)}>
+            <ExportCsv
+              options={{ utf8WithBom: true, fileName: "Metadata" }}
+              render={(props) => (
+                <Box component="button" type="button" onClick={props.onClick}>
+                  <ListItemText primary="Exportera till CSV" />
+                </Box>
+              )}
+            />
+          </MenuItem>
+          <MenuItem onClick={() => setExportAnchor(null)}>
+            <ExportPrint
+              render={(props) => (
+                <Box component="button" type="button" onClick={props.onClick}>
+                  <ListItemText primary="Skriv ut" />
+                </Box>
+              )}
+            />
+          </MenuItem>
+        </Menu>
+
+        <QuickFilter defaultExpanded={false}>
+          <Box
+            sx={{ ml: 1, display: "flex", alignItems: "center", width: 260 }}
+          >
+            <QuickFilterControl
+              render={({ ref, ...props }) => (
+                <TextField
+                  {...props}
+                  inputRef={ref}
+                  aria-label="Search"
+                  placeholder="Sök..."
+                  size="small"
+                  sx={{
+                    width: 1,
+                    "& .MuiInputBase-root": { height: 34, fontSize: 13 },
+                  }}
+                />
+              )}
+            />
+            <QuickFilterClear edge="end" size="small" aria-label="Clear search">
+              <CancelIcon fontSize="small" />
+            </QuickFilterClear>
+          </Box>
+        </QuickFilter>
+      </Box>
+    </Toolbar>
+  );
+}
 
 type MetadataFormState = {
   sakerhetsKlassDokument: string;
@@ -187,6 +400,26 @@ export default function MetadataPage() {
   const [openEdit, setOpenEdit] = React.useState<Metadata | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<Metadata | null>(null);
   const [form, setForm] = React.useState<MetadataFormState>(emptyForm);
+  const [density, setDensity] = React.useState<GridDensity>("standard");
+  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
+    () => {
+      try {
+        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : defaultColumnVisibility;
+      } catch {
+        return defaultColumnVisibility;
+      }
+    }
+  );
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(
+        COLUMN_VISIBILITY_STORAGE_KEY,
+        JSON.stringify(columnVisibilityModel)
+      );
+    } catch {}
+  }, [columnVisibilityModel]);
 
   const rows = React.useMemo(
     () =>
@@ -197,7 +430,14 @@ export default function MetadataPage() {
   );
 
   const columns: GridColDef<Metadata>[] = [
-    { field: "gid", headerName: "GID", width: 90 },
+    {
+      field: "gid",
+      headerName: "GID",
+      width: 90,
+      renderCell: (params: GridRenderCellParams) => (
+        <Box sx={{ pl: 2 }}>{params.value}</Box>
+      ),
+    },
     { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
     {
       field: "arendeNummer",
@@ -205,9 +445,151 @@ export default function MetadataPage() {
       minWidth: 150,
       flex: 1,
     },
+    {
+      field: "bestallareNamn",
+      headerName: "Beställare namn",
+      minWidth: 160,
+      flex: 1,
+    },
+    {
+      field: "bestallareEpost",
+      headerName: "Beställare e-post",
+      minWidth: 180,
+      flex: 1,
+    },
+    {
+      field: "sakerhetsKlassDokument",
+      headerName: "Säkerhetsklass dokument",
+      minWidth: 190,
+      flex: 1,
+    },
+    {
+      field: "sakerhetsKlass",
+      headerName: "Säkerhetsklass",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "dataKallaTyp",
+      headerName: "Datakälla typ",
+      minWidth: 150,
+      flex: 1,
+    },
+    { field: "schema", headerName: "Schema", minWidth: 140, flex: 0.8 },
+    {
+      field: "beskrivning",
+      headerName: "Beskrivning",
+      minWidth: 200,
+      flex: 1.2,
+    },
+    { field: "syfte", headerName: "Syfte", minWidth: 200, flex: 1.2 },
+    {
+      field: "datakalla",
+      headerName: "Datakälla",
+      minWidth: 180,
+      flex: 1,
+      valueGetter: (_value, row) => row.datakalla?.join(", ") ?? "-",
+    },
+    { field: "metod", headerName: "Metod", minWidth: 140, flex: 0.9 },
+    { field: "projekt", headerName: "Projekt", minWidth: 140, flex: 0.9 },
+    {
+      field: "geografiskBegransning",
+      headerName: "Geografisk begränsning",
+      minWidth: 220,
+      flex: 1,
+      valueGetter: (_value, row) =>
+        row.geografiskBegransning?.join(", ") ?? "-",
+    },
+    {
+      field: "uppdateringsFrekvens",
+      headerName: "Uppdateringsfrekvens",
+      minWidth: 180,
+      flex: 1,
+    },
+    {
+      field: "fullstandighet",
+      headerName: "Fullständighet",
+      minWidth: 150,
+      flex: 1,
+    },
+    { field: "skalnivå", headerName: "Skalnivå", minWidth: 140, flex: 0.8 },
+    {
+      field: "nyckelOrd",
+      headerName: "Nyckelord",
+      minWidth: 180,
+      flex: 1,
+      valueGetter: (_value, row) => row.nyckelOrd?.join(", ") ?? "-",
+    },
     { field: "kategori", headerName: "Kategori", minWidth: 140, flex: 0.9 },
+    {
+      field: "tidsperiod",
+      headerName: "Tidsperiod",
+      minWidth: 120,
+      flex: 0.7,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "tidsperiodStartdatum",
+      headerName: "Tidsperiod start",
+      minWidth: 150,
+      flex: 0.9,
+    },
+    {
+      field: "tidsperiodSlutdatum",
+      headerName: "Tidsperiod slut",
+      minWidth: 150,
+      flex: 0.9,
+    },
+    {
+      field: "tidsUpplosning",
+      headerName: "Tidsupplösning",
+      minWidth: 140,
+      flex: 0.9,
+    },
+    {
+      field: "skapelseDatum",
+      headerName: "Skapelsedatum",
+      minWidth: 140,
+      flex: 0.9,
+    },
+    {
+      field: "anvandarBegransningLicens",
+      headerName: "Användarbegränsning licens",
+      minWidth: 190,
+      flex: 1,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "anvandarBegransningLicensText",
+      headerName: "Licenstext",
+      minWidth: 180,
+      flex: 1.1,
+    },
+    {
+      field: "relateradeResurser",
+      headerName: "Relaterade resurser",
+      minWidth: 200,
+      flex: 1,
+      valueGetter: (_value, row) => row.relateradeResurser?.join(", ") ?? "-",
+    },
     { field: "status", headerName: "Status", minWidth: 140, flex: 0.9 },
     { field: "handlaggare", headerName: "Handläggare", minWidth: 150, flex: 1 },
+    {
+      field: "metaDataVersion",
+      headerName: "Metadata version",
+      minWidth: 150,
+      flex: 0.9,
+    },
+    {
+      field: "skapadTidPunkt",
+      headerName: "Skapad tidpunkt",
+      minWidth: 170,
+      flex: 1,
+    },
     {
       field: "actions",
       headerName: "Åtgärder",
@@ -260,7 +642,7 @@ export default function MetadataPage() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 2, mb: 6 }}>
+    <Container maxWidth="xl" sx={{ mt: { xs: 1, md: 4 }, mb: 6 }}>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -268,9 +650,9 @@ export default function MetadataPage() {
         mb={2}
       >
         <Typography variant="body2" fontWeight={600}>
-          Hantera metadata med skapa, redigera och ta bort.
+          Hantera metadata med redigera och ta bort.
         </Typography>
-        <Button
+        {/* <Button
           variant="contained"
           onClick={() => {
             setForm(emptyForm);
@@ -278,18 +660,82 @@ export default function MetadataPage() {
           }}
         >
           Skapa ny rad
-        </Button>
+        </Button> */}
       </Box>
 
-      <Paper sx={{ height: { xs: 350, md: 550 } }}>
+      <Paper
+        elevation={0}
+        sx={{
+          height: { xs: 300, md: 400, lg: 500, xl: 700 },
+          width: "100%",
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          overflow: "hidden",
+          bgcolor: "background.paper",
+        }}
+      >
         <DataGrid
+          columnVisibilityModel={columnVisibilityModel}
+          onColumnVisibilityModelChange={setColumnVisibilityModel}
           rows={rows}
           columns={columns}
           localeText={GRID_DEFAULT_LOCALE_TEXT}
           pageSizeOptions={[10, 25, 50]}
+          density={density}
+          showToolbar
+          slots={{
+            toolbar: (props) => (
+              <GridToolbar
+                {...props}
+                density={density}
+                onDensityChange={setDensity}
+              />
+            ),
+          }}
           initialState={{
             pagination: { paginationModel: { pageSize: 10, page: 0 } },
             sorting: { sortModel: [{ field: "gid", sort: "asc" }] },
+          }}
+          sx={{
+            border: 0,
+
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "background.paper",
+              borderBottom: "1px solid",
+              borderColor: "divider",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": { fontWeight: 600 },
+            '& .MuiDataGrid-columnHeader[data-field="gid"] .MuiDataGrid-columnHeaderTitleContainer':
+              {
+                pl: 1,
+              },
+            "& .MuiDataGrid-columnSeparator": {
+              display: "block",
+              color: "divider",
+            },
+            "& .MuiDataGrid-cell": {
+              borderBottom: "1px dotted",
+              borderColor: "divider",
+            },
+
+            "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox":
+              {
+                px: 1,
+              },
+
+            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-columnHeader:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus-within":
+              {
+                outline: "none",
+              },
+
+            "& .MuiDataGrid-footerContainer": {
+              borderTop: "1px solid",
+              borderColor: "divider",
+            },
           }}
         />
       </Paper>
@@ -437,11 +883,21 @@ export default function MetadataPage() {
       </Dialog>
 
       <Dialog open={deleteItem !== null} onClose={() => setDeleteItem(null)}>
-        <DialogTitle>Ta bort metadata</DialogTitle>
-        <DialogContent>
-          Vill du ta bort posten med GID <strong>{deleteItem?.gid}</strong>?
+        <DialogTitle sx={{ color: "error" }}>Ta bort post</DialogTitle>
+        <Divider />
+        <DialogContent sx={{ pt: 3 }}>
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Åtgärden kan inte ångras.
+          </Alert>
+          <Typography>
+            Vill du ta bort posten med GID <strong>{deleteItem?.gid}</strong>
+            {deleteItem?.arendeNummer ? (
+              <> (ärendenummer: {deleteItem.arendeNummer})</>
+            ) : null}
+          </Typography>
         </DialogContent>
-        <DialogActions>
+        <Divider />
+        <DialogActions sx={{ p: 2.5 }}>
           <Button onClick={() => setDeleteItem(null)}>Avbryt</Button>
           <Button
             color="error"
