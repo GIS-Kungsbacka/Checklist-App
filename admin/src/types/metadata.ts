@@ -16,7 +16,7 @@ export interface Metadata {
   geografiskBegransning?: string[];
   uppdateringsFrekvens?: string;
   fullstandighet?: string;
-  skalnivå?: string;
+  Skalniva?: string;
   nyckelOrd?: string[];
   kategori?: string;
   tidsperiod?: boolean;
@@ -33,5 +33,4 @@ export interface Metadata {
   skapadTidPunkt?: string;
 }
 
-export type CreateMetadataDto = Omit<Metadata, "gid">;
 export type UpdateMetadataDto = Omit<Metadata, "gid">;

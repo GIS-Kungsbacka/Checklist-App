@@ -24,5 +24,4 @@ export interface ManagementPlan {
   skapadTidPunkt?: string;
 }
 
-export type CreateManagementPlanDto = Omit<ManagementPlan, "gid">;
 export type UpdateManagementPlanDto = Omit<ManagementPlan, "gid">;

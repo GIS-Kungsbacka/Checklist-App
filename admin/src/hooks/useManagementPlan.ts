@@ -14,25 +14,21 @@ export const useManagementPlans = () =>
     staleTime: 0,
   });
 
-export const useCreateManagementPlan = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: managementPlanRequests.create,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["management-plans"] });
-      broadcastQueryInvalidation(["management-plans"]);
-    },
-  });
-};
-
 export const useUpdateManagementPlan = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ gid, data }: { gid: number; data: UpdateManagementPlanDto }) =>
-      managementPlanRequests.update(gid, data),
+    mutationFn: ({
+      gid,
+      data,
+    }: {
+      gid: number;
+      data: UpdateManagementPlanDto;
+    }) => managementPlanRequests.update(gid, data),
     onSuccess: (_, { gid }) => {
       void queryClient.invalidateQueries({ queryKey: ["management-plans"] });
-      void queryClient.invalidateQueries({ queryKey: ["management-plans", gid] });
+      void queryClient.invalidateQueries({
+        queryKey: ["management-plans", gid],
+      });
       broadcastQueryInvalidation(["management-plans"]);
       broadcastQueryInvalidation(["management-plans", gid.toString()]);
     },

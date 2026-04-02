@@ -61,62 +61,6 @@ public class MetadataController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new metadata record
-    /// </summary>
-    [HttpPost]
-    public async Task<ActionResult<Metadata>> Create([FromBody] CreateMetadataDto dto)
-    {
-        try
-        {
-            var item = new Metadata
-            {
-                Gid = dto.Gid,
-                SakerhetsKlassDokument = dto.SakerhetsKlassDokument,
-                ArendeNummer = dto.ArendeNummer,
-                BestallareNamn = dto.BestallareNamn,
-                BestallareEpost = dto.BestallareEpost,
-                SakerhetsKlass = dto.SakerhetsKlass,
-                DataKallaTyp = dto.DataKallaTyp,
-                Schema = dto.Schema,
-                Namn = dto.Namn,
-                Beskrivning = dto.Beskrivning,
-                Syfte = dto.Syfte,
-                Datakalla = dto.Datakalla,
-                Metod = dto.Metod,
-                Projekt = dto.Projekt,
-                GeografiskBegransning = dto.GeografiskBegransning,
-                UppdateringsFrekvens = dto.UppdateringsFrekvens,
-                Fullstandighet = dto.Fullstandighet,
-                Skalnivå = dto.Skalnivå,
-                NyckelOrd = dto.NyckelOrd,
-                Kategori = dto.Kategori,
-                Tidsperiod = dto.Tidsperiod,
-                TidsperiodStartdatum = dto.TidsperiodStartdatum,
-                TidsperiodSlutdatum = dto.TidsperiodSlutdatum,
-                TidsUpplosning = dto.TidsUpplosning,
-                SkapelseDatum = dto.SkapelseDatum,
-                AnvandarBegransningLicens = dto.AnvandarBegransningLicens,
-                AnvandarBegransningLicensText = dto.AnvandarBegransningLicensText,
-                RelateradeResurser = dto.RelateradeResurser,
-                Status = dto.Status,
-                Handlaggare = dto.Handlaggare,
-                MetaDataVersion = dto.MetaDataVersion,
-                SkapadTidPunkt = dto.SkapadTidPunkt,
-            };
-
-            var createdItem = await _repository.CreateAsync(item);
-            var username = User.Identity?.Name ?? "Unknown";
-            _logger.LogInformation("Metadata record {Gid} created by {User}", createdItem.Gid, username);
-            return StatusCode(201, createdItem);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating metadata record");
-            return StatusCode(500, new { error = "An error occurred while creating the record", details = ex.Message });
-        }
-    }
-
-    /// <summary>
     /// Update an existing metadata record
     /// </summary>
     [HttpPut("{gid}")]
@@ -143,7 +87,7 @@ public class MetadataController : ControllerBase
                 GeografiskBegransning = dto.GeografiskBegransning,
                 UppdateringsFrekvens = dto.UppdateringsFrekvens,
                 Fullstandighet = dto.Fullstandighet,
-                Skalnivå = dto.Skalnivå,
+                Skalniva = dto.Skalniva,
                 NyckelOrd = dto.NyckelOrd,
                 Kategori = dto.Kategori,
                 Tidsperiod = dto.Tidsperiod,
@@ -222,7 +166,7 @@ public class CreateMetadataDto
     public string[]? GeografiskBegransning { get; set; }
     public string? UppdateringsFrekvens { get; set; }
     public string? Fullstandighet { get; set; }
-    public string? Skalnivå { get; set; }
+    public string? Skalniva { get; set; }
     public string[]? NyckelOrd { get; set; }
     public string? Kategori { get; set; }
     public bool? Tidsperiod { get; set; }
@@ -258,7 +202,7 @@ public class UpdateMetadataDto
     public string[]? GeografiskBegransning { get; set; }
     public string? UppdateringsFrekvens { get; set; }
     public string? Fullstandighet { get; set; }
-    public string? Skalnivå { get; set; }
+    public string? Skalniva { get; set; }
     public string[]? NyckelOrd { get; set; }
     public string? Kategori { get; set; }
     public bool? Tidsperiod { get; set; }

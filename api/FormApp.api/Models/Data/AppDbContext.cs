@@ -205,7 +205,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Metadata>()
             .Property(x => x.Fullstandighet).HasColumnName("fullstandighet");
         modelBuilder.Entity<Metadata>()
-            .Property(x => x.Skalnivå).HasColumnName("skalniva");
+            .Property(x => x.Skalniva).HasColumnName("skalniva");
         modelBuilder.Entity<Metadata>()
             .Property(x => x.NyckelOrd).HasColumnName("nyckelord");
         modelBuilder.Entity<Metadata>()

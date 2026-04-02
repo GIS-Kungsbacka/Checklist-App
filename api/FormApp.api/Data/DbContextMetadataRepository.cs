@@ -55,7 +55,7 @@ public class DbContextMetadataRepository : IMetadataRepository
         existing.GeografiskBegransning = item.GeografiskBegransning;
         existing.UppdateringsFrekvens = item.UppdateringsFrekvens;
         existing.Fullstandighet = item.Fullstandighet;
-        existing.Skalnivå = item.Skalnivå;
+        existing.Skalniva = item.Skalniva;
         existing.NyckelOrd = item.NyckelOrd;
         existing.Kategori = item.Kategori;
         existing.Tidsperiod = item.Tidsperiod;

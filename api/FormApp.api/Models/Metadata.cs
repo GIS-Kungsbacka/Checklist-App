@@ -19,7 +19,7 @@
         public string[]? GeografiskBegransning { get; set; }
         public string? UppdateringsFrekvens { get; set; }
         public string? Fullstandighet { get; set; }
-        public string? Skalnivå { get; set; }
+        public string? Skalniva { get; set; }
         public string[]? NyckelOrd { get; set; }
         public string? Kategori { get; set; }
         public bool? Tidsperiod { get; set; }

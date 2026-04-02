@@ -14,17 +14,6 @@ export const useMetadatas = () =>
     staleTime: 0,
   });
 
-export const useCreateMetadata = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: metadataRequests.create,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["metadatas"] });
-      broadcastQueryInvalidation(["metadatas"]);
-    },
-  });
-};
-
 export const useUpdateMetadata = () => {
   const queryClient = useQueryClient();
   return useMutation({

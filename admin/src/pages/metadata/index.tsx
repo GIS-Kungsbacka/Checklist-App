@@ -80,7 +80,7 @@ const defaultColumnVisibility = {
   geografiskBegransning: false,
   uppdateringsFrekvens: false,
   fullstandighet: false,
-  skalnivå: false,
+  Skalniva: false,
   nyckelOrd: false,
   kategori: true,
   tidsperiod: false,
@@ -271,7 +271,7 @@ type MetadataFormState = {
   geografiskBegransning: string;
   uppdateringsFrekvens: string;
   fullstandighet: string;
-  skalnivå: string;
+  Skalniva: string;
   nyckelOrd: string;
   kategori: string;
   tidsperiod: boolean;
@@ -305,7 +305,7 @@ const emptyForm: MetadataFormState = {
   geografiskBegransning: "",
   uppdateringsFrekvens: "",
   fullstandighet: "",
-  skalnivå: "",
+  Skalniva: "",
   nyckelOrd: "",
   kategori: "",
   tidsperiod: false,
@@ -339,7 +339,7 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   geografiskBegransning: fromArray(item.geografiskBegransning),
   uppdateringsFrekvens: item.uppdateringsFrekvens ?? "",
   fullstandighet: item.fullstandighet ?? "",
-  skalnivå: item.skalnivå ?? "",
+  Skalniva: item.Skalniva ?? "",
   nyckelOrd: fromArray(item.nyckelOrd),
   kategori: item.kategori ?? "",
   tidsperiod: item.tidsperiod ?? false,
@@ -373,7 +373,7 @@ const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   geografiskBegransning: toArray(state.geografiskBegransning),
   uppdateringsFrekvens: state.uppdateringsFrekvens || undefined,
   fullstandighet: state.fullstandighet || undefined,
-  skalnivå: state.skalnivå || undefined,
+  Skalniva: state.Skalniva || undefined,
   nyckelOrd: toArray(state.nyckelOrd),
   kategori: state.kategori || undefined,
   tidsperiod: state.tidsperiod,
@@ -512,7 +512,7 @@ export default function MetadataPage() {
       minWidth: 150,
       flex: 1,
     },
-    { field: "skalnivå", headerName: "Skalnivå", minWidth: 140, flex: 0.8 },
+    { field: "Skalniva", headerName: "Skalniva", minWidth: 140, flex: 0.8 },
     {
       field: "nyckelOrd",
       headerName: "Nyckelord",
@@ -781,7 +781,7 @@ export default function MetadataPage() {
                 ["relateradeResurser", "Relaterade resurser (kommaseparerat)"],
                 ["uppdateringsFrekvens", "Uppdateringsfrekvens"],
                 ["fullstandighet", "Fullständighet"],
-                ["skalnivå", "Skalnivå"],
+                ["Skalniva", "Skalniva"],
                 ["tidsUpplosning", "Tidsupplösning"],
                 ["tidsperiodStartdatum", "Tidsperiod startdatum (YYYY-MM-DD)"],
                 ["tidsperiodSlutdatum", "Tidsperiod slutdatum (YYYY-MM-DD)"],

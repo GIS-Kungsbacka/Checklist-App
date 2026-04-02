@@ -1,9 +1,5 @@
 import { api } from "./axiosConfig";
-import type {
-  Metadata,
-  CreateMetadataDto,
-  UpdateMetadataDto,
-} from "../types/metadata";
+import type { Metadata, UpdateMetadataDto } from "../types/metadata";
 
 const BASE = "/admin/metadata";
 
@@ -15,11 +11,6 @@ export const metadataRequests = {
 
   getById: async (gid: number): Promise<Metadata> => {
     const response = await api.get<Metadata>(`${BASE}/${gid}`);
-    return response.data;
-  },
-
-  create: async (dto: CreateMetadataDto): Promise<Metadata> => {
-    const response = await api.post<Metadata>(BASE, dto);
     return response.data;
   },
 
