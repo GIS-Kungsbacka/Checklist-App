@@ -4,21 +4,14 @@ import {
   Typography,
   Box,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
   CircularProgress,
   Alert,
   Chip,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
+  Link,
+  Tooltip,
+  ListItemText,
+  Menu,
+  MenuItem,
   TextField,
 } from "@mui/material";
 import { Undo } from "@mui/icons-material";
@@ -26,8 +19,217 @@ import { useChecklists, useUpdateChecklist } from "../../hooks/useChecklist";
 import type { Checklist, UpdateChecklistDto } from "../../types/checklist";
 import { getPrioritetChipColor } from "./checklist-data-grid";
 import { useNavigate } from "react-router-dom";
+import {
+  ColumnsPanelTrigger,
+  DataGrid,
+  ExportCsv,
+  ExportPrint,
+  FilterPanelTrigger,
+  GridActionsCellItem,
+  type GridColDef,
+  type GridDensity,
+  type GridRenderCellParams,
+  QuickFilter,
+  QuickFilterClear,
+  QuickFilterControl,
+  Toolbar,
+  ToolbarButton,
+} from "@mui/x-data-grid";
+import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import DensityMediumOutlinedIcon from "@mui/icons-material/DensityMediumOutlined";
+import CancelIcon from "@mui/icons-material/Cancel";
 
-export default function Avslutade() {
+const COLUMN_VISIBILITY_STORAGE_KEY = "avslutade-column-visibility";
+const defaultColumnVisibility = {
+  gid: true,
+  arendenummerArtvise: true,
+  dataunderlag: true,
+  dataadministrator: true,
+  nyttjandeInterntExternt: true,
+  leveransArbetstimmar: true,
+  kategori: false,
+  kategoriTyp: true,
+  prioritet: true,
+  antagenJaNej: true,
+  antagenJaNejMotivering: true,
+  handlaggare: true,
+  malgrupper: false,
+  leverans: false,
+  tabell: false,
+  wms: false,
+  fme: false,
+  redigering: false,
+  kopiering: false,
+  information: false,
+  kommentar: false,
+  verksamhetskritiskData: true,
+  levererad: true,
+};
+
+const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
+  props,
+  _ref
+) {
+  return (
+    <Tooltip title="Kolumner">
+      <ToolbarButton aria-label="Columns" {...props}>
+        <ViewColumnOutlinedIcon fontSize="small" />
+      </ToolbarButton>
+    </Tooltip>
+  );
+});
+
+function GridToolbar({
+  density,
+  onDensityChange,
+}: {
+  density: GridDensity;
+  onDensityChange: (d: GridDensity) => void;
+}) {
+  const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
+  const exportOpen = Boolean(exportAnchor);
+  const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
+  const densityOpen = Boolean(densityAnchor);
+
+  return (
+    <Toolbar aria-label="Grid toolbar">
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 0.5,
+          px: 1.5,
+          py: 1,
+          minHeight: 52,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Tooltip title="Täthet">
+          <ToolbarButton
+            aria-label="Density"
+            onClick={(e) => setDensityAnchor(e.currentTarget)}
+          >
+            <DensityMediumOutlinedIcon fontSize="small" />
+          </ToolbarButton>
+        </Tooltip>
+        <Menu
+          anchorEl={densityAnchor}
+          open={densityOpen}
+          onClose={() => setDensityAnchor(null)}
+        >
+          {(["compact", "standard", "comfortable"] as GridDensity[]).map(
+            (d) => (
+              <MenuItem
+                key={d}
+                selected={density === d}
+                onClick={() => {
+                  onDensityChange(d);
+                  setDensityAnchor(null);
+                }}
+              >
+                <ListItemText
+                  primary={
+                    d === "compact"
+                      ? "Kompakt"
+                      : d === "standard"
+                      ? "Standard"
+                      : "Komfortabelt"
+                  }
+                />
+              </MenuItem>
+            )
+          )}
+        </Menu>
+
+        <ColumnsPanelTrigger render={<ColumnsToolbarButton />} />
+        <FilterPanelTrigger
+          render={(props) => (
+            <Tooltip title="Filtrera">
+              <ToolbarButton aria-label="Filter" {...props}>
+                <FilterAltOutlinedIcon fontSize="small" />
+              </ToolbarButton>
+            </Tooltip>
+          )}
+        />
+
+        <Tooltip title="Exportera">
+          <ToolbarButton
+            aria-label="Export"
+            onClick={(e) => setExportAnchor(e.currentTarget)}
+          >
+            <DownloadOutlinedIcon fontSize="small" />
+          </ToolbarButton>
+        </Tooltip>
+        <Menu
+          anchorEl={exportAnchor}
+          open={exportOpen}
+          onClose={() => setExportAnchor(null)}
+        >
+          <MenuItem onClick={() => setExportAnchor(null)}>
+            <ExportCsv
+              options={{ utf8WithBom: true, fileName: "Avslutade" }}
+              render={(props) => (
+                <Box component="button" type="button" onClick={props.onClick}>
+                  <ListItemText primary="Exportera till CSV" />
+                </Box>
+              )}
+            />
+          </MenuItem>
+          <MenuItem onClick={() => setExportAnchor(null)}>
+            <ExportPrint
+              render={(props) => (
+                <Box component="button" type="button" onClick={props.onClick}>
+                  <ListItemText primary="Skriv ut" />
+                </Box>
+              )}
+            />
+          </MenuItem>
+        </Menu>
+
+        <QuickFilter defaultExpanded={false}>
+          <Box
+            sx={{ ml: 1, display: "flex", alignItems: "center", width: 260 }}
+          >
+            <QuickFilterControl
+              render={({ ref, ...props }) => (
+                <TextField
+                  {...props}
+                  inputRef={ref}
+                  aria-label="Search"
+                  placeholder="Sök..."
+                  size="small"
+                  sx={{
+                    width: 1,
+                    "& .MuiInputBase-root": { height: 34, fontSize: 13 },
+                  }}
+                />
+              )}
+            />
+            <QuickFilterClear edge="end" size="small" aria-label="Clear search">
+              <CancelIcon fontSize="small" />
+            </QuickFilterClear>
+          </Box>
+        </QuickFilter>
+      </Box>
+    </Toolbar>
+  );
+}
+
+export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
+  const arendenummerLinkBaseUrl = React.useMemo(() => {
+    // Use the current domain (dev/test/prod) automatically.
+    return `${window.location.origin}/FormApp/client/form`;
+  }, []);
+
   const { data: allItems = [], isLoading, isError } = useChecklists();
   const updateMutation = useUpdateChecklist();
   const navigate = useNavigate();
@@ -40,31 +242,25 @@ export default function Avslutade() {
         .sort((a, b) => a.gid - b.gid),
     [allItems]
   );
-
-  const pageSize = 10;
-  const [search, setSearch] = React.useState("");
-  const filteredItems = React.useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return items;
-    return items.filter((item) =>
-      [
-        String(item.gid),
-        item.arendenummerArtvise,
-        item.prioritet,
-        item.dataadministrator,
-        item.kategori,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(q))
-    );
-  }, [items, search]);
-  const [page, setPage] = React.useState(0);
-  React.useEffect(() => setPage(0), [filteredItems.length, search]);
-  const pagedItems = filteredItems.slice(
-    page * pageSize,
-    page * pageSize + pageSize
+  const [density, setDensity] = React.useState<GridDensity>("standard");
+  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
+    () => {
+      try {
+        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : defaultColumnVisibility;
+      } catch {
+        return defaultColumnVisibility;
+      }
+    }
   );
-  const showTable = true;
+  React.useEffect(() => {
+    try {
+      localStorage.setItem(
+        COLUMN_VISIBILITY_STORAGE_KEY,
+        JSON.stringify(columnVisibilityModel)
+      );
+    } catch {}
+  }, [columnVisibilityModel]);
 
   const handleView = (item: Checklist) => {
     navigate(`/avslutade/${item.gid}`);
@@ -110,6 +306,160 @@ export default function Avslutade() {
     );
   };
 
+  const columns: GridColDef<Checklist>[] = [
+    {
+      field: "gid",
+      headerName: "GID",
+      minWidth: 90,
+      flex: 0.5,
+      renderCell: (params: GridRenderCellParams) => (
+        <Box sx={{ pl: 2 }}>{params.value}</Box>
+      ),
+    },
+    {
+      field: "arendenummerArtvise",
+      headerName: "Ärendenummer",
+      minWidth: 140,
+      flex: 0.8,
+      hideable: false,
+      renderCell: (params: GridRenderCellParams<Checklist>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+
+        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
+        return (
+          <Tooltip
+            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          >
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              onClick={(e) => {
+                // Prevent row click navigation when user clicks the link.
+                e.stopPropagation();
+              }}
+              sx={{ fontWeight: 600 }}
+            >
+              {value}
+            </Link>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      field: "dataunderlag",
+      headerName: "Dataunderlag",
+      minWidth: 110,
+      flex: 0.8,
+    },
+    {
+      field: "dataadministrator",
+      headerName: "Dataadministratör",
+      minWidth: 150,
+      flex: 1,
+    },
+    { field: "malgrupper", headerName: "Målgrupper", minWidth: 180, flex: 1 },
+    {
+      field: "nyttjandeInterntExternt",
+      headerName: "Nyttjande",
+      minWidth: 110,
+      flex: 0.8,
+    },
+    { field: "leverans", headerName: "Leverans", minWidth: 110, flex: 1 },
+    { field: "kategori", headerName: "Kategori", minWidth: 110, flex: 0.8 },
+    {
+      field: "prioritet",
+      headerName: "Prioritet",
+      minWidth: 110,
+      flex: 0.6,
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? (
+          <Chip
+            label={params.value}
+            size="small"
+            color={getPrioritetChipColor(params.value)}
+            variant="filled"
+          />
+        ) : (
+          "-"
+        ),
+    },
+    { field: "antagenJaNej", headerName: "Antagen", minWidth: 100, flex: 0.8 },
+    {
+      field: "handlaggare",
+      headerName: "Handläggare",
+      minWidth: 110,
+      flex: 0.8,
+    },
+    { field: "tabell", headerName: "Tabell", minWidth: 100, flex: 0.8 },
+    { field: "wms", headerName: "WMS", minWidth: 100, flex: 0.8 },
+    { field: "fme", headerName: "FME", minWidth: 100, flex: 0.8 },
+    {
+      field: "redigering",
+      headerName: "Redigering",
+      minWidth: 110,
+      flex: 0.8,
+    },
+    {
+      field: "kopiering",
+      headerName: "Kopiering",
+      minWidth: 110,
+      flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "information",
+      headerName: "Information",
+      minWidth: 120,
+      flex: 0.8,
+    },
+    {
+      field: "verksamhetskritiskData",
+      headerName: "Verksamhetskritisk data",
+      minWidth: 200,
+      flex: 1,
+    },
+    {
+      field: "kommentar",
+      headerName: "Kommentar",
+      minWidth: 110,
+      flex: 1,
+    },
+    {
+      field: "levererad",
+      headerName: "Levererad",
+      minWidth: 110,
+      flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "actions",
+      headerName: "Åtgärder",
+      type: "actions",
+      width: 120,
+      getActions: (params) => [
+        <GridActionsCellItem
+          key="undo"
+          icon={<Undo />}
+          label="Ångra"
+          disabled={updateMutation.isPending}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleUndo(params.row as Checklist);
+          }}
+        />,
+      ],
+    },
+  ];
+
+  const rows = items.map((item) => ({ ...item, id: item.gid }));
+
   if (isLoading) {
     return (
       <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
@@ -139,18 +489,9 @@ export default function Avslutade() {
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
       <Box mb={3}>
         <Typography variant="body2" fontWeight={600}>
-          Poster med levererad markerad. Klicka på ångra för att flytta tillbaka
-          till checklistan.
+          Här listas objekt med levererad satt till "true". Klicka på ångra för
+          att flytta tillbaka till beställningslistan.
         </Typography>
-      </Box>
-      <Box display="flex" justifyContent="flex-end" mb={2}>
-        <TextField
-          size="small"
-          placeholder="Sök i tabellen..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ width: { xs: "100%", sm: 300 } }}
-        />
       </Box>
 
       {updateMutation.isError && (
@@ -159,164 +500,77 @@ export default function Avslutade() {
         </Alert>
       )}
 
-      {filteredItems.length === 0 ? (
+      {items.length === 0 ? (
         <Paper elevation={2} sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary">
-            Inga poster matchar din sökning.
+            Inga avslutade poster.
           </Typography>
         </Paper>
-      ) : showTable ? (
-        <Paper elevation={2}>
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>GID</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Ärendenummer</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Prioritet</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Data</TableCell>
-                  <TableCell sx={{ fontWeight: 600, width: 140 }}>
-                    Åtgärder
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {pagedItems.map((item) => (
-                  <TableRow
-                    key={item.gid}
-                    hover
-                    onClick={() => handleView(item)}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <TableCell>{item.gid}</TableCell>
-                    <TableCell>{item.arendenummerArtvise ?? "-"}</TableCell>
-                    <TableCell>
-                      {item.prioritet ? (
-                        <Chip
-                          label={item.prioritet}
-                          size="small"
-                          color={getPrioritetChipColor(item.prioritet)}
-                          variant="filled"
-                        />
-                      ) : (
-                        "-"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.dataadministrator ?? "-"}
-                      {item.kategori ? ` • ${item.kategori}` : ""}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outlined"
-                        startIcon={<Undo />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleUndo(item);
-                        }}
-                        disabled={updateMutation.isPending}
-                      >
-                        Ångra
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <TablePagination
-            component="div"
-            count={filteredItems.length}
-            page={page}
-            onPageChange={(_e, nextPage) => setPage(nextPage)}
-            rowsPerPage={pageSize}
-            rowsPerPageOptions={[pageSize]}
-          />
-        </Paper>
       ) : (
-        <Paper elevation={2}>
-          <List>
-            {items.map((item, index) => (
-              <React.Fragment key={item.gid}>
-                <ListItem
-                  onClick={() => handleView(item)}
-                  sx={{
-                    cursor: "pointer",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    py: 2,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 1,
-                    }}
-                  >
-                    <Box sx={{ flex: 1 }}>
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                        mb={1}
-                      >
-                        <Typography variant="subtitle1" fontWeight={600}>
-                          GID: {item.gid}
-                        </Typography>
-                        {item.arendenummerArtvise && (
-                          <Typography variant="body2" color="text.secondary">
-                            ({item.arendenummerArtvise})
-                          </Typography>
-                        )}
-                        {item.prioritet && (
-                          <Chip
-                            label={item.prioritet}
-                            size="small"
-                            color={getPrioritetChipColor(item.prioritet)}
-                            variant="filled"
-                          />
-                        )}
-                      </Stack>
-                      <ListItemText
-                        primary=""
-                        secondary={
-                          <Box component="span">
-                            {item.dataadministrator && (
-                              <>
-                                Dataadministratör: {item.dataadministrator} •{" "}
-                              </>
-                            )}
-                            {item.kategori && <>Kategori: {item.kategori}</>}
-                            {item.dataunderlag && (
-                              <> • Dataunderlag: {item.dataunderlag}</>
-                            )}
-                          </Box>
-                        }
-                      />
-                    </Box>
-                    <Button
-                      variant="outlined"
-                      startIcon={<Undo />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleUndo(item);
-                      }}
-                      disabled={updateMutation.isPending}
-                      sx={{ ml: 2 }}
-                    >
-                      Ångra
-                    </Button>
-                  </Box>
-                </ListItem>
-                {index < items.length - 1 && (
-                  <Box component="hr" sx={{ m: 0 }} />
-                )}
-              </React.Fragment>
-            ))}
-          </List>
+        <Paper
+          elevation={0}
+          sx={{
+            height: { xs: 300, md: 400, lg: 500, xl: 700 },
+            width: "100%",
+            borderRadius: 3,
+            border: "1px solid",
+            borderColor: "divider",
+            overflow: "hidden",
+            bgcolor: "background.paper",
+          }}
+        >
+          <DataGrid
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={setColumnVisibilityModel}
+            rows={rows}
+            columns={columns}
+            disableRowSelectionOnClick
+            onRowClick={(params) => handleView(params.row as Checklist)}
+            pageSizeOptions={[10, 25, 50]}
+            pagination
+            density={density}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10, page: 0 } },
+              sorting: { sortModel: [{ field: "gid", sort: "asc" }] },
+            }}
+            showToolbar
+            slots={{
+              toolbar: (props) => (
+                <GridToolbar
+                  {...props}
+                  density={density}
+                  onDensityChange={setDensity}
+                />
+              ),
+            }}
+            sx={{
+              border: 0,
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "background.paper",
+                borderBottom: "1px solid",
+                borderColor: "divider",
+              },
+              "& .MuiDataGrid-columnHeaderTitle": { fontWeight: 600 },
+              '& .MuiDataGrid-columnHeader[data-field="gid"] .MuiDataGrid-columnHeaderTitleContainer':
+                { pl: 1 },
+              "& .MuiDataGrid-columnSeparator": {
+                color: mode === "light" ? "grey" : "white",
+              },
+              "& .MuiDataGrid-cell": {
+                borderBottom: "1px dotted",
+                borderColor: "divider",
+              },
+              "& .MuiDataGrid-cell:focus, & .MuiDataGrid-columnHeader:focus": {
+                outline: "none",
+              },
+              "& .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus-within":
+                { outline: "none" },
+              "& .MuiDataGrid-footerContainer": {
+                borderTop: "1px solid",
+                borderColor: "divider",
+              },
+            }}
+          />
         </Paper>
       )}
     </Container>

@@ -41,6 +41,8 @@ if (useJsonFile)
 {
     builder.Services.AddScoped<IChecklistRepository, JsonChecklistRepository>();
     builder.Services.AddScoped<IOrderSummaryRepository, JsonOrderSummaryRepository>();
+    builder.Services.AddScoped<IMetadataRepository, JsonMetadataRepository>();
+    builder.Services.AddScoped<IManagementPlanRepository, JsonManagementPlanRepository>();
     Console.WriteLine("INFO: Using JSON file storage for forms data");
 }
 else

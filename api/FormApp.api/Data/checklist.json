@@ -86,18 +86,18 @@
     "Kategori": "Effektanalys",
     "KategoriTyp": "Standard",
     "Prioritet": "Medel",
-    "AntagenJaNej": "Ja",
+    "AntagenJaNej": "ja",
     "AntagenJaNejMotivering": "Datatillgang och ansvarsfordelning ar tydlig",
     "Handlaggare": "Test4",
     "Tabell": null,
     "Wms": null,
     "Fme": null,
     "Redigering": null,
-    "Kopiering": null,
+    "Kopiering": false,
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": null
+    "Levererad": false
   },
   {
     "Gid": 5,

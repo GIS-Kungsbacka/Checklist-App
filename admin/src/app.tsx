@@ -113,7 +113,7 @@ function AppContent() {
                 path="/"
                 element={
                   <ProtectedRoute>
-                    <ChecklistGrid />
+                    <ChecklistGrid mode={mode} />
                   </ProtectedRoute>
                 }
               />
@@ -121,7 +121,7 @@ function AppContent() {
                 path="/bestallningslistan"
                 element={
                   <ProtectedRoute>
-                    <ChecklistGrid />
+                    <ChecklistGrid mode={mode} />
                   </ProtectedRoute>
                 }
               />
@@ -129,7 +129,7 @@ function AppContent() {
                 path="/idebanken"
                 element={
                   <ProtectedRoute>
-                    <Idebanken />
+                    <Idebanken mode={mode} />
                   </ProtectedRoute>
                 }
               />
@@ -145,7 +145,7 @@ function AppContent() {
                 path="/avslutade"
                 element={
                   <ProtectedRoute>
-                    <Avslutade />
+                    <Avslutade mode={mode} />
                   </ProtectedRoute>
                 }
               />
@@ -161,7 +161,7 @@ function AppContent() {
                 path="/metadata"
                 element={
                   <ProtectedRoute>
-                    <MetadataPage />
+                    <MetadataPage mode={mode} />
                   </ProtectedRoute>
                 }
               />
@@ -169,7 +169,7 @@ function AppContent() {
                 path="/management-plan"
                 element={
                   <ProtectedRoute>
-                    <ManagementPlanPage />
+                    <ManagementPlanPage mode={mode} />
                   </ProtectedRoute>
                 }
               />

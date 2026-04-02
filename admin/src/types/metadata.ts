@@ -8,6 +8,7 @@ export interface Metadata {
   dataKallaTyp?: string;
   schema?: string;
   namn?: string;
+  titel?: string;
   beskrivning?: string;
   syfte?: string;
   datakalla?: string[];

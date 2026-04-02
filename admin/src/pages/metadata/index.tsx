@@ -12,6 +12,7 @@ import {
   DialogTitle,
   Divider,
   FormControlLabel,
+  Link,
   ListItemText,
   Menu,
   MenuItem,
@@ -46,11 +47,11 @@ import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
   useMetadatas,
-  useCreateMetadata,
   useUpdateMetadata,
   useDeleteMetadata,
 } from "../../hooks/useMetadata";
-import type { CreateMetadataDto, Metadata } from "../../types/metadata";
+import { useManagementPlans } from "../../hooks/useManagementPlan";
+import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -68,6 +69,7 @@ const defaultColumnVisibility = {
   arendeNummer: true,
   bestallareNamn: true,
   bestallareEpost: false,
+  titel: false,
   sakerhetsKlassDokument: false,
   sakerhetsKlass: false,
   dataKallaTyp: false,
@@ -356,7 +358,7 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   skapadTidPunkt: item.skapadTidPunkt ?? "",
 });
 
-const toDto = (state: MetadataFormState): CreateMetadataDto => ({
+const toDto = (state: MetadataFormState): UpdateMetadataDto => ({
   sakerhetsKlassDokument: state.sakerhetsKlassDokument || undefined,
   arendeNummer: state.arendeNummer || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
@@ -391,9 +393,14 @@ const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   skapadTidPunkt: state.skapadTidPunkt || undefined,
 });
 
-export default function MetadataPage() {
+export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
+  const arendenummerLinkBaseUrl = React.useMemo(() => {
+    // Use the current domain (dev/test/prod) automatically.
+    return `${window.location.origin}/FormApp/client/form`;
+  }, []);
+
   const { data = [], isLoading, isError } = useMetadatas();
-  const createMutation = useCreateMetadata();
+  const { data: managementPlans = [] } = useManagementPlans();
   const updateMutation = useUpdateMetadata();
   const deleteMutation = useDeleteMetadata();
   const [openCreate, setOpenCreate] = React.useState(false);
@@ -429,6 +436,18 @@ export default function MetadataPage() {
     [data]
   );
 
+  const titelByArendeNummer = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const plan of managementPlans) {
+      const key = String(plan.arendeNummer ?? "").trim();
+      const titel = String(plan.titel ?? "").trim();
+      if (!key || !titel) continue;
+      // If duplicates exist, keep the first non-empty titel.
+      if (!map.has(key)) map.set(key, titel);
+    }
+    return map;
+  }, [managementPlans]);
+
   const columns: GridColDef<Metadata>[] = [
     {
       field: "gid",
@@ -438,12 +457,44 @@ export default function MetadataPage() {
         <Box sx={{ pl: 2 }}>{params.value}</Box>
       ),
     },
-    { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
     {
       field: "arendeNummer",
       headerName: "Ärendenummer",
       minWidth: 150,
       flex: 1,
+      hideable: false,
+      renderCell: (params: GridRenderCellParams<Metadata>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+
+        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
+        return (
+          <Tooltip
+            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          >
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ fontWeight: 600 }}
+            >
+              {value}
+            </Link>
+          </Tooltip>
+        );
+      },
+    },
+    { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
+    {
+      field: "titel",
+      headerName: "Titel",
+      minWidth: 150,
+      flex: 1,
+      valueGetter: (_value, row) => {
+        const key = String(row.arendeNummer ?? "").trim();
+        return key ? titelByArendeNummer.get(key) ?? "-" : "-";
+      },
     },
     {
       field: "bestallareNamn",
@@ -616,10 +667,7 @@ export default function MetadataPage() {
     },
   ];
 
-  const isSubmitting =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    deleteMutation.isPending;
+  const isSubmitting = updateMutation.isPending || deleteMutation.isPending;
 
   if (isLoading) {
     return (
@@ -650,17 +698,9 @@ export default function MetadataPage() {
         mb={2}
       >
         <Typography variant="body2" fontWeight={600}>
-          Hantera metadata med redigera och ta bort.
+          Här skapas och listas metadata automatiskt som kommer från e-tjänsten.
+          Redigera eller ta bort objekt.
         </Typography>
-        {/* <Button
-          variant="contained"
-          onClick={() => {
-            setForm(emptyForm);
-            setOpenCreate(true);
-          }}
-        >
-          Skapa ny rad
-        </Button> */}
       </Box>
 
       <Paper
@@ -711,8 +751,7 @@ export default function MetadataPage() {
                 pl: 1,
               },
             "& .MuiDataGrid-columnSeparator": {
-              display: "block",
-              color: "divider",
+              color: mode === "light" ? "grey" : "white",
             },
             "& .MuiDataGrid-cell": {
               borderBottom: "1px dotted",
@@ -742,7 +781,7 @@ export default function MetadataPage() {
 
       <Dialog
         open={openCreate || openEdit !== null}
-        onClose={() => (openCreate ? setOpenCreate(false) : setOpenEdit(null))}
+        onClose={() => (openEdit ? setOpenEdit(null) : setOpenCreate(false))}
         maxWidth="md"
         fullWidth
       >
@@ -853,7 +892,7 @@ export default function MetadataPage() {
         <DialogActions>
           <Button
             onClick={() =>
-              openCreate ? setOpenCreate(false) : setOpenEdit(null)
+              openEdit ? setOpenEdit(null) : setOpenCreate(false)
             }
           >
             Avbryt
@@ -863,18 +902,12 @@ export default function MetadataPage() {
             disabled={isSubmitting}
             onClick={() => {
               const dto = toDto(form);
-              if (openCreate) {
-                createMutation.mutate(dto, {
-                  onSuccess: () => setOpenCreate(false),
-                });
-                return;
-              }
-              if (openEdit) {
-                updateMutation.mutate(
-                  { gid: openEdit.gid, data: dto },
-                  { onSuccess: () => setOpenEdit(null) }
-                );
-              }
+              if (!openEdit) return;
+
+              updateMutation.mutate(
+                { gid: openEdit.gid, data: dto },
+                { onSuccess: () => setOpenEdit(null) }
+              );
             }}
           >
             Spara

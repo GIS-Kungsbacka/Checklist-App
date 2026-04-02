@@ -8,6 +8,7 @@ import {
   Alert,
   Typography,
   Chip,
+  Link,
   Menu,
   MenuItem,
   ListItemText,
@@ -25,6 +26,9 @@ import {
   Autocomplete,
   Checkbox,
   FormControlLabel,
+  IconButton,
+  InputAdornment,
+  OutlinedInput,
   keyframes,
 } from "@mui/material";
 
@@ -54,6 +58,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -66,6 +71,102 @@ import {
 import { useOrderSummaries } from "../../hooks/useOrderSummary";
 import type { Checklist, CreateChecklistDto } from "../../types/checklist";
 import type { OrderSummary } from "../../types/orderSummary";
+
+const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
+  arendenummerArtvise:
+    "Ärendenummer (Artvise). Välj från beställningsunderlag. Används som unik identifierare i listan.",
+  dataunderlag:
+    "Vilket underlag som används (t.ex. beställningsunderlag, datakälla).",
+  dataadministrator: "Vem som ansvarar för dataadministration/hantering.",
+  malgrupper: "Vilka målgrupper som nyttjar resultatet.",
+  nyttjandeInterntExternt: "Om nyttjandet är internt och/eller externt.",
+  leverans: "Vad som ska levereras (t.ex. tjänst, lager, fil, rapport).",
+  leveransArbetstimmar: "Uppskattad arbetsinsats i timmar för leveransen.",
+  kategori: "Kategori för ärendet.",
+  kategoriTyp: "Typ av kategori: ny eller förändring.",
+  prioritet: "Prioritet: Hög/Medel/Låg.",
+  antagenJaNej:
+    "Om posten är antagen. Värdet 'ja' skickar automatiskt objektet till idebanken.",
+  antagenJaNejMotivering: "Motivering till 'Antagen' (särskilt vid 'nej').",
+  handlaggare: "Ansvarig handläggare.",
+  tabell: "Information om tabell(er) som berörs.",
+  wms: "Information om WMS-publicering/åtkomst.",
+  fme: "Information om FME-script/app eller koppling till FME.",
+  redigering: "Hur redigering ska ske (process/verktyg/åtkomst).",
+  kopiering: "Om kopiering är tillåten/aktuell för data.",
+  information: "Övrig viktig information som behövs för hantering/leverans.",
+  kommentar: "Interna kommentarer/anteckningar.",
+  levererad:
+    "Om leveransen är klar. Kryssrutan 'Levererad' skickar automatiskt objektet till Avslutad.",
+  verksamhetskritiskData:
+    "Om data bedöms vara verksamhetskritisk (beskrivning/klassning).",
+};
+
+function helpAdornment(
+  key: keyof CreateChecklistDto,
+  opts?: { offsetForSelectIcon?: boolean }
+) {
+  const title = FIELD_TOOLTIPS[key];
+  if (!title) return null;
+  return (
+    <InputAdornment position="end">
+      <Tooltip title={title} arrow placement="top" enterDelay={250}>
+        <IconButton
+          size="small"
+          tabIndex={-1}
+          edge="end"
+          aria-label="Hjälp"
+          sx={
+            opts?.offsetForSelectIcon
+              ? {
+                  // MUI Select renders its dropdown arrow on the far right;
+                  // nudge the help icon left so they don't overlap.
+                  mr: 2.5,
+                }
+              : undefined
+          }
+          onMouseDown={(e) => {
+            // Keep focus on the input
+            e.preventDefault();
+          }}
+        >
+          <HelpOutlineIcon fontSize="inherit" />
+        </IconButton>
+      </Tooltip>
+    </InputAdornment>
+  );
+}
+
+function mergeEndAdornment(
+  existing: React.ReactNode,
+  help: React.ReactNode
+): React.ReactNode {
+  if (!help) return existing ?? null;
+  if (!existing) return help;
+  return (
+    <>
+      {existing}
+      {help}
+    </>
+  );
+}
+
+function helpIconInline(key: keyof CreateChecklistDto) {
+  const title = FIELD_TOOLTIPS[key];
+  if (!title) return null;
+  return (
+    <Tooltip title={title} arrow placement="top" enterDelay={250}>
+      <IconButton
+        size="small"
+        tabIndex={-1}
+        aria-label="Hjälp"
+        onMouseDown={(e) => e.preventDefault()}
+      >
+        <HelpOutlineIcon fontSize="inherit" />
+      </IconButton>
+    </Tooltip>
+  );
+}
 
 export const getPrioritetChipColor = (
   p: string | undefined
@@ -115,7 +216,7 @@ const defaultColumnVisibility = {
   dataadministrator: true,
   nyttjandeInterntExternt: true,
   leveransArbetstimmar: true,
-  kategori: true,
+  kategori: false,
   kategoriTyp: true,
   prioritet: true,
   antagenJaNej: true,
@@ -131,7 +232,7 @@ const defaultColumnVisibility = {
   information: false,
   kommentar: false,
   verksamhetskritiskData: true,
-  levererad: false,
+  levererad: true,
 };
 const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
   props,
@@ -351,7 +452,12 @@ function ScreenshotToolbar({
   );
 }
 
-export default function ChecklistGrid() {
+export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
+  const arendenummerLinkBaseUrl = React.useMemo(() => {
+    // Use the current domain (dev/test/prod) automatically.
+    return `${window.location.origin}/FormApp/client/form`;
+  }, []);
+
   const {
     data: allItems = [],
     isLoading,
@@ -629,7 +735,8 @@ export default function ChecklistGrid() {
     {
       field: "gid",
       headerName: "GID",
-      width: 90,
+      minWidth: 90,
+      flex: 0.5,
       renderCell: (params: GridRenderCellParams) => (
         <Box sx={{ pl: 2 }}>{params.value}</Box>
       ),
@@ -637,34 +744,60 @@ export default function ChecklistGrid() {
     {
       field: "arendenummerArtvise",
       headerName: "Ärendenummer",
-      minWidth: 160,
-      flex: 1,
+      minWidth: 140,
+      flex: 0.8,
+      hideable: false,
+      renderCell: (params: GridRenderCellParams<Checklist>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+
+        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
+        return (
+          <Tooltip
+            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          >
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              onClick={(e) => {
+                // Prevent row click/selection when user clicks the link.
+                e.stopPropagation();
+              }}
+              sx={{ fontWeight: 600 }}
+            >
+              {value}
+            </Link>
+          </Tooltip>
+        );
+      },
     },
     {
       field: "dataunderlag",
       headerName: "Dataunderlag",
-      minWidth: 220,
-      flex: 1.2,
+      minWidth: 110,
+      flex: 0.8,
     },
     {
       field: "dataadministrator",
       headerName: "Dataadministratör",
-      minWidth: 180,
+      minWidth: 150,
       flex: 1,
     },
     { field: "malgrupper", headerName: "Målgrupper", minWidth: 180, flex: 1 },
     {
       field: "nyttjandeInterntExternt",
       headerName: "Nyttjande",
-      minWidth: 150,
+      minWidth: 110,
       flex: 0.8,
     },
-    { field: "leverans", headerName: "Leverans", minWidth: 200, flex: 1 },
-    { field: "kategori", headerName: "Kategori", minWidth: 150, flex: 0.8 },
+    { field: "leverans", headerName: "Leverans", minWidth: 110, flex: 1 },
+    { field: "kategori", headerName: "Kategori", minWidth: 110, flex: 0.8 },
     {
       field: "prioritet",
       headerName: "Prioritet",
-      minWidth: 130,
+      minWidth: 110,
       flex: 0.6,
       renderCell: (params: GridRenderCellParams) =>
         params.value ? (
@@ -678,26 +811,26 @@ export default function ChecklistGrid() {
           "-"
         ),
     },
-    { field: "antagenJaNej", headerName: "Antagen", minWidth: 130, flex: 0.7 },
+    { field: "antagenJaNej", headerName: "Antagen", minWidth: 100, flex: 0.8 },
     {
       field: "handlaggare",
       headerName: "Handläggare",
-      minWidth: 150,
+      minWidth: 110,
       flex: 0.8,
     },
-    { field: "tabell", headerName: "Tabell", minWidth: 150, flex: 0.8 },
-    { field: "wms", headerName: "WMS", minWidth: 150, flex: 0.8 },
-    { field: "fme", headerName: "FME", minWidth: 150, flex: 0.8 },
+    { field: "tabell", headerName: "Tabell", minWidth: 100, flex: 0.8 },
+    { field: "wms", headerName: "WMS", minWidth: 100, flex: 0.8 },
+    { field: "fme", headerName: "FME", minWidth: 100, flex: 0.8 },
     {
       field: "redigering",
       headerName: "Redigering",
-      minWidth: 150,
+      minWidth: 110,
       flex: 0.8,
     },
     {
       field: "kopiering",
       headerName: "Kopiering",
-      minWidth: 150,
+      minWidth: 110,
       flex: 0.8,
       type: "boolean",
       renderCell: (params: GridRenderCellParams) =>
@@ -706,7 +839,7 @@ export default function ChecklistGrid() {
     {
       field: "information",
       headerName: "Information",
-      minWidth: 150,
+      minWidth: 120,
       flex: 0.8,
     },
     {
@@ -718,13 +851,13 @@ export default function ChecklistGrid() {
     {
       field: "kommentar",
       headerName: "Kommentar",
-      minWidth: 200,
+      minWidth: 110,
       flex: 1,
     },
     {
       field: "levererad",
       headerName: "Levererad",
-      minWidth: 150,
+      minWidth: 110,
       flex: 0.8,
       type: "boolean",
       renderCell: (params: GridRenderCellParams) =>
@@ -734,7 +867,7 @@ export default function ChecklistGrid() {
       field: "åtgärder",
       headerName: "Åtgärder",
       type: "actions",
-      width: 110,
+      width: 100,
       sortable: false,
       filterable: false,
       getActions: (params) => [
@@ -865,8 +998,7 @@ export default function ChecklistGrid() {
                 pl: 1,
               },
             "& .MuiDataGrid-columnSeparator": {
-              display: "block",
-              color: "divider",
+              color: mode === "light" ? "grey" : "white",
             },
             "& .MuiDataGrid-cell": {
               borderBottom: "1px dotted",
@@ -948,7 +1080,11 @@ export default function ChecklistGrid() {
                 ] as const
               ).map(([key, label]) => (
                 <Grid
-                  size={key === "antagenJaNejMotivering" ? 12 : 6}
+                  size={
+                    key === "antagenJaNejMotivering" || key === "kommentar"
+                      ? 12
+                      : 6
+                  }
                   key={key}
                 >
                   {key === "prioritet" ? (
@@ -965,6 +1101,14 @@ export default function ChecklistGrid() {
                             labelId="create-prioritet-label"
                             label="Prioritet"
                             value={field.value ?? ""}
+                            input={
+                              <OutlinedInput
+                                label="Prioritet"
+                                endAdornment={helpAdornment("prioritet", {
+                                  offsetForSelectIcon: true,
+                                })}
+                              />
+                            }
                           >
                             <MenuItem value="">
                               <em>Välj prioritet</em>
@@ -992,6 +1136,14 @@ export default function ChecklistGrid() {
                             labelId="create-kategori-label"
                             label="Kategori"
                             value={field.value ?? ""}
+                            input={
+                              <OutlinedInput
+                                label="Kategori"
+                                endAdornment={helpAdornment("kategori", {
+                                  offsetForSelectIcon: true,
+                                })}
+                              />
+                            }
                           >
                             <MenuItem value="">
                               <em>Välj kategori</em>
@@ -1019,6 +1171,14 @@ export default function ChecklistGrid() {
                             labelId="create-kategoriTyp-label"
                             label="Kategori typ"
                             value={field.value ?? ""}
+                            input={
+                              <OutlinedInput
+                                label="Kategori typ"
+                                endAdornment={helpAdornment("kategoriTyp", {
+                                  offsetForSelectIcon: true,
+                                })}
+                              />
+                            }
                           >
                             <MenuItem value="">
                               <em>Välj kategori typ</em>
@@ -1046,6 +1206,14 @@ export default function ChecklistGrid() {
                             labelId="create-antagenJaNej-label"
                             label="Antagen"
                             value={field.value ?? ""}
+                            input={
+                              <OutlinedInput
+                                label="Antagen"
+                                endAdornment={helpAdornment("antagenJaNej", {
+                                  offsetForSelectIcon: true,
+                                })}
+                              />
+                            }
                           >
                             <MenuItem value="">
                               <em>Välj</em>
@@ -1096,7 +1264,7 @@ export default function ChecklistGrid() {
                               slotProps={{
                                 input: {
                                   ...params.InputProps,
-                                  endAdornment: (
+                                  endAdornment: mergeEndAdornment(
                                     <>
                                       {isLoadingOrderSummaries ? (
                                         <CircularProgress
@@ -1105,7 +1273,8 @@ export default function ChecklistGrid() {
                                         />
                                       ) : null}
                                       {params.InputProps.endAdornment}
-                                    </>
+                                    </>,
+                                    helpAdornment("arendenummerArtvise")
                                   ),
                                 },
                               }}
@@ -1135,6 +1304,13 @@ export default function ChecklistGrid() {
                           }
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
+                          slotProps={{
+                            input: {
+                              endAdornment: helpAdornment(
+                                key as keyof CreateChecklistDto
+                              ),
+                            },
+                          }}
                         />
                       )}
                     />
@@ -1155,30 +1331,36 @@ export default function ChecklistGrid() {
                 name="kopiering"
                 control={createControl}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Kopiering"
-                  />
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={Boolean(field.value)}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      }
+                      label="Kopiering"
+                    />
+                    {helpIconInline("kopiering")}
+                  </Box>
                 )}
               />
               <Controller
                 name="levererad"
                 control={createControl}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Levererad"
-                  />
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={Boolean(field.value)}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      }
+                      label="Levererad"
+                    />
+                    {helpIconInline("levererad")}
+                  </Box>
                 )}
               />
             </Box>
@@ -1257,7 +1439,11 @@ export default function ChecklistGrid() {
                 ] as const
               ).map(([key, label]) => (
                 <Grid
-                  size={key === "antagenJaNejMotivering" ? 12 : 6}
+                  size={
+                    key === "antagenJaNejMotivering" || key === "kommentar"
+                      ? 12
+                      : 6
+                  }
                   key={key}
                 >
                   {key === "prioritet" ? (
@@ -1279,6 +1465,14 @@ export default function ChecklistGrid() {
                               labelId="edit-prioritet-label"
                               label="Prioritet"
                               value={field.value ?? ""}
+                              input={
+                                <OutlinedInput
+                                  label="Prioritet"
+                                  endAdornment={helpAdornment("prioritet", {
+                                    offsetForSelectIcon: true,
+                                  })}
+                                />
+                              }
                             >
                               <MenuItem value="">
                                 <em>Välj prioritet</em>
@@ -1312,6 +1506,14 @@ export default function ChecklistGrid() {
                               labelId="edit-kategori-label"
                               label="Kategori"
                               value={field.value ?? ""}
+                              input={
+                                <OutlinedInput
+                                  label="Kategori"
+                                  endAdornment={helpAdornment("kategori", {
+                                    offsetForSelectIcon: true,
+                                  })}
+                                />
+                              }
                             >
                               <MenuItem value="">
                                 <em>Välj kategori</em>
@@ -1345,6 +1547,14 @@ export default function ChecklistGrid() {
                               labelId="edit-kategoriTyp-label"
                               label="Kategori typ"
                               value={field.value ?? ""}
+                              input={
+                                <OutlinedInput
+                                  label="Kategori typ"
+                                  endAdornment={helpAdornment("kategoriTyp", {
+                                    offsetForSelectIcon: true,
+                                  })}
+                                />
+                              }
                             >
                               <MenuItem value="">
                                 <em>Välj kategori typ</em>
@@ -1385,6 +1595,14 @@ export default function ChecklistGrid() {
                                 field.onChange(
                                   normalizeAntagenJaNej(String(e.target.value))
                                 )
+                              }
+                              input={
+                                <OutlinedInput
+                                  label="Antagen"
+                                  endAdornment={helpAdornment("antagenJaNej", {
+                                    offsetForSelectIcon: true,
+                                  })}
+                                />
                               }
                             >
                               <MenuItem value="">
@@ -1460,7 +1678,7 @@ export default function ChecklistGrid() {
                                 slotProps={{
                                   input: {
                                     ...params.InputProps,
-                                    endAdornment: (
+                                    endAdornment: mergeEndAdornment(
                                       <>
                                         {isLoadingOrderSummaries ? (
                                           <CircularProgress
@@ -1469,7 +1687,8 @@ export default function ChecklistGrid() {
                                           />
                                         ) : null}
                                         {params.InputProps.endAdornment}
-                                      </>
+                                      </>,
+                                      helpAdornment("arendenummerArtvise")
                                     ),
                                   },
                                 }}
@@ -1498,6 +1717,13 @@ export default function ChecklistGrid() {
                               ? 2
                               : 1
                           }
+                          slotProps={{
+                            input: {
+                              endAdornment: helpAdornment(
+                                key as keyof CreateChecklistDto
+                              ),
+                            },
+                          }}
                         />
                       )}
                     />
@@ -1518,30 +1744,36 @@ export default function ChecklistGrid() {
                 name="kopiering"
                 control={editControl}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Kopiering"
-                  />
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={Boolean(field.value)}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      }
+                      label="Kopiering"
+                    />
+                    {helpIconInline("kopiering")}
+                  </Box>
                 )}
               />
               <Controller
                 name="levererad"
                 control={editControl}
                 render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Levererad"
-                  />
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={Boolean(field.value)}
+                          onChange={(e) => field.onChange(e.target.checked)}
+                        />
+                      }
+                      label="Levererad"
+                    />
+                    {helpIconInline("levererad")}
+                  </Box>
                 )}
               />
             </Box>

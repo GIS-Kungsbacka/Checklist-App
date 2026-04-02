@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  Link,
   ListItemText,
   Menu,
   MenuItem,
@@ -46,13 +47,12 @@ import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
   useManagementPlans,
-  useCreateManagementPlan,
   useUpdateManagementPlan,
   useDeleteManagementPlan,
 } from "../../hooks/useManagementPlan";
 import type {
-  CreateManagementPlanDto,
   ManagementPlan,
+  UpdateManagementPlanDto,
 } from "../../types/managementPlan";
 
 const toArray = (value: string): string[] | undefined => {
@@ -323,7 +323,7 @@ const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
   skapadTidPunkt: item.skapadTidPunkt ?? "",
 });
 
-const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
+const toDto = (state: ManagementPlanFormState): UpdateManagementPlanDto => ({
   arendeNummer: state.arendeNummer || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
@@ -348,9 +348,17 @@ const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
   skapadTidPunkt: state.skapadTidPunkt || undefined,
 });
 
-export default function ManagementPlanPage() {
+export default function ManagementPlanPage({
+  mode,
+}: {
+  mode: "light" | "dark";
+}) {
+  const arendenummerLinkBaseUrl = React.useMemo(() => {
+    // Use the current domain (dev/test/prod) automatically.
+    return `${window.location.origin}/FormApp/client/form`;
+  }, []);
+
   const { data = [], isLoading, isError } = useManagementPlans();
-  const createMutation = useCreateManagementPlan();
   const updateMutation = useUpdateManagementPlan();
   const deleteMutation = useDeleteManagementPlan();
   const [openCreate, setOpenCreate] = React.useState(false);
@@ -397,13 +405,36 @@ export default function ManagementPlanPage() {
         <Box sx={{ pl: 2 }}>{params.value}</Box>
       ),
     },
-    { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
     {
       field: "arendeNummer",
       headerName: "Ärendenummer",
       minWidth: 150,
       flex: 1,
+      hideable: false,
+      renderCell: (params: GridRenderCellParams<ManagementPlan>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+
+        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
+        return (
+          <Tooltip
+            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          >
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              underline="hover"
+              sx={{ fontWeight: 600 }}
+            >
+              {value}
+            </Link>
+          </Tooltip>
+        );
+      },
     },
+    { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
+    { field: "titel", headerName: "Titel", minWidth: 150, flex: 1 },
     {
       field: "bestallareNamn",
       headerName: "Beställare namn",
@@ -429,7 +460,6 @@ export default function ManagementPlanPage() {
       flex: 1,
     },
     { field: "schema", headerName: "Schema", minWidth: 140, flex: 0.8 },
-    { field: "titel", headerName: "Titel", minWidth: 150, flex: 1 },
     { field: "dataAgare", headerName: "Dataägare", minWidth: 150, flex: 1 },
     {
       field: "dataForvaltare",
@@ -527,10 +557,7 @@ export default function ManagementPlanPage() {
     },
   ];
 
-  const isSubmitting =
-    createMutation.isPending ||
-    updateMutation.isPending ||
-    deleteMutation.isPending;
+  const isSubmitting = updateMutation.isPending || deleteMutation.isPending;
 
   if (isLoading) {
     return (
@@ -561,17 +588,9 @@ export default function ManagementPlanPage() {
         mb={2}
       >
         <Typography variant="body2" fontWeight={600}>
-          Hantera förvaltningsplan med redigera och ta bort.
+          Här skapas och listas förvaltningsplaner automatiskt som kommer från
+          e-tjänsten. Redigera eller ta bort objekt.
         </Typography>
-        {/* <Button
-          variant="contained"
-          onClick={() => {
-            setForm(emptyForm);
-            setOpenCreate(true);
-          }}
-        >
-          Skapa ny rad
-        </Button> */}
       </Box>
 
       <Paper
@@ -622,8 +641,7 @@ export default function ManagementPlanPage() {
                 pl: 1,
               },
             "& .MuiDataGrid-columnSeparator": {
-              display: "block",
-              color: "divider",
+              color: mode === "light" ? "grey" : "white",
             },
             "& .MuiDataGrid-cell": {
               borderBottom: "1px dotted",
@@ -653,7 +671,7 @@ export default function ManagementPlanPage() {
 
       <Dialog
         open={openCreate || openEdit !== null}
-        onClose={() => (openCreate ? setOpenCreate(false) : setOpenEdit(null))}
+        onClose={() => (openEdit ? setOpenEdit(null) : setOpenCreate(false))}
         maxWidth="md"
         fullWidth
       >
@@ -725,9 +743,7 @@ export default function ManagementPlanPage() {
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() =>
-              openCreate ? setOpenCreate(false) : setOpenEdit(null)
-            }
+            onClick={() => (openEdit ? setOpenEdit(null) : setOpenEdit(null))}
           >
             Avbryt
           </Button>
@@ -736,18 +752,11 @@ export default function ManagementPlanPage() {
             disabled={isSubmitting}
             onClick={() => {
               const dto = toDto(form);
-              if (openCreate) {
-                createMutation.mutate(dto, {
-                  onSuccess: () => setOpenCreate(false),
-                });
-                return;
-              }
-              if (openEdit) {
-                updateMutation.mutate(
-                  { gid: openEdit.gid, data: dto },
-                  { onSuccess: () => setOpenEdit(null) }
-                );
-              }
+              if (!openEdit) return;
+              updateMutation.mutate(
+                { gid: openEdit.gid, data: dto },
+                { onSuccess: () => setOpenEdit(null) }
+              );
             }}
           >
             Spara
