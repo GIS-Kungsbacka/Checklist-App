@@ -28,8 +28,8 @@ import {
   ExportPrint,
   FilterPanelTrigger,
   GridActionsCellItem,
-  type GridDensity,
   type GridColDef,
+  type GridDensity,
   type GridRenderCellParams,
   QuickFilter,
   QuickFilterClear,
@@ -38,20 +38,22 @@ import {
   ToolbarButton,
 } from "@mui/x-data-grid";
 import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import DensityMediumOutlinedIcon from "@mui/icons-material/DensityMediumOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
+  useDeleteMetadata,
   useMetadatas,
   useUpdateMetadata,
-  useDeleteMetadata,
 } from "../../hooks/useMetadata";
 import { useManagementPlans } from "../../hooks/useManagementPlan";
 import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
+import { useGridPrefs } from "../../utils/gridPrefs";
+import appConfig from "../../config.json";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -62,27 +64,27 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
-const COLUMN_VISIBILITY_STORAGE_KEY = "metadata-column-visibility";
+const GRID_PREFS_STORAGE_KEY = "metadata-grid-prefs";
 const defaultColumnVisibility = {
   gid: true,
   namn: true,
-  arendeNummer: true,
+  arendeNummerOpenE: true,
   bestallareNamn: true,
   bestallareEpost: false,
   titel: false,
-  sakerhetsKlassDokument: false,
   sakerhetsKlass: false,
   dataKallaTyp: false,
-  schema: false,
+  schemaNamn: false,
   beskrivning: false,
+  ursprung: false,
   syfte: false,
-  datakalla: false,
   metod: false,
+  metodUrl: false,
   projekt: false,
   geografiskBegransning: false,
   uppdateringsFrekvens: false,
   fullstandighet: false,
-  Skalniva: false,
+  skalniva: false,
   nyckelOrd: false,
   kategori: true,
   tidsperiod: false,
@@ -93,10 +95,10 @@ const defaultColumnVisibility = {
   anvandarBegransningLicens: false,
   anvandarBegransningLicensText: false,
   relateradeResurser: false,
+  kolumnBeskrivningUrl: false,
   status: true,
   handlaggare: true,
   metaDataVersion: false,
-  skapadTidPunkt: false,
   actions: true,
 };
 
@@ -257,23 +259,23 @@ function GridToolbar({
 }
 
 type MetadataFormState = {
-  sakerhetsKlassDokument: string;
-  arendeNummer: string;
+  arendeNummerOpenE: string;
   bestallareNamn: string;
   bestallareEpost: string;
   sakerhetsKlass: string;
   dataKallaTyp: string;
-  schema: string;
+  schemaNamn: string;
   namn: string;
   beskrivning: string;
+  ursprung: string;
   syfte: string;
-  datakalla: string;
   metod: string;
+  metodUrl: string;
   projekt: string;
   geografiskBegransning: string;
   uppdateringsFrekvens: string;
   fullstandighet: string;
-  Skalniva: string;
+  skalniva: string;
   nyckelOrd: string;
   kategori: string;
   tidsperiod: boolean;
@@ -284,30 +286,30 @@ type MetadataFormState = {
   anvandarBegransningLicens: boolean;
   anvandarBegransningLicensText: string;
   relateradeResurser: string;
+  kolumnBeskrivningUrl: string;
   status: string;
   handlaggare: string;
   metaDataVersion: string;
-  skapadTidPunkt: string;
 };
 
 const emptyForm: MetadataFormState = {
-  sakerhetsKlassDokument: "",
-  arendeNummer: "",
+  arendeNummerOpenE: "",
   bestallareNamn: "",
   bestallareEpost: "",
   sakerhetsKlass: "",
   dataKallaTyp: "",
-  schema: "",
+  schemaNamn: "",
   namn: "",
   beskrivning: "",
+  ursprung: "",
   syfte: "",
-  datakalla: "",
   metod: "",
+  metodUrl: "",
   projekt: "",
   geografiskBegransning: "",
   uppdateringsFrekvens: "",
   fullstandighet: "",
-  Skalniva: "",
+  skalniva: "",
   nyckelOrd: "",
   kategori: "",
   tidsperiod: false,
@@ -318,30 +320,30 @@ const emptyForm: MetadataFormState = {
   anvandarBegransningLicens: false,
   anvandarBegransningLicensText: "",
   relateradeResurser: "",
+  kolumnBeskrivningUrl: "",
   status: "",
   handlaggare: "",
   metaDataVersion: "",
-  skapadTidPunkt: "",
 };
 
 const toFormState = (item: Metadata): MetadataFormState => ({
-  sakerhetsKlassDokument: item.sakerhetsKlassDokument ?? "",
-  arendeNummer: item.arendeNummer ?? "",
+  arendeNummerOpenE: item.arendeNummerOpenE ?? "",
   bestallareNamn: item.bestallareNamn ?? "",
   bestallareEpost: item.bestallareEpost ?? "",
   sakerhetsKlass: item.sakerhetsKlass ?? "",
   dataKallaTyp: item.dataKallaTyp ?? "",
-  schema: item.schema ?? "",
+  schemaNamn: item.schemaNamn ?? "",
   namn: item.namn ?? "",
   beskrivning: item.beskrivning ?? "",
+  ursprung: fromArray(item.ursprung),
   syfte: item.syfte ?? "",
-  datakalla: fromArray(item.datakalla),
   metod: item.metod ?? "",
+  metodUrl: item.metodUrl ?? "",
   projekt: item.projekt ?? "",
   geografiskBegransning: fromArray(item.geografiskBegransning),
   uppdateringsFrekvens: item.uppdateringsFrekvens ?? "",
   fullstandighet: item.fullstandighet ?? "",
-  Skalniva: item.Skalniva ?? "",
+  skalniva: item.skalniva ?? "",
   nyckelOrd: fromArray(item.nyckelOrd),
   kategori: item.kategori ?? "",
   tidsperiod: item.tidsperiod ?? false,
@@ -352,30 +354,30 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   anvandarBegransningLicens: item.anvandarBegransningLicens ?? false,
   anvandarBegransningLicensText: item.anvandarBegransningLicensText ?? "",
   relateradeResurser: fromArray(item.relateradeResurser),
+  kolumnBeskrivningUrl: item.kolumnBeskrivningUrl ?? "",
   status: item.status ?? "",
   handlaggare: item.handlaggare ?? "",
   metaDataVersion: item.metaDataVersion ?? "",
-  skapadTidPunkt: item.skapadTidPunkt ?? "",
 });
 
 const toDto = (state: MetadataFormState): UpdateMetadataDto => ({
-  sakerhetsKlassDokument: state.sakerhetsKlassDokument || undefined,
-  arendeNummer: state.arendeNummer || undefined,
+  arendeNummerOpenE: state.arendeNummerOpenE || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
   sakerhetsKlass: state.sakerhetsKlass || undefined,
   dataKallaTyp: state.dataKallaTyp || undefined,
-  schema: state.schema || undefined,
+  schemaNamn: state.schemaNamn || undefined,
   namn: state.namn || undefined,
   beskrivning: state.beskrivning || undefined,
+  ursprung: toArray(state.ursprung),
   syfte: state.syfte || undefined,
-  datakalla: toArray(state.datakalla),
   metod: state.metod || undefined,
+  metodUrl: state.metodUrl || undefined,
   projekt: state.projekt || undefined,
   geografiskBegransning: toArray(state.geografiskBegransning),
   uppdateringsFrekvens: state.uppdateringsFrekvens || undefined,
   fullstandighet: state.fullstandighet || undefined,
-  Skalniva: state.Skalniva || undefined,
+  skalniva: state.skalniva || undefined,
   nyckelOrd: toArray(state.nyckelOrd),
   kategori: state.kategori || undefined,
   tidsperiod: state.tidsperiod,
@@ -387,17 +389,14 @@ const toDto = (state: MetadataFormState): UpdateMetadataDto => ({
   anvandarBegransningLicensText:
     state.anvandarBegransningLicensText || undefined,
   relateradeResurser: toArray(state.relateradeResurser),
+  kolumnBeskrivningUrl: state.kolumnBeskrivningUrl || undefined,
   status: state.status || undefined,
   handlaggare: state.handlaggare || undefined,
   metaDataVersion: state.metaDataVersion || undefined,
-  skapadTidPunkt: state.skapadTidPunkt || undefined,
 });
 
 export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
-  const arendenummerLinkBaseUrl = React.useMemo(() => {
-    // Use the current domain (dev/test/prod) automatically.
-    return `${window.location.origin}/FormApp/client/form`;
-  }, []);
+  const metadataCatalogBaseUrl = appConfig.metadataBaseUrl;
 
   const { data = [], isLoading, isError } = useMetadatas();
   const { data: managementPlans = [] } = useManagementPlans();
@@ -407,26 +406,23 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
   const [openEdit, setOpenEdit] = React.useState<Metadata | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<Metadata | null>(null);
   const [form, setForm] = React.useState<MetadataFormState>(emptyForm);
-  const [density, setDensity] = React.useState<GridDensity>("standard");
-  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
-    () => {
-      try {
-        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : defaultColumnVisibility;
-      } catch {
-        return defaultColumnVisibility;
-      }
-    }
-  );
+  const {
+    columnVisibilityModel,
+    setColumnVisibilityModel,
+    density,
+    setDensity,
+    pageSize,
+    setPageSize,
+  } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
+    columnVisibilityModel: defaultColumnVisibility,
+    density: "standard",
+    pageSize: 10,
+  });
 
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(
-        COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel)
-      );
-    } catch {}
-  }, [columnVisibilityModel]);
+  const [paginationModel, setPaginationModel] = React.useState(() => ({
+    page: 0,
+    pageSize,
+  }));
 
   const rows = React.useMemo(
     () =>
@@ -439,11 +435,12 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
   const titelByArendeNummer = React.useMemo(() => {
     const map = new Map<string, string>();
     for (const plan of managementPlans) {
-      const key = String(plan.arendeNummer ?? "").trim();
+      const key = String(plan.arendeNummberOpenE ?? "").trim();
       const titel = String(plan.titel ?? "").trim();
-      if (!key || !titel) continue;
-      // If duplicates exist, keep the first non-empty titel.
-      if (!map.has(key)) map.set(key, titel);
+      if (!key || !titel || map.has(key)) {
+        continue;
+      }
+      map.set(key, titel);
     }
     return map;
   }, [managementPlans]);
@@ -458,30 +455,28 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       ),
     },
     {
-      field: "arendeNummer",
+      field: "arendeNummerOpenE",
       headerName: "Ärendenummer",
       minWidth: 150,
       flex: 1,
       hideable: false,
       renderCell: (params: GridRenderCellParams<Metadata>) => {
         const value = String(params.value ?? "").trim();
-        if (!value) return "-";
+        if (!value) {
+          return "-";
+        }
 
-        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
+        const href = `${metadataCatalogBaseUrl}/${encodeURIComponent(value)}`;
         return (
-          <Tooltip
-            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{ fontWeight: 600 }}
           >
-            <Link
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-              sx={{ fontWeight: 600 }}
-            >
-              {value}
-            </Link>
-          </Tooltip>
+            {value}
+          </Link>
         );
       },
     },
@@ -492,7 +487,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       minWidth: 150,
       flex: 1,
       valueGetter: (_value, row) => {
-        const key = String(row.arendeNummer ?? "").trim();
+        const key = String(row.arendeNummerOpenE ?? "").trim();
         return key ? titelByArendeNummer.get(key) ?? "-" : "-";
       },
     },
@@ -509,12 +504,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       flex: 1,
     },
     {
-      field: "sakerhetsKlassDokument",
-      headerName: "Säkerhetsklass dokument",
-      minWidth: 190,
-      flex: 1,
-    },
-    {
       field: "sakerhetsKlass",
       headerName: "Säkerhetsklass",
       minWidth: 150,
@@ -526,22 +515,23 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       minWidth: 150,
       flex: 1,
     },
-    { field: "schema", headerName: "Schema", minWidth: 140, flex: 0.8 },
+    { field: "schemaNamn", headerName: "Schema", minWidth: 140, flex: 0.8 },
     {
       field: "beskrivning",
       headerName: "Beskrivning",
       minWidth: 200,
       flex: 1.2,
     },
-    { field: "syfte", headerName: "Syfte", minWidth: 200, flex: 1.2 },
     {
-      field: "datakalla",
-      headerName: "Datakälla",
+      field: "ursprung",
+      headerName: "Ursprung",
       minWidth: 180,
       flex: 1,
-      valueGetter: (_value, row) => row.datakalla?.join(", ") ?? "-",
+      valueGetter: (_value, row) => row.ursprung?.join(", ") ?? "-",
     },
+    { field: "syfte", headerName: "Syfte", minWidth: 200, flex: 1.2 },
     { field: "metod", headerName: "Metod", minWidth: 140, flex: 0.9 },
+    { field: "metodUrl", headerName: "Metod URL", minWidth: 180, flex: 1 },
     { field: "projekt", headerName: "Projekt", minWidth: 140, flex: 0.9 },
     {
       field: "geografiskBegransning",
@@ -563,7 +553,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       minWidth: 150,
       flex: 1,
     },
-    { field: "Skalniva", headerName: "Skalniva", minWidth: 140, flex: 0.8 },
+    { field: "skalniva", headerName: "Skalniva", minWidth: 140, flex: 0.8 },
     {
       field: "nyckelOrd",
       headerName: "Nyckelord",
@@ -627,6 +617,12 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       flex: 1,
       valueGetter: (_value, row) => row.relateradeResurser?.join(", ") ?? "-",
     },
+    {
+      field: "kolumnBeskrivningUrl",
+      headerName: "Kolumnbeskrivning URL",
+      minWidth: 220,
+      flex: 1,
+    },
     { field: "status", headerName: "Status", minWidth: 140, flex: 0.9 },
     { field: "handlaggare", headerName: "Handläggare", minWidth: 150, flex: 1 },
     {
@@ -634,12 +630,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       headerName: "Metadata version",
       minWidth: 150,
       flex: 0.9,
-    },
-    {
-      field: "skapadTidPunkt",
-      headerName: "Skapad tidpunkt",
-      minWidth: 170,
-      flex: 1,
     },
     {
       field: "actions",
@@ -699,7 +689,8 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       >
         <Typography variant="body2" fontWeight={600}>
           Här skapas och listas metadata automatiskt som kommer från e-tjänsten.
-          Redigera eller ta bort objekt.
+          Redigera eller ta bort objekt. <br /> Klicka på ärendenummer för att
+          öppna geodatamängden i metadatakatalogen.
         </Typography>
       </Box>
 
@@ -717,13 +708,16 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       >
         <DataGrid
           columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={setColumnVisibilityModel}
+          onColumnVisibilityModelChange={(model) =>
+            setColumnVisibilityModel(model)
+          }
           rows={rows}
           columns={columns}
           localeText={GRID_DEFAULT_LOCALE_TEXT}
           pageSizeOptions={[10, 25, 50]}
           density={density}
           showToolbar
+          disableRowSelectionOnClick
           slots={{
             toolbar: (props) => (
               <GridToolbar
@@ -734,12 +728,16 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             ),
           }}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
             sorting: { sortModel: [{ field: "gid", sort: "asc" }] },
+          }}
+          pagination
+          paginationModel={paginationModel}
+          onPaginationModelChange={(model) => {
+            setPaginationModel(model);
+            if (model.pageSize !== pageSize) setPageSize(model.pageSize);
           }}
           sx={{
             border: 0,
-
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "background.paper",
               borderBottom: "1px solid",
@@ -757,12 +755,10 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
               borderBottom: "1px dotted",
               borderColor: "divider",
             },
-
             "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox":
               {
                 px: 1,
               },
-
             "& .MuiDataGrid-cell:focus, & .MuiDataGrid-columnHeader:focus": {
               outline: "none",
             },
@@ -770,7 +766,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
               {
                 outline: "none",
               },
-
             "& .MuiDataGrid-footerContainer": {
               borderTop: "1px solid",
               borderColor: "divider",
@@ -800,18 +795,17 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             {(
               [
                 ["namn", "Namn"],
-                ["arendeNummer", "Ärendenummer"],
+                ["arendeNummerOpenE", "Ärendenummer"],
                 ["bestallareNamn", "Beställare namn"],
                 ["bestallareEpost", "Beställare e-post"],
-                ["sakerhetsKlassDokument", "Säkerhetsklass dokument"],
                 ["sakerhetsKlass", "Säkerhetsklass"],
                 ["dataKallaTyp", "Datakälla typ"],
-                ["schema", "Schema"],
+                ["schemaNamn", "Schema"],
                 ["kategori", "Kategori"],
                 ["status", "Status"],
                 ["handlaggare", "Handläggare"],
                 ["metaDataVersion", "Metadata version"],
-                ["datakalla", "Datakälla (kommaseparerat)"],
+                ["ursprung", "Ursprung (kommaseparerat)"],
                 [
                   "geografiskBegransning",
                   "Geografisk begränsning (kommaseparerat)",
@@ -820,14 +814,15 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 ["relateradeResurser", "Relaterade resurser (kommaseparerat)"],
                 ["uppdateringsFrekvens", "Uppdateringsfrekvens"],
                 ["fullstandighet", "Fullständighet"],
-                ["Skalniva", "Skalniva"],
+                ["skalniva", "Skalniva"],
                 ["tidsUpplosning", "Tidsupplösning"],
                 ["tidsperiodStartdatum", "Tidsperiod startdatum (YYYY-MM-DD)"],
                 ["tidsperiodSlutdatum", "Tidsperiod slutdatum (YYYY-MM-DD)"],
                 ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
-                ["skapadTidPunkt", "Skapad tidpunkt (ISO datetime)"],
                 ["metod", "Metod"],
+                ["metodUrl", "Metod URL"],
                 ["projekt", "Projekt"],
+                ["kolumnBeskrivningUrl", "Kolumnbeskrivning URL"],
                 [
                   "anvandarBegransningLicensText",
                   "Användarbegränsning licens text",
@@ -902,7 +897,9 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             disabled={isSubmitting}
             onClick={() => {
               const dto = toDto(form);
-              if (!openEdit) return;
+              if (!openEdit) {
+                return;
+              }
 
               updateMutation.mutate(
                 { gid: openEdit.gid, data: dto },
@@ -924,8 +921,8 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
           </Alert>
           <Typography>
             Vill du ta bort posten med GID <strong>{deleteItem?.gid}</strong>
-            {deleteItem?.arendeNummer ? (
-              <> (ärendenummer: {deleteItem.arendeNummer})</>
+            {deleteItem?.arendeNummerOpenE ? (
+              <> (ärendenummer: {deleteItem.arendeNummerOpenE})</>
             ) : null}
           </Typography>
         </DialogContent>
@@ -936,7 +933,9 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             color="error"
             variant="contained"
             onClick={() => {
-              if (!deleteItem) return;
+              if (!deleteItem) {
+                return;
+              }
               deleteMutation.mutate(deleteItem.gid, {
                 onSuccess: () => setDeleteItem(null),
               });

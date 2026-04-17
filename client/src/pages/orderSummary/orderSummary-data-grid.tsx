@@ -67,12 +67,13 @@ import {
 import { useOrders } from "../../hooks/useOrders";
 import type { OrderSummary } from "../../types/orderSummary";
 import { useNavigate } from "react-router-dom";
+import { useGridPrefs } from "../../utils/gridPrefs";
 
 type ViewMode = "cards" | "list";
 
 const STORAGE_KEY = "orderSummaryViewMode";
 const STORAGE_KEY_CARD_PAGINATION = "orderSummaryCardPagination";
-const COLUMN_VISIBILITY_STORAGE_KEY = "orderSummary-column-visibility";
+const GRID_PREFS_STORAGE_KEY = "orderSummary-grid-prefs";
 const CARD_ITEMS_PER_PAGE = 8;
 
 const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
@@ -347,7 +348,11 @@ function OrderSummaryToolbar({
   );
 }
 
-export default function OrderSummaryDataGrid() {
+export default function OrderSummaryDataGrid({
+  mode,
+}: {
+  mode: "light" | "dark";
+}) {
   const navigate = useNavigate();
   const {
     data: items = [],
@@ -373,29 +378,28 @@ export default function OrderSummaryDataGrid() {
     getInitialCardPagination
   );
 
-  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
-    () => {
-      try {
-        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
-        return {
-          ...(saved ? JSON.parse(saved) : defaultColumnVisibility),
-          arendenummerArtvise: true,
-        };
-      } catch {
-        return {
-          ...defaultColumnVisibility,
-          arendenummerArtvise: true,
-        };
-      }
-    }
-  );
+  const {
+    columnVisibilityModel,
+    setColumnVisibilityModel,
+    density,
+    setDensity,
+    pageSize,
+    setPageSize,
+  } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
+    columnVisibilityModel: {
+      ...defaultColumnVisibility,
+      arendenummerArtvise: true,
+    },
+    density: "standard",
+    pageSize: 10,
+  });
 
   const handleColumnVisibilityModelChange = React.useCallback(
     (nextModel: Record<string, boolean>) => {
       setColumnVisibilityModel({
         ...nextModel,
         arendenummerArtvise: true,
-      });
+      } as unknown as Record<string, boolean>);
     },
     []
   );
@@ -419,16 +423,10 @@ export default function OrderSummaryDataGrid() {
     }
   }, [cardPaginationEnabled]);
 
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(
-        COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel)
-      );
-    } catch {}
-  }, [columnVisibilityModel]);
-
-  const [density, setDensity] = React.useState<GridDensity>("standard");
+  const [paginationModel, setPaginationModel] = React.useState(() => ({
+    page: 0,
+    pageSize,
+  }));
 
   const uniqueValues = React.useMemo(() => {
     const map: Record<string, string[]> = {};
@@ -457,15 +455,36 @@ export default function OrderSummaryDataGrid() {
     let result = items;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
-      result = result.filter(
-        (item) =>
-          item.arendenummerArtvise?.toLowerCase().includes(q) ||
-          item.beskrivning?.toLowerCase().includes(q) ||
-          item.bestallareOrganisation?.toLowerCase().includes(q) ||
-          item.dataadministrator?.toLowerCase().includes(q) ||
-          item.kategori?.toLowerCase().includes(q) ||
-          item.arendenummerArtvise?.toString().includes(q)
-      );
+      result = result.filter((item) => {
+        for (const value of Object.values(item)) {
+          if (value === null || value === undefined) continue;
+          if (typeof value === "string") {
+            if (value.toLowerCase().includes(q)) return true;
+            continue;
+          }
+          if (typeof value === "number" || typeof value === "boolean") {
+            if (String(value).toLowerCase().includes(q)) return true;
+            continue;
+          }
+          if (Array.isArray(value)) {
+            const hay = value
+              .filter((v) => v !== null && v !== undefined)
+              .map((v) => String(v))
+              .join(" ")
+              .toLowerCase();
+            if (hay.includes(q)) return true;
+            continue;
+          }
+          if (typeof value === "object") {
+            try {
+              if (JSON.stringify(value).toLowerCase().includes(q)) return true;
+            } catch {
+              // ignore non-serializable values
+            }
+          }
+        }
+        return false;
+      });
     }
 
     for (const col of FILTER_COLUMNS) {
@@ -598,20 +617,7 @@ export default function OrderSummaryDataGrid() {
       flex: 1.2,
       hideable: false,
       renderCell: (params: GridRenderCellParams) => (
-        <Box
-          sx={{
-            cursor: "pointer",
-            color: "primary.main",
-            "&:hover": { textDecoration: "underline" },
-            pl: 1,
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/form/${params.value}`);
-          }}
-        >
-          {params.value}
-        </Box>
+        <Box sx={{ pl: 2 }}>{params.value}</Box>
       ),
     },
     {
@@ -771,8 +777,8 @@ export default function OrderSummaryDataGrid() {
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {viewMode === "cards"
-              ? "Sök, filtrera och visa poster i kortvy eller listvy."
-              : "Sök, filtrera, visa/dölj kolumner, exportera listan och klicka på ärendenummer för att se detaljer."}
+              ? "Klicka på ärendenummer för att se fler detaljer. Sök, filtrera och visa poster i kortvy eller listvy."
+              : "Klicka på en rad för att se fler detaljer. Sök, filtrera, visa/dölj kolumner, exportera listan."}
           </Typography>
         </Box>
         <Stack direction="row" alignItems="center" spacing={2} flexWrap="wrap">
@@ -1232,6 +1238,17 @@ export default function OrderSummaryDataGrid() {
             pageSizeOptions={[10, 25, 50]}
             pagination
             disableRowSelectionOnClick
+            paginationModel={paginationModel}
+            onPaginationModelChange={(model) => {
+              setPaginationModel(model);
+              if (model.pageSize !== pageSize) setPageSize(model.pageSize);
+            }}
+            onRowClick={(params) => {
+              const id = (params.row as OrderSummary | undefined)
+                ?.arendenummerArtvise;
+              if (!id) return;
+              navigate(`/form/${id}`);
+            }}
             slotProps={{
               loadingOverlay: {
                 variant: "skeleton",
@@ -1240,17 +1257,8 @@ export default function OrderSummaryDataGrid() {
             }}
             density={density}
             initialState={{
-              pagination: { paginationModel: { pageSize: 10, page: 0 } },
               sorting: {
                 sortModel: [{ field: "arendenummerArtvise", sort: "asc" }],
-              },
-              columns: {
-                columnVisibilityModel: {
-                  arendenummerOpenE: false,
-                  beskrivning: false,
-                  kansligInformation: false,
-                  kansligInformationBeskrivning: false,
-                },
               },
             }}
             showToolbar
@@ -1265,6 +1273,9 @@ export default function OrderSummaryDataGrid() {
             }}
             sx={{
               border: 0,
+              "& .MuiDataGrid-row": {
+                cursor: "pointer",
+              },
 
               "& .MuiDataGrid-columnHeaders": {
                 backgroundColor: "background.paper",
@@ -1272,9 +1283,12 @@ export default function OrderSummaryDataGrid() {
                 borderColor: "divider",
               },
               "& .MuiDataGrid-columnHeaderTitle": { fontWeight: 600 },
+              '& .MuiDataGrid-columnHeader[data-field="arendenummerArtvise"] .MuiDataGrid-columnHeaderTitleContainer':
+                {
+                  pl: 1,
+                },
               "& .MuiDataGrid-columnSeparator": {
-                display: "block",
-                color: "divider",
+                color: mode === "light" ? "grey" : "white",
               },
               "& .MuiDataGrid-cell": {
                 borderBottom: "1px dotted",

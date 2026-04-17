@@ -97,7 +97,7 @@ function AppContent() {
                 path="/"
                 element={
                   <ProtectedRoute>
-                    <OrderSummaryDataGrid />
+                    <OrderSummaryDataGrid mode={mode} />
                   </ProtectedRoute>
                 }
               />

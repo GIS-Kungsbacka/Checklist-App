@@ -39,12 +39,12 @@ public class DbContextManagementPlanRepository : IManagementPlanRepository
             return null;
         }
 
-        existing.ArendeNummer = item.ArendeNummer;
+        existing.ArendeNummberOpenE = item.ArendeNummberOpenE;
         existing.BestallareNamn = item.BestallareNamn;
         existing.BestallareEpost = item.BestallareEpost;
         existing.Sakerhetsklass = item.Sakerhetsklass;
         existing.DatakallaTyp = item.DatakallaTyp;
-        existing.Schema = item.Schema;
+        existing.SchemaNamn = item.SchemaNamn;
         existing.Namn = item.Namn;
         existing.Titel = item.Titel;
         existing.DataAgare = item.DataAgare;
@@ -52,15 +52,24 @@ public class DbContextManagementPlanRepository : IManagementPlanRepository
         existing.DataAdministrator = item.DataAdministrator;
         existing.DataKonsument = item.DataKonsument;
         existing.RedigeringsKalla = item.RedigeringsKalla;
-        existing.Publicering = item.Publicering;
         existing.OppnaData = item.OppnaData;
+        existing.DokumentSkUrl = item.DokumentSkUrl;
+        existing.DokuementInfoUrl = item.DokuementInfoUrl;
+        existing.OvrigInformation = item.OvrigInformation;
+        existing.KritiskDatamangd = item.KritiskDatamangd;
         existing.Arkivering = item.Arkivering;
         existing.ArkiveringTidpunkt = item.ArkiveringTidpunkt;
+        existing.Publicerad = item.Publicerad;
+        existing.PubliceradOppnaData = item.PubliceradOppnaData;
         existing.Atkomst = item.Atkomst;
+        existing.Integration = item.Integration;
         existing.Status = item.Status;
         existing.Handlaggare = item.Handlaggare;
         existing.ForvaltningsplanVersion = item.ForvaltningsplanVersion;
         existing.SkapadTidPunkt = item.SkapadTidPunkt;
+        existing.SkapadAv = item.SkapadAv;
+        existing.AndradTidPunkt = item.AndradTidPunkt;
+        existing.AndradAv = item.AndradAv;
 
         await _context.SaveChangesAsync();
         return existing;

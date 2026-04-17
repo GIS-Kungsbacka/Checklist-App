@@ -19,6 +19,7 @@ import { useChecklists, useUpdateChecklist } from "../../hooks/useChecklist";
 import type { Checklist, UpdateChecklistDto } from "../../types/checklist";
 import { getPrioritetChipColor } from "./checklist-data-grid";
 import { useNavigate } from "react-router-dom";
+import { useGridPrefs } from "../../utils/gridPrefs";
 import {
   ColumnsPanelTrigger,
   DataGrid,
@@ -41,7 +42,7 @@ import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import DensityMediumOutlinedIcon from "@mui/icons-material/DensityMediumOutlined";
 import CancelIcon from "@mui/icons-material/Cancel";
 
-const COLUMN_VISIBILITY_STORAGE_KEY = "avslutade-column-visibility";
+const GRID_PREFS_STORAGE_KEY = "avslutade-grid-prefs";
 const defaultColumnVisibility = {
   gid: true,
   arendenummerArtvise: true,
@@ -242,25 +243,23 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
         .sort((a, b) => a.gid - b.gid),
     [allItems]
   );
-  const [density, setDensity] = React.useState<GridDensity>("standard");
-  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
-    () => {
-      try {
-        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : defaultColumnVisibility;
-      } catch {
-        return defaultColumnVisibility;
-      }
-    }
-  );
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(
-        COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel)
-      );
-    } catch {}
-  }, [columnVisibilityModel]);
+  const {
+    columnVisibilityModel,
+    setColumnVisibilityModel,
+    density,
+    setDensity,
+    pageSize,
+    setPageSize,
+  } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
+    columnVisibilityModel: defaultColumnVisibility,
+    density: "standard",
+    pageSize: 10,
+  });
+
+  const [paginationModel, setPaginationModel] = React.useState(() => ({
+    page: 0,
+    pageSize,
+  }));
 
   const handleView = (item: Checklist) => {
     navigate(`/avslutade/${item.gid}`);
@@ -328,23 +327,19 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
 
         const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
         return (
-          <Tooltip
-            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            onClick={(e) => {
+              // Prevent row click navigation when user clicks the link.
+              e.stopPropagation();
+            }}
+            sx={{ fontWeight: 600 }}
           >
-            <Link
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-              onClick={(e) => {
-                // Prevent row click navigation when user clicks the link.
-                e.stopPropagation();
-              }}
-              sx={{ fontWeight: 600 }}
-            >
-              {value}
-            </Link>
-          </Tooltip>
+            {value}
+          </Link>
         );
       },
     },
@@ -490,7 +485,8 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       <Box mb={3}>
         <Typography variant="body2" fontWeight={600}>
           Här listas objekt med levererad satt till "true". Klicka på ångra för
-          att flytta tillbaka till beställningslistan.
+          att flytta tillbaka till beställningslistan. <br /> Klicka på
+          ärendenummer för att öppna checklistan i client.
         </Typography>
       </Box>
 
@@ -521,7 +517,9 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
         >
           <DataGrid
             columnVisibilityModel={columnVisibilityModel}
-            onColumnVisibilityModelChange={setColumnVisibilityModel}
+            onColumnVisibilityModelChange={(model) =>
+              setColumnVisibilityModel(model)
+            }
             rows={rows}
             columns={columns}
             disableRowSelectionOnClick
@@ -530,8 +528,12 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
             pagination
             density={density}
             initialState={{
-              pagination: { paginationModel: { pageSize: 10, page: 0 } },
               sorting: { sortModel: [{ field: "gid", sort: "asc" }] },
+            }}
+            paginationModel={paginationModel}
+            onPaginationModelChange={(model) => {
+              setPaginationModel(model);
+              if (model.pageSize !== pageSize) setPageSize(model.pageSize);
             }}
             showToolbar
             slots={{
@@ -545,6 +547,9 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
             }}
             sx={{
               border: 0,
+              "& .MuiDataGrid-row": {
+                cursor: "pointer",
+              },
               "& .MuiDataGrid-columnHeaders": {
                 backgroundColor: "background.paper",
                 borderBottom: "1px solid",

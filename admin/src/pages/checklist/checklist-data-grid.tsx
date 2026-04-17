@@ -71,6 +71,7 @@ import {
 import { useOrderSummaries } from "../../hooks/useOrderSummary";
 import type { Checklist, CreateChecklistDto } from "../../types/checklist";
 import type { OrderSummary } from "../../types/orderSummary";
+import { useGridPrefs } from "../../utils/gridPrefs";
 
 const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
   arendenummerArtvise:
@@ -188,7 +189,7 @@ const KATEGORI_OPTIONS = [
 ] as const;
 const KATEGORI_TYP_OPTIONS = ["ny", "förändring"] as const;
 const ANTAGEN_OPTIONS = ["ja", "nej"] as const;
-const COLUMN_VISIBILITY_STORAGE_KEY = "checklist-column-visibility";
+const GRID_PREFS_STORAGE_KEY = "checklist-grid-prefs";
 
 function normalizeAntagenJaNej(value: string | undefined): string {
   const v = (value ?? "").trim();
@@ -486,25 +487,23 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
     null
   );
 
-  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
-    () => {
-      try {
-        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : defaultColumnVisibility;
-      } catch {
-        return defaultColumnVisibility;
-      }
-    }
-  );
+  const {
+    columnVisibilityModel,
+    setColumnVisibilityModel,
+    density,
+    setDensity,
+    pageSize,
+    setPageSize,
+  } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
+    columnVisibilityModel: defaultColumnVisibility,
+    density: "standard",
+    pageSize: 10,
+  });
 
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(
-        COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel)
-      );
-    } catch {}
-  }, [COLUMN_VISIBILITY_STORAGE_KEY, columnVisibilityModel]);
+  const [paginationModel, setPaginationModel] = React.useState(() => ({
+    page: 0,
+    pageSize,
+  }));
 
   const {
     control: createControl,
@@ -679,7 +678,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
     }
   };
 
-  const [density, setDensity] = React.useState<GridDensity>("standard");
+  // density is persisted via useGridPrefs
 
   if (isLoading) {
     return (
@@ -753,23 +752,19 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
 
         const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
         return (
-          <Tooltip
-            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            onClick={(e) => {
+              // Prevent row click/selection when user clicks the link.
+              e.stopPropagation();
+            }}
+            sx={{ fontWeight: 600 }}
           >
-            <Link
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-              onClick={(e) => {
-                // Prevent row click/selection when user clicks the link.
-                e.stopPropagation();
-              }}
-              sx={{ fontWeight: 600 }}
-            >
-              {value}
-            </Link>
-          </Tooltip>
+            {value}
+          </Link>
         );
       },
     },
@@ -901,8 +896,8 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       >
         <Box>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Sök, filtrera, visa/dölj kolumner, exportera listan och hantera
-            poster.
+            Klicka på ärendenummer för att öppna checklistan i client. Sök,
+            filtrera, visa/dölj kolumner, exportera tabellen till CSV.
           </Typography>
         </Box>
         <Button
@@ -953,7 +948,9 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       >
         <DataGrid
           columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={setColumnVisibilityModel}
+          onColumnVisibilityModelChange={(model) =>
+            setColumnVisibilityModel(model)
+          }
           localeText={GRID_DEFAULT_LOCALE_TEXT}
           rows={rows}
           columns={columns}
@@ -961,6 +958,11 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           disableRowSelectionOnClick
           pageSizeOptions={[10, 25, 50]}
           pagination
+          paginationModel={paginationModel}
+          onPaginationModelChange={(model) => {
+            setPaginationModel(model);
+            if (model.pageSize !== pageSize) setPageSize(model.pageSize);
+          }}
           slotProps={{
             loadingOverlay: {
               variant: "skeleton",
@@ -969,7 +971,6 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           }}
           density={density}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
             sorting: {
               sortModel: [{ field: "gid", sort: "asc" }],
             },

@@ -16,9 +16,10 @@ import {
   AdminPanelSettings,
   ExpandLess,
   ExpandMore,
-  Brightness4,
-  Brightness7,
 } from "@mui/icons-material";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+
 import { Link, useLocation } from "react-router-dom";
 import { useAuth, getInitials } from "../hooks/useAuth";
 
@@ -61,6 +62,18 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton
+              onClick={onToggleMode}
+              color="inherit"
+              aria-label="Toggle dark mode"
+              size="small"
+            >
+              {mode === "light" ? (
+                <LightModeOutlinedIcon />
+              ) : (
+                <DarkModeOutlinedIcon />
+              )}
+            </IconButton>
             {isAdmin && (
               <Avatar
                 sx={{
@@ -70,14 +83,6 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                 {getInitials(user?.username ?? "")}
               </Avatar>
             )}
-            <IconButton
-              onClick={onToggleMode}
-              color="inherit"
-              aria-label="Toggle dark mode"
-              size="small"
-            >
-              {mode === "light" ? <Brightness4 /> : <Brightness7 />}
-            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
@@ -225,7 +230,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                   }}
                 >
                   <ListItemText
-                    primary="Översikt (datagrid)"
+                    primary="Tabell"
                     slotProps={{
                       primary: {
                         fontWeight:
@@ -264,7 +269,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                   }}
                 >
                   <ListItemText
-                    primary="Översikt (datagrid)"
+                    primary="Tabell"
                     slotProps={{
                       primary: {
                         fontWeight:

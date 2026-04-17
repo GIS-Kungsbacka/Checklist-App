@@ -72,12 +72,12 @@ public class ManagementPlanController : ControllerBase
             var item = new ManagementPlan
             {
                 Gid = gid,
-                ArendeNummer = dto.ArendeNummer,
+                ArendeNummberOpenE = dto.ArendeNummberOpenE,
                 BestallareNamn = dto.BestallareNamn,
                 BestallareEpost = dto.BestallareEpost,
                 Sakerhetsklass = dto.Sakerhetsklass,
                 DatakallaTyp = dto.DatakallaTyp,
-                Schema = dto.Schema,
+                SchemaNamn = dto.SchemaNamn,
                 Namn = dto.Namn,
                 Titel = dto.Titel,
                 DataAgare = dto.DataAgare,
@@ -85,15 +85,24 @@ public class ManagementPlanController : ControllerBase
                 DataAdministrator = dto.DataAdministrator,
                 DataKonsument = dto.DataKonsument,
                 RedigeringsKalla = dto.RedigeringsKalla,
-                Publicering = dto.Publicering,
                 OppnaData = dto.OppnaData,
+                DokumentSkUrl = dto.DokumentSkUrl,
+                DokuementInfoUrl = dto.DokuementInfoUrl,
+                OvrigInformation = dto.OvrigInformation,
+                KritiskDatamangd = dto.KritiskDatamangd,
                 Arkivering = dto.Arkivering,
                 ArkiveringTidpunkt = dto.ArkiveringTidpunkt,
+                Publicerad = dto.Publicerad,
+                PubliceradOppnaData = dto.PubliceradOppnaData,
                 Atkomst = dto.Atkomst,
+                Integration = dto.Integration,
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 ForvaltningsplanVersion = dto.ForvaltningsplanVersion,
                 SkapadTidPunkt = dto.SkapadTidPunkt,
+                SkapadAv = dto.SkapadAv,
+                AndradTidPunkt = dto.AndradTidPunkt,
+                AndradAv = dto.AndradAv,
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -142,12 +151,12 @@ public class ManagementPlanController : ControllerBase
 public class CreateManagementPlanDto
 {
     public int Gid { get; set; }
-    public string? ArendeNummer { get; set; }
+    public string? ArendeNummberOpenE { get; set; }
     public string? BestallareNamn { get; set; }
     public string? BestallareEpost { get; set; }
     public string? Sakerhetsklass { get; set; }
     public string? DatakallaTyp { get; set; }
-    public string? Schema { get; set; }
+    public string? SchemaNamn { get; set; }
     public string? Namn { get; set; }
     public string? Titel { get; set; }
     public string? DataAgare { get; set; }
@@ -155,26 +164,35 @@ public class CreateManagementPlanDto
     public string[]? DataAdministrator { get; set; }
     public string[]? DataKonsument { get; set; }
     public string[]? RedigeringsKalla { get; set; }
-    public string? Publicering { get; set; }
     public bool? OppnaData { get; set; }
+    public string? DokumentSkUrl { get; set; }
+    public string? DokuementInfoUrl { get; set; }
+    public string? OvrigInformation { get; set; }
+    public bool? KritiskDatamangd { get; set; }
     public string? Arkivering { get; set; }
     public string? ArkiveringTidpunkt { get; set; }
+    public string[]? Publicerad { get; set; }
+    public bool? PubliceradOppnaData { get; set; }
     public string[]? Atkomst { get; set; }
+    public string[]? Integration { get; set; }
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? ForvaltningsplanVersion { get; set; }
-    public DateTimeOffset SkapadTidPunkt { get; set; }
+    public DateTimeOffset? SkapadTidPunkt { get; set; }
+    public string? SkapadAv { get; set; }
+    public DateTimeOffset? AndradTidPunkt { get; set; }
+    public string? AndradAv { get; set; }
 }
 
 public class UpdateManagementPlanDto
 {
     public int Gid { get; set; }
-    public string? ArendeNummer { get; set; }
+    public string? ArendeNummberOpenE { get; set; }
     public string? BestallareNamn { get; set; }
     public string? BestallareEpost { get; set; }
     public string? Sakerhetsklass { get; set; }
     public string? DatakallaTyp { get; set; }
-    public string? Schema { get; set; }
+    public string? SchemaNamn { get; set; }
     public string? Namn { get; set; }
     public string? Titel { get; set; }
     public string? DataAgare { get; set; }
@@ -182,13 +200,22 @@ public class UpdateManagementPlanDto
     public string[]? DataAdministrator { get; set; }
     public string[]? DataKonsument { get; set; }
     public string[]? RedigeringsKalla { get; set; }
-    public string? Publicering { get; set; }
     public bool? OppnaData { get; set; }
+    public string? DokumentSkUrl { get; set; }
+    public string? DokuementInfoUrl { get; set; }
+    public string? OvrigInformation { get; set; }
+    public bool? KritiskDatamangd { get; set; }
     public string? Arkivering { get; set; }
     public string? ArkiveringTidpunkt { get; set; }
+    public string[]? Publicerad { get; set; }
+    public bool? PubliceradOppnaData { get; set; }
     public string[]? Atkomst { get; set; }
+    public string[]? Integration { get; set; }
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? ForvaltningsplanVersion { get; set; }
-    public DateTimeOffset SkapadTidPunkt { get; set; }
+    public DateTimeOffset? SkapadTidPunkt { get; set; }
+    public string? SkapadAv { get; set; }
+    public DateTimeOffset? AndradTidPunkt { get; set; }
+    public string? AndradAv { get; set; }
 }

@@ -39,18 +39,18 @@ public class DbContextMetadataRepository : IMetadataRepository
             return null;
         }
 
-        existing.SakerhetsKlassDokument = item.SakerhetsKlassDokument;
-        existing.ArendeNummer = item.ArendeNummer;
+        existing.ArendeNummerOpenE = item.ArendeNummerOpenE;
         existing.BestallareNamn = item.BestallareNamn;
         existing.BestallareEpost = item.BestallareEpost;
         existing.SakerhetsKlass = item.SakerhetsKlass;
         existing.DataKallaTyp = item.DataKallaTyp;
-        existing.Schema = item.Schema;
+        existing.SchemaNamn = item.SchemaNamn;
         existing.Namn = item.Namn;
         existing.Beskrivning = item.Beskrivning;
+        existing.Ursprung = item.Ursprung;
         existing.Syfte = item.Syfte;
-        existing.Datakalla = item.Datakalla;
         existing.Metod = item.Metod;
+        existing.MetodUrl = item.MetodUrl;
         existing.Projekt = item.Projekt;
         existing.GeografiskBegransning = item.GeografiskBegransning;
         existing.UppdateringsFrekvens = item.UppdateringsFrekvens;
@@ -66,10 +66,10 @@ public class DbContextMetadataRepository : IMetadataRepository
         existing.AnvandarBegransningLicens = item.AnvandarBegransningLicens;
         existing.AnvandarBegransningLicensText = item.AnvandarBegransningLicensText;
         existing.RelateradeResurser = item.RelateradeResurser;
+        existing.KolumnBeskrivningUrl = item.KolumnBeskrivningUrl;
         existing.Status = item.Status;
         existing.Handlaggare = item.Handlaggare;
         existing.MetaDataVersion = item.MetaDataVersion;
-        existing.SkapadTidPunkt = item.SkapadTidPunkt;
 
         await _context.SaveChangesAsync();
         return existing;

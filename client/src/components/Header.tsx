@@ -1,6 +1,7 @@
 import { AppBar, Toolbar, Typography, IconButton } from "@mui/material";
 import { Checklist } from "@mui/icons-material";
-import { Brightness4, Brightness7 } from "@mui/icons-material";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import { useNavigate } from "react-router-dom";
 
 type HeaderProps = {
@@ -25,7 +26,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
           sx={{ flexGrow: 1, fontWeight: 600, cursor: "pointer" }}
           onClick={() => navigate("/")}
         >
-          Geodata - Stärka fabriken
+          Geodata - checklistor
         </Typography>
         <IconButton
           onClick={() => onToggleMode()}
@@ -35,10 +36,10 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
         >
           {mode === "light" ? (
             // In light mode we show a "dark" moon icon.
-            <Brightness4 />
+            <LightModeOutlinedIcon />
           ) : (
             // In dark mode we show a "light" sun icon.
-            <Brightness7 />
+            <DarkModeOutlinedIcon />
           )}
         </IconButton>
       </Toolbar>

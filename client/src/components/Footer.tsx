@@ -38,7 +38,7 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {currentYear} Geodata - Stärka fabriken.
+            © {currentYear} Geodataavdelningen
           </Typography>
           <Box sx={{ display: "flex", gap: 4 }}>
             <Link

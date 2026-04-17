@@ -71,18 +71,18 @@ public class MetadataController : ControllerBase
             var item = new Metadata
             {
                 Gid = gid,
-                SakerhetsKlassDokument = dto.SakerhetsKlassDokument,
-                ArendeNummer = dto.ArendeNummer,
+                ArendeNummerOpenE = dto.ArendeNummerOpenE,
                 BestallareNamn = dto.BestallareNamn,
                 BestallareEpost = dto.BestallareEpost,
                 SakerhetsKlass = dto.SakerhetsKlass,
                 DataKallaTyp = dto.DataKallaTyp,
-                Schema = dto.Schema,
+                SchemaNamn = dto.SchemaNamn,
                 Namn = dto.Namn,
                 Beskrivning = dto.Beskrivning,
+                Ursprung = dto.Ursprung,
                 Syfte = dto.Syfte,
-                Datakalla = dto.Datakalla,
                 Metod = dto.Metod,
+                MetodUrl = dto.MetodUrl,
                 Projekt = dto.Projekt,
                 GeografiskBegransning = dto.GeografiskBegransning,
                 UppdateringsFrekvens = dto.UppdateringsFrekvens,
@@ -98,10 +98,10 @@ public class MetadataController : ControllerBase
                 AnvandarBegransningLicens = dto.AnvandarBegransningLicens,
                 AnvandarBegransningLicensText = dto.AnvandarBegransningLicensText,
                 RelateradeResurser = dto.RelateradeResurser,
+                KolumnBeskrivningUrl = dto.KolumnBeskrivningUrl,
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
-                SkapadTidPunkt = dto.SkapadTidPunkt,
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -150,18 +150,18 @@ public class MetadataController : ControllerBase
 public class CreateMetadataDto
 {
     public int Gid { get; set; }
-    public string? SakerhetsKlassDokument { get; set; }
-    public string? ArendeNummer { get; set; }
+    public string? ArendeNummerOpenE { get; set; }
     public string? BestallareNamn { get; set; }
     public string? BestallareEpost { get; set; }
     public string? SakerhetsKlass { get; set; }
     public string? DataKallaTyp { get; set; }
-    public string? Schema { get; set; }
+    public string? SchemaNamn { get; set; }
     public string? Namn { get; set; }
     public string? Beskrivning { get; set; }
+    public string[]? Ursprung { get; set; }
     public string? Syfte { get; set; }
-    public string[]? Datakalla { get; set; }
     public string? Metod { get; set; }
+    public string? MetodUrl { get; set; }
     public string? Projekt { get; set; }
     public string[]? GeografiskBegransning { get; set; }
     public string? UppdateringsFrekvens { get; set; }
@@ -177,27 +177,27 @@ public class CreateMetadataDto
     public bool AnvandarBegransningLicens { get; set; }
     public string? AnvandarBegransningLicensText { get; set; }
     public string[]? RelateradeResurser { get; set; }
+    public string? KolumnBeskrivningUrl { get; set; }
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? MetaDataVersion { get; set; }
-    public DateTimeOffset SkapadTidPunkt { get; set; }
 }
 
 public class UpdateMetadataDto
 {
     public int Gid { get; set; }
-    public string? SakerhetsKlassDokument { get; set; }
-    public string? ArendeNummer { get; set; }
+    public string? ArendeNummerOpenE { get; set; }
     public string? BestallareNamn { get; set; }
     public string? BestallareEpost { get; set; }
     public string? SakerhetsKlass { get; set; }
     public string? DataKallaTyp { get; set; }
-    public string? Schema { get; set; }
+    public string? SchemaNamn { get; set; }
     public string? Namn { get; set; }
     public string? Beskrivning { get; set; }
+    public string[]? Ursprung { get; set; }
     public string? Syfte { get; set; }
-    public string[]? Datakalla { get; set; }
     public string? Metod { get; set; }
+    public string? MetodUrl { get; set; }
     public string? Projekt { get; set; }
     public string[]? GeografiskBegransning { get; set; }
     public string? UppdateringsFrekvens { get; set; }
@@ -213,8 +213,8 @@ public class UpdateMetadataDto
     public bool AnvandarBegransningLicens { get; set; }
     public string? AnvandarBegransningLicensText { get; set; }
     public string[]? RelateradeResurser { get; set; }
+    public string? KolumnBeskrivningUrl { get; set; }
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? MetaDataVersion { get; set; }
-    public DateTimeOffset SkapadTidPunkt { get; set; }
 }

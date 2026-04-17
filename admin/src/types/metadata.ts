@@ -1,23 +1,22 @@
 export interface Metadata {
   gid: number;
-  sakerhetsKlassDokument?: string;
-  arendeNummer?: string;
+  arendeNummerOpenE?: string;
   bestallareNamn?: string;
   bestallareEpost?: string;
   sakerhetsKlass?: string;
   dataKallaTyp?: string;
-  schema?: string;
+  schemaNamn?: string;
   namn?: string;
-  titel?: string;
   beskrivning?: string;
+  ursprung?: string[];
   syfte?: string;
-  datakalla?: string[];
   metod?: string;
+  metodUrl?: string;
   projekt?: string;
   geografiskBegransning?: string[];
   uppdateringsFrekvens?: string;
   fullstandighet?: string;
-  Skalniva?: string;
+  skalniva?: string;
   nyckelOrd?: string[];
   kategori?: string;
   tidsperiod?: boolean;
@@ -28,10 +27,10 @@ export interface Metadata {
   anvandarBegransningLicens?: boolean;
   anvandarBegransningLicensText?: string;
   relateradeResurser?: string[];
+  kolumnBeskrivningUrl?: string;
   status?: string;
   handlaggare?: string;
   metaDataVersion?: string;
-  skapadTidPunkt?: string;
 }
 
 export type UpdateMetadataDto = Omit<Metadata, "gid">;

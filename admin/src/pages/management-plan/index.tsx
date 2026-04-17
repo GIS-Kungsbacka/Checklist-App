@@ -10,6 +10,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControlLabel,
   Link,
   ListItemText,
@@ -19,7 +20,6 @@ import {
   TextField,
   Tooltip,
   Typography,
-  Divider,
 } from "@mui/material";
 import {
   ColumnsPanelTrigger,
@@ -28,8 +28,8 @@ import {
   ExportPrint,
   FilterPanelTrigger,
   GridActionsCellItem,
-  type GridDensity,
   type GridColDef,
+  type GridDensity,
   type GridRenderCellParams,
   QuickFilter,
   QuickFilterClear,
@@ -38,22 +38,24 @@ import {
   ToolbarButton,
 } from "@mui/x-data-grid";
 import CancelIcon from "@mui/icons-material/Cancel";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import DensityMediumOutlinedIcon from "@mui/icons-material/DensityMediumOutlined";
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
+  useDeleteManagementPlan,
   useManagementPlans,
   useUpdateManagementPlan,
-  useDeleteManagementPlan,
 } from "../../hooks/useManagementPlan";
 import type {
   ManagementPlan,
   UpdateManagementPlanDto,
 } from "../../types/managementPlan";
+import appConfig from "../../config.json";
+import { useGridPrefs } from "../../utils/gridPrefs";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -64,31 +66,40 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
-const COLUMN_VISIBILITY_STORAGE_KEY = "management-plan-column-visibility";
+const GRID_PREFS_STORAGE_KEY = "management-plan-grid-prefs";
 const defaultColumnVisibility = {
   gid: true,
   namn: true,
-  arendeNummer: true,
+  arendeNummberOpenE: true,
   bestallareNamn: true,
   bestallareEpost: false,
   sakerhetsklass: false,
   datakallaTyp: false,
-  schema: false,
+  schemaNamn: false,
   titel: false,
   dataAgare: false,
   dataForvaltare: false,
   dataAdministrator: false,
   dataKonsument: false,
   redigeringsKalla: false,
-  publicering: false,
   oppnaData: false,
+  dokumentSkUrl: false,
+  dokuementInfoUrl: false,
+  ovrigInformation: false,
+  kritiskDatamangd: false,
   arkivering: false,
   arkiveringTidpunkt: false,
+  publicerad: false,
+  publiceradOppnaData: false,
   atkomst: false,
+  integration: false,
   status: true,
   handlaggare: true,
   forvaltningsplanVersion: false,
   skapadTidPunkt: false,
+  skapadAv: false,
+  andradTidPunkt: false,
+  andradAv: false,
   actions: true,
 };
 
@@ -249,12 +260,12 @@ function GridToolbar({
 }
 
 type ManagementPlanFormState = {
-  arendeNummer: string;
+  arendeNummberOpenE: string;
   bestallareNamn: string;
   bestallareEpost: string;
   sakerhetsklass: string;
   datakallaTyp: string;
-  schema: string;
+  schemaNamn: string;
   namn: string;
   titel: string;
   dataAgare: string;
@@ -262,24 +273,33 @@ type ManagementPlanFormState = {
   dataAdministrator: string;
   dataKonsument: string;
   redigeringsKalla: string;
-  publicering: string;
   oppnaData: boolean;
+  dokumentSkUrl: string;
+  dokuementInfoUrl: string;
+  ovrigInformation: string;
+  kritiskDatamangd: boolean;
   arkivering: string;
   arkiveringTidpunkt: string;
+  publicerad: string;
+  publiceradOppnaData: boolean;
   atkomst: string;
+  integration: string;
   status: string;
   handlaggare: string;
   forvaltningsplanVersion: string;
   skapadTidPunkt: string;
+  skapadAv: string;
+  andradTidPunkt: string;
+  andradAv: string;
 };
 
 const emptyForm: ManagementPlanFormState = {
-  arendeNummer: "",
+  arendeNummberOpenE: "",
   bestallareNamn: "",
   bestallareEpost: "",
   sakerhetsklass: "",
   datakallaTyp: "",
-  schema: "",
+  schemaNamn: "",
   namn: "",
   titel: "",
   dataAgare: "",
@@ -287,24 +307,33 @@ const emptyForm: ManagementPlanFormState = {
   dataAdministrator: "",
   dataKonsument: "",
   redigeringsKalla: "",
-  publicering: "",
   oppnaData: false,
+  dokumentSkUrl: "",
+  dokuementInfoUrl: "",
+  ovrigInformation: "",
+  kritiskDatamangd: false,
   arkivering: "",
   arkiveringTidpunkt: "",
+  publicerad: "",
+  publiceradOppnaData: false,
   atkomst: "",
+  integration: "",
   status: "",
   handlaggare: "",
   forvaltningsplanVersion: "",
   skapadTidPunkt: "",
+  skapadAv: "",
+  andradTidPunkt: "",
+  andradAv: "",
 };
 
 const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
-  arendeNummer: item.arendeNummer ?? "",
+  arendeNummberOpenE: item.arendeNummberOpenE ?? "",
   bestallareNamn: item.bestallareNamn ?? "",
   bestallareEpost: item.bestallareEpost ?? "",
   sakerhetsklass: item.sakerhetsklass ?? "",
   datakallaTyp: item.datakallaTyp ?? "",
-  schema: item.schema ?? "",
+  schemaNamn: item.schemaNamn ?? "",
   namn: item.namn ?? "",
   titel: item.titel ?? "",
   dataAgare: item.dataAgare ?? "",
@@ -312,24 +341,33 @@ const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
   dataAdministrator: fromArray(item.dataAdministrator),
   dataKonsument: fromArray(item.dataKonsument),
   redigeringsKalla: fromArray(item.redigeringsKalla),
-  publicering: item.publicering ?? "",
   oppnaData: item.oppnaData ?? false,
+  dokumentSkUrl: item.dokumentSkUrl ?? "",
+  dokuementInfoUrl: item.dokuementInfoUrl ?? "",
+  ovrigInformation: item.ovrigInformation ?? "",
+  kritiskDatamangd: item.kritiskDatamangd ?? false,
   arkivering: item.arkivering ?? "",
   arkiveringTidpunkt: item.arkiveringTidpunkt ?? "",
+  publicerad: fromArray(item.publicerad),
+  publiceradOppnaData: item.publiceradOppnaData ?? false,
   atkomst: fromArray(item.atkomst),
+  integration: fromArray(item.integration),
   status: item.status ?? "",
   handlaggare: item.handlaggare ?? "",
   forvaltningsplanVersion: item.forvaltningsplanVersion ?? "",
   skapadTidPunkt: item.skapadTidPunkt ?? "",
+  skapadAv: item.skapadAv ?? "",
+  andradTidPunkt: item.andradTidPunkt ?? "",
+  andradAv: item.andradAv ?? "",
 });
 
 const toDto = (state: ManagementPlanFormState): UpdateManagementPlanDto => ({
-  arendeNummer: state.arendeNummer || undefined,
+  arendeNummberOpenE: state.arendeNummberOpenE || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
   sakerhetsklass: state.sakerhetsklass || undefined,
   datakallaTyp: state.datakallaTyp || undefined,
-  schema: state.schema || undefined,
+  schemaNamn: state.schemaNamn || undefined,
   namn: state.namn || undefined,
   titel: state.titel || undefined,
   dataAgare: state.dataAgare || undefined,
@@ -337,15 +375,24 @@ const toDto = (state: ManagementPlanFormState): UpdateManagementPlanDto => ({
   dataAdministrator: toArray(state.dataAdministrator),
   dataKonsument: toArray(state.dataKonsument),
   redigeringsKalla: toArray(state.redigeringsKalla),
-  publicering: state.publicering || undefined,
   oppnaData: state.oppnaData,
+  dokumentSkUrl: state.dokumentSkUrl || undefined,
+  dokuementInfoUrl: state.dokuementInfoUrl || undefined,
+  ovrigInformation: state.ovrigInformation || undefined,
+  kritiskDatamangd: state.kritiskDatamangd,
   arkivering: state.arkivering || undefined,
   arkiveringTidpunkt: state.arkiveringTidpunkt || undefined,
+  publicerad: toArray(state.publicerad),
+  publiceradOppnaData: state.publiceradOppnaData,
   atkomst: toArray(state.atkomst),
+  integration: toArray(state.integration),
   status: state.status || undefined,
   handlaggare: state.handlaggare || undefined,
   forvaltningsplanVersion: state.forvaltningsplanVersion || undefined,
   skapadTidPunkt: state.skapadTidPunkt || undefined,
+  skapadAv: state.skapadAv || undefined,
+  andradTidPunkt: state.andradTidPunkt || undefined,
+  andradAv: state.andradAv || undefined,
 });
 
 export default function ManagementPlanPage({
@@ -353,10 +400,7 @@ export default function ManagementPlanPage({
 }: {
   mode: "light" | "dark";
 }) {
-  const arendenummerLinkBaseUrl = React.useMemo(() => {
-    // Use the current domain (dev/test/prod) automatically.
-    return `${window.location.origin}/FormApp/client/form`;
-  }, []);
+  const managementPlanCatalogBaseUrl = appConfig.managementPlanBaseUrl;
 
   const { data = [], isLoading, isError } = useManagementPlans();
   const updateMutation = useUpdateManagementPlan();
@@ -367,26 +411,23 @@ export default function ManagementPlanPage({
     null
   );
   const [form, setForm] = React.useState<ManagementPlanFormState>(emptyForm);
-  const [density, setDensity] = React.useState<GridDensity>("standard");
-  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState(
-    () => {
-      try {
-        const saved = localStorage.getItem(COLUMN_VISIBILITY_STORAGE_KEY);
-        return saved ? JSON.parse(saved) : defaultColumnVisibility;
-      } catch {
-        return defaultColumnVisibility;
-      }
-    }
-  );
+  const {
+    columnVisibilityModel,
+    setColumnVisibilityModel,
+    density,
+    setDensity,
+    pageSize,
+    setPageSize,
+  } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
+    columnVisibilityModel: defaultColumnVisibility,
+    density: "standard",
+    pageSize: 10,
+  });
 
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(
-        COLUMN_VISIBILITY_STORAGE_KEY,
-        JSON.stringify(columnVisibilityModel)
-      );
-    } catch {}
-  }, [columnVisibilityModel]);
+  const [paginationModel, setPaginationModel] = React.useState(() => ({
+    page: 0,
+    pageSize,
+  }));
 
   const rows = React.useMemo(
     () =>
@@ -406,30 +447,28 @@ export default function ManagementPlanPage({
       ),
     },
     {
-      field: "arendeNummer",
+      field: "arendeNummberOpenE",
       headerName: "Ärendenummer",
       minWidth: 150,
       flex: 1,
       hideable: false,
       renderCell: (params: GridRenderCellParams<ManagementPlan>) => {
         const value = String(params.value ?? "").trim();
-        if (!value) return "-";
+        if (!value) {
+          return "-";
+        }
 
-        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
+        const href = `${managementPlanCatalogBaseUrl}/${encodeURIComponent(value)}`;
         return (
-          <Tooltip
-            title={`Öppna ärendenummer ${value} i nytt fönster (client)`}
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            sx={{ fontWeight: 600 }}
           >
-            <Link
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              underline="hover"
-              sx={{ fontWeight: 600 }}
-            >
-              {value}
-            </Link>
-          </Tooltip>
+            {value}
+          </Link>
         );
       },
     },
@@ -459,7 +498,7 @@ export default function ManagementPlanPage({
       minWidth: 150,
       flex: 1,
     },
-    { field: "schema", headerName: "Schema", minWidth: 140, flex: 0.8 },
+    { field: "schemaNamn", headerName: "Schema", minWidth: 140, flex: 0.8 },
     { field: "dataAgare", headerName: "Dataägare", minWidth: 150, flex: 1 },
     {
       field: "dataForvaltare",
@@ -489,16 +528,37 @@ export default function ManagementPlanPage({
       valueGetter: (_value, row) => row.redigeringsKalla?.join(", ") ?? "-",
     },
     {
-      field: "publicering",
-      headerName: "Publicering",
-      minWidth: 140,
-      flex: 0.9,
-    },
-    {
       field: "oppnaData",
       headerName: "Öppna data",
       minWidth: 120,
       flex: 0.8,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
+      field: "dokumentSkUrl",
+      headerName: "Dokument SK URL",
+      minWidth: 190,
+      flex: 1,
+    },
+    {
+      field: "dokuementInfoUrl",
+      headerName: "Dokument info URL",
+      minWidth: 190,
+      flex: 1,
+    },
+    {
+      field: "ovrigInformation",
+      headerName: "Övrig information",
+      minWidth: 200,
+      flex: 1.1,
+    },
+    {
+      field: "kritiskDatamangd",
+      headerName: "Kritisk datamängd",
+      minWidth: 150,
+      flex: 0.9,
       type: "boolean",
       renderCell: (params: GridRenderCellParams) =>
         params.value ? "Ja" : params.value === false ? "Nej" : "-",
@@ -511,11 +571,34 @@ export default function ManagementPlanPage({
       flex: 1,
     },
     {
+      field: "publicerad",
+      headerName: "Publicerad",
+      minWidth: 170,
+      flex: 1,
+      valueGetter: (_value, row) => row.publicerad?.join(", ") ?? "-",
+    },
+    {
+      field: "publiceradOppnaData",
+      headerName: "Publicerad öppna data",
+      minWidth: 170,
+      flex: 1,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams) =>
+        params.value ? "Ja" : params.value === false ? "Nej" : "-",
+    },
+    {
       field: "atkomst",
       headerName: "Åtkomst",
       minWidth: 180,
       flex: 1,
       valueGetter: (_value, row) => row.atkomst?.join(", ") ?? "-",
+    },
+    {
+      field: "integration",
+      headerName: "Integration",
+      minWidth: 180,
+      flex: 1,
+      valueGetter: (_value, row) => row.integration?.join(", ") ?? "-",
     },
     { field: "status", headerName: "Status", minWidth: 140, flex: 1 },
     { field: "handlaggare", headerName: "Handläggare", minWidth: 150, flex: 1 },
@@ -531,6 +614,14 @@ export default function ManagementPlanPage({
       minWidth: 170,
       flex: 1,
     },
+    { field: "skapadAv", headerName: "Skapad av", minWidth: 150, flex: 1 },
+    {
+      field: "andradTidPunkt",
+      headerName: "Ändrad tidpunkt",
+      minWidth: 170,
+      flex: 1,
+    },
+    { field: "andradAv", headerName: "Ändrad av", minWidth: 150, flex: 1 },
     {
       field: "actions",
       headerName: "Åtgärder",
@@ -589,7 +680,8 @@ export default function ManagementPlanPage({
       >
         <Typography variant="body2" fontWeight={600}>
           Här skapas och listas förvaltningsplaner automatiskt som kommer från
-          e-tjänsten. Redigera eller ta bort objekt.
+          e-tjänsten. Redigera eller ta bort objekt. <br /> Klicka på
+          ärendenummer för att öppna förvaltningsplanen i metadatakatalogen.
         </Typography>
       </Box>
 
@@ -607,13 +699,20 @@ export default function ManagementPlanPage({
       >
         <DataGrid
           columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={setColumnVisibilityModel}
+          onColumnVisibilityModelChange={(model) => setColumnVisibilityModel(model)}
           rows={rows}
           columns={columns}
           localeText={GRID_DEFAULT_LOCALE_TEXT}
           pageSizeOptions={[10, 25, 50]}
           density={density}
           showToolbar
+          disableRowSelectionOnClick
+          slotProps={{
+            loadingOverlay: {
+              variant: "skeleton",
+              noRowsVariant: "skeleton",
+            },
+          }}
           slots={{
             toolbar: (props) => (
               <GridToolbar
@@ -624,12 +723,16 @@ export default function ManagementPlanPage({
             ),
           }}
           initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
             sorting: { sortModel: [{ field: "gid", sort: "asc" }] },
+          }}
+          pagination
+          paginationModel={paginationModel}
+          onPaginationModelChange={(model) => {
+            setPaginationModel(model);
+            if (model.pageSize !== pageSize) setPageSize(model.pageSize);
           }}
           sx={{
             border: 0,
-
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "background.paper",
               borderBottom: "1px solid",
@@ -647,12 +750,10 @@ export default function ManagementPlanPage({
               borderBottom: "1px dotted",
               borderColor: "divider",
             },
-
             "& .MuiDataGrid-cellCheckbox, & .MuiDataGrid-columnHeaderCheckbox":
               {
                 px: 1,
               },
-
             "& .MuiDataGrid-cell:focus, & .MuiDataGrid-columnHeader:focus": {
               outline: "none",
             },
@@ -660,7 +761,6 @@ export default function ManagementPlanPage({
               {
                 outline: "none",
               },
-
             "& .MuiDataGrid-footerContainer": {
               borderTop: "1px solid",
               borderColor: "divider",
@@ -693,25 +793,32 @@ export default function ManagementPlanPage({
               [
                 ["namn", "Namn"],
                 ["titel", "Titel"],
-                ["arendeNummer", "Ärendenummer"],
+                ["arendeNummberOpenE", "Ärendenummer"],
                 ["bestallareNamn", "Beställare namn"],
                 ["bestallareEpost", "Beställare e-post"],
                 ["sakerhetsklass", "Säkerhetsklass"],
                 ["datakallaTyp", "Datakälla typ"],
-                ["schema", "Schema"],
+                ["schemaNamn", "Schema"],
                 ["dataAgare", "Dataägare"],
                 ["dataForvaltare", "Dataförvaltare"],
                 ["dataAdministrator", "Dataadministratör (kommaseparerat)"],
                 ["dataKonsument", "Datakonsument (kommaseparerat)"],
                 ["redigeringsKalla", "Redigeringskälla (kommaseparerat)"],
-                ["atkomst", "Åtkomst (kommaseparerat)"],
-                ["publicering", "Publicering"],
+                ["dokumentSkUrl", "Dokument SK URL"],
+                ["dokuementInfoUrl", "Dokument info URL"],
+                ["ovrigInformation", "Övrig information"],
                 ["arkivering", "Arkivering"],
                 ["arkiveringTidpunkt", "Arkivering tidpunkt"],
+                ["publicerad", "Publicerad (kommaseparerat)"],
+                ["atkomst", "Åtkomst (kommaseparerat)"],
+                ["integration", "Integration (kommaseparerat)"],
                 ["status", "Status"],
                 ["handlaggare", "Handläggare"],
                 ["forvaltningsplanVersion", "Förvaltningsplan version"],
                 ["skapadTidPunkt", "Skapad tidpunkt (ISO datetime)"],
+                ["skapadAv", "Skapad av"],
+                ["andradTidPunkt", "Ändrad tidpunkt (ISO datetime)"],
+                ["andradAv", "Ändrad av"],
               ] as const
             ).map(([key, label]) => (
               <TextField
@@ -721,10 +828,12 @@ export default function ManagementPlanPage({
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, [key]: e.target.value }))
                 }
+                multiline={key === "ovrigInformation"}
+                minRows={key === "ovrigInformation" ? 2 : undefined}
               />
             ))}
           </Box>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -739,11 +848,41 @@ export default function ManagementPlanPage({
               }
               label="Öppna data"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={form.kritiskDatamangd}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      kritiskDatamangd: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Kritisk datamängd"
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={form.publiceradOppnaData}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      publiceradOppnaData: e.target.checked,
+                    }))
+                  }
+                />
+              }
+              label="Publicerad öppna data"
+            />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button
-            onClick={() => (openEdit ? setOpenEdit(null) : setOpenEdit(null))}
+            onClick={() =>
+              openEdit ? setOpenEdit(null) : setOpenCreate(false)
+            }
           >
             Avbryt
           </Button>
@@ -752,7 +891,9 @@ export default function ManagementPlanPage({
             disabled={isSubmitting}
             onClick={() => {
               const dto = toDto(form);
-              if (!openEdit) return;
+              if (!openEdit) {
+                return;
+              }
               updateMutation.mutate(
                 { gid: openEdit.gid, data: dto },
                 { onSuccess: () => setOpenEdit(null) }
@@ -773,8 +914,8 @@ export default function ManagementPlanPage({
           </Alert>
           <Typography>
             Vill du ta bort posten med GID <strong>{deleteItem?.gid}</strong>
-            {deleteItem?.arendeNummer ? (
-              <> (ärendenummer: {deleteItem.arendeNummer})</>
+            {deleteItem?.arendeNummberOpenE ? (
+              <> (ärendenummer: {deleteItem.arendeNummberOpenE})</>
             ) : null}
           </Typography>
         </DialogContent>
@@ -785,7 +926,9 @@ export default function ManagementPlanPage({
             color="error"
             variant="contained"
             onClick={() => {
-              if (!deleteItem) return;
+              if (!deleteItem) {
+                return;
+              }
               deleteMutation.mutate(deleteItem.gid, {
                 onSuccess: () => setDeleteItem(null),
               });

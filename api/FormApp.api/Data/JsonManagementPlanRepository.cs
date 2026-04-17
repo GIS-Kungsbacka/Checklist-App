@@ -37,12 +37,12 @@ namespace FormApp.Api.Data
                 new ManagementPlan
                 {
                     Gid = 1,
-                    ArendeNummer = "263521",
+                    ArendeNummberOpenE = "263521",
                     BestallareNamn = "Testnamn",
                     BestallareEpost = "testnamn@test.com",
                     Sakerhetsklass = "sk0_test",
-                    DatakallaTyp = "{Extern,organisation}",
-                    Schema = "sk0_schema_test",
+                    DatakallaTyp = "Extern, organisation",
+                    SchemaNamn = "sk0_schema_test",
                     Namn = "lekplatser_test_123",
                     Titel = "lekplatser_test_123",
                     DataAgare = "Testnamn",
@@ -50,15 +50,24 @@ namespace FormApp.Api.Data
                     DataAdministrator = ["Jag"],
                     DataKonsument = ["organisation"],
                     RedigeringsKalla = ["Extern", "organisation"],
-                    Publicering = "Nej",
                     OppnaData = false,
+                    DokumentSkUrl = "https://example.com/dokument-sk",
+                    DokuementInfoUrl = "https://example.com/dokument-info",
+                    OvrigInformation = "Testinformation",
+                    KritiskDatamangd = false,
                     Arkivering = "Nej",
                     ArkiveringTidpunkt = "Ej planerad",
+                    Publicerad = ["Nej"],
+                    PubliceradOppnaData = false,
                     Atkomst = ["Intern"],
+                    Integration = ["Ingen"],
                     Status = "granskas",
                     Handlaggare = "Jag",
                     ForvaltningsplanVersion = "1.0",
-                    SkapadTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00")
+                    SkapadTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00"),
+                    SkapadAv = "System",
+                    AndradTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00"),
+                    AndradAv = "System"
                 }
             };
 
@@ -136,12 +145,12 @@ namespace FormApp.Api.Data
                 return Task.FromResult<ManagementPlan?>(null);
             }
 
-            existing.ArendeNummer = item.ArendeNummer;
+            existing.ArendeNummberOpenE = item.ArendeNummberOpenE;
             existing.BestallareNamn = item.BestallareNamn;
             existing.BestallareEpost = item.BestallareEpost;
             existing.Sakerhetsklass = item.Sakerhetsklass;
             existing.DatakallaTyp = item.DatakallaTyp;
-            existing.Schema = item.Schema;
+            existing.SchemaNamn = item.SchemaNamn;
             existing.Namn = item.Namn;
             existing.Titel = item.Titel;
             existing.DataAgare = item.DataAgare;
@@ -149,15 +158,24 @@ namespace FormApp.Api.Data
             existing.DataAdministrator = item.DataAdministrator;
             existing.DataKonsument = item.DataKonsument;
             existing.RedigeringsKalla = item.RedigeringsKalla;
-            existing.Publicering = item.Publicering;
             existing.OppnaData = item.OppnaData;
+            existing.DokumentSkUrl = item.DokumentSkUrl;
+            existing.DokuementInfoUrl = item.DokuementInfoUrl;
+            existing.OvrigInformation = item.OvrigInformation;
+            existing.KritiskDatamangd = item.KritiskDatamangd;
             existing.Arkivering = item.Arkivering;
             existing.ArkiveringTidpunkt = item.ArkiveringTidpunkt;
+            existing.Publicerad = item.Publicerad;
+            existing.PubliceradOppnaData = item.PubliceradOppnaData;
             existing.Atkomst = item.Atkomst;
+            existing.Integration = item.Integration;
             existing.Status = item.Status;
             existing.Handlaggare = item.Handlaggare;
             existing.ForvaltningsplanVersion = item.ForvaltningsplanVersion;
             existing.SkapadTidPunkt = item.SkapadTidPunkt;
+            existing.SkapadAv = item.SkapadAv;
+            existing.AndradTidPunkt = item.AndradTidPunkt;
+            existing.AndradAv = item.AndradAv;
 
             SaveData(data);
             return Task.FromResult<ManagementPlan?>(existing);

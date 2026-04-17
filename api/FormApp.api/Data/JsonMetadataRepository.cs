@@ -37,19 +37,19 @@ using System.Text.Json;
             new Metadata
             {
                 Gid = 1,
-                SakerhetsKlassDokument = "sk-0-test.pdf",
-                ArendeNummer = "263521",
+                ArendeNummerOpenE = "263521",
                 BestallareNamn = "Testnamn",
                 BestallareEpost = "testnamn@test.com",
                 SakerhetsKlass = "sk0_test",
-                DataKallaTyp = "{Extern,organisation}",
-                Schema = "sk0_schema_test",
+                DataKallaTyp = "Extern, organisation",
+                SchemaNamn = "sk0_schema_test",
                 Namn = "lekplatser_test_123",
                 Beskrivning = "Test beskrivning",
+                Ursprung = ["Extern", "Organisation"],
                 Syfte = "Att identifiera alla lekplatser och ta en kopp kaffe",
-                Datakalla = ["Extern","organisation"],
                 Metod = "Fjärranalys",
-                Projekt = "Nej",
+                MetodUrl = "https://example.com/metod",
+                Projekt = "Testprojekt",
                 GeografiskBegransning = ["tätort","test"],
                 UppdateringsFrekvens = "Årligen",
                 Fullstandighet = "Fullständig",
@@ -64,10 +64,10 @@ using System.Text.Json;
                 AnvandarBegransningLicens = false,
                 AnvandarBegransningLicensText = "Test",
                 RelateradeResurser = ["Nej"],
+                KolumnBeskrivningUrl = "https://example.com/kolumner",
                 Status = "granskas",
                 Handlaggare = "Jag",
-                MetaDataVersion = "1.0",
-                SkapadTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00")
+                MetaDataVersion = "1.0"
             }
         };
 
@@ -145,18 +145,18 @@ using System.Text.Json;
                 return Task.FromResult<Metadata?>(null);
             }
 
-            existing.SakerhetsKlassDokument = item.SakerhetsKlassDokument;
-            existing.ArendeNummer = item.ArendeNummer;
+            existing.ArendeNummerOpenE = item.ArendeNummerOpenE;
             existing.BestallareNamn = item.BestallareNamn;
             existing.BestallareEpost = item.BestallareEpost;
             existing.SakerhetsKlass = item.SakerhetsKlass;
             existing.DataKallaTyp = item.DataKallaTyp;
-            existing.Schema = item.Schema;
+            existing.SchemaNamn = item.SchemaNamn;
             existing.Namn = item.Namn;
             existing.Beskrivning = item.Beskrivning;
+            existing.Ursprung = item.Ursprung;
             existing.Syfte = item.Syfte;
-            existing.Datakalla = item.Datakalla;
             existing.Metod = item.Metod;
+            existing.MetodUrl = item.MetodUrl;
             existing.Projekt = item.Projekt;
             existing.GeografiskBegransning = item.GeografiskBegransning;
             existing.UppdateringsFrekvens = item.UppdateringsFrekvens;
@@ -172,10 +172,10 @@ using System.Text.Json;
             existing.AnvandarBegransningLicens = item.AnvandarBegransningLicens;
             existing.AnvandarBegransningLicensText = item.AnvandarBegransningLicensText;
             existing.RelateradeResurser = item.RelateradeResurser;
+            existing.KolumnBeskrivningUrl = item.KolumnBeskrivningUrl;
             existing.Status = item.Status;
             existing.Handlaggare = item.Handlaggare;
             existing.MetaDataVersion = item.MetaDataVersion;
-            existing.SkapadTidPunkt = item.SkapadTidPunkt;
 
             SaveData(data);
             return Task.FromResult<Metadata?>(existing);
