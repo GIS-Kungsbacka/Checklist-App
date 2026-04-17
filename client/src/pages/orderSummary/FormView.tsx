@@ -1,4 +1,5 @@
-import { useParams, useNavigate } from "react-router-dom";
+import * as React from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Button,
@@ -15,7 +16,8 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import { ArrowBack, Download } from "@mui/icons-material";
+import { ArrowBack, Download, Link } from "@mui/icons-material";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import { useOrderById } from "../../hooks/useOrders";
 import type { OrderSummary } from "../../types/orderSummary";
 import jsPDF from "jspdf";
@@ -167,6 +169,8 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
 export default function FormView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [linkCopied, setLinkCopied] = React.useState(false);
 
   const orderId = id ? id : "";
   const { data: item, isLoading, error } = useOrderById(orderId);
@@ -312,15 +316,39 @@ export default function FormView() {
               {item.arendenummerArtvise ||
                 `Beställning ${item.arendenummerArtvise}`}
             </Typography>
-            <Tooltip title="Ladda ner som PDF">
-              <IconButton
-                onClick={() => generatePDF(item, fieldLabels)}
-                color="primary"
-                sx={{ ml: 2 }}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Tooltip
+                title={linkCopied ? "Länk kopierad" : "Kopiera länk"}
+                disableInteractive
               >
-                <Download />
-              </IconButton>
-            </Tooltip>
+                <IconButton
+                  onClick={async () => {
+                    const url = `${window.location.origin}${location.pathname}`;
+                    try {
+                      await navigator.clipboard.writeText(url);
+                      setLinkCopied(true);
+                      window.setTimeout(() => setLinkCopied(false), 3500);
+                    } catch {
+                      // ignore (clipboard might be blocked)
+                    }
+                  }}
+                  color={linkCopied ? "primary" : "primary"}
+                  sx={{ ml: 2 }}
+                >
+                  {linkCopied ? <CheckCircleOutlinedIcon /> : <Link />}
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Ladda ner som PDF">
+                <IconButton
+                  onClick={() => generatePDF(item, fieldLabels)}
+                  color="primary"
+                  sx={{ ml: 1 }}
+                >
+                  <Download />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
           <Stack
             direction="row"

@@ -1,4 +1,4 @@
-import { AppBar, Toolbar, Typography, IconButton } from "@mui/material";
+import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
 import { Checklist } from "@mui/icons-material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -23,11 +23,12 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
         <Typography
           variant="h6"
           component="div"
-          sx={{ flexGrow: 1, fontWeight: 600, cursor: "pointer" }}
+          sx={{ fontWeight: 600, cursor: "pointer", width: "fit-content" }}
           onClick={() => navigate("/")}
         >
-          Geodata - checklistor
+          Geodata - beställningslista
         </Typography>
+        <Box sx={{ flexGrow: 1 }} />
         <IconButton
           onClick={() => onToggleMode()}
           color="inherit"
