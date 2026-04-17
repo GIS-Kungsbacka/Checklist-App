@@ -54,8 +54,8 @@ import type {
   ManagementPlan,
   UpdateManagementPlanDto,
 } from "../../types/managementPlan";
-import appConfig from "../../config.json";
 import { useGridPrefs } from "../../utils/gridPrefs";
+import { buildArendeUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -400,7 +400,8 @@ export default function ManagementPlanPage({
 }: {
   mode: "light" | "dark";
 }) {
-  const managementPlanCatalogBaseUrl = appConfig.managementPlanBaseUrl;
+  const { config } = useRuntimeConfig();
+  const managementPlanCatalogBaseUrl = config.managementPlanBaseUrl;
 
   const { data = [], isLoading, isError } = useManagementPlans();
   const updateMutation = useUpdateManagementPlan();
@@ -458,7 +459,8 @@ export default function ManagementPlanPage({
           return "-";
         }
 
-        const href = `${managementPlanCatalogBaseUrl}/${encodeURIComponent(value)}`;
+        const href = buildArendeUrl(managementPlanCatalogBaseUrl, value);
+        if (!href) return value;
         return (
           <Link
             href={href}

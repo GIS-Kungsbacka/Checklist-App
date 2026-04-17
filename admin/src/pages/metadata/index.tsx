@@ -53,7 +53,7 @@ import {
 import { useManagementPlans } from "../../hooks/useManagementPlan";
 import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
 import { useGridPrefs } from "../../utils/gridPrefs";
-import appConfig from "../../config.json";
+import { buildArendeUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -396,7 +396,8 @@ const toDto = (state: MetadataFormState): UpdateMetadataDto => ({
 });
 
 export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
-  const metadataCatalogBaseUrl = appConfig.metadataBaseUrl;
+  const { config } = useRuntimeConfig();
+  const metadataCatalogBaseUrl = config.metadataBaseUrl;
 
   const { data = [], isLoading, isError } = useMetadatas();
   const { data: managementPlans = [] } = useManagementPlans();
@@ -466,7 +467,8 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
           return "-";
         }
 
-        const href = `${metadataCatalogBaseUrl}/${encodeURIComponent(value)}`;
+        const href = buildArendeUrl(metadataCatalogBaseUrl, value);
+        if (!href) return value;
         return (
           <Link
             href={href}

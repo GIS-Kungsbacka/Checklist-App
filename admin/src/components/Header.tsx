@@ -22,6 +22,7 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 
 import { Link, useLocation } from "react-router-dom";
 import { useAuth, getInitials } from "../hooks/useAuth";
+import { useRuntimeConfig } from "../utils/runtimeConfig";
 
 type HeaderProps = {
   mode: "light" | "dark";
@@ -31,9 +32,11 @@ type HeaderProps = {
 export default function Header({ mode, onToggleMode }: HeaderProps) {
   const { user, isAdmin } = useAuth();
   const location = useLocation();
+  const { config } = useRuntimeConfig();
   const [openChecklistor, setOpenChecklistor] = useState(true);
   const [openMetadatakatalog, setOpenMetadatakatalog] = useState(false);
   const [openForvaltningsplan, setOpenForvaltningsplan] = useState(false);
+  const [openOvrigt, setOpenOvrigt] = useState(false);
 
   const handleToggleChecklistor = () => {
     setOpenChecklistor((prev) => !prev);
@@ -45,6 +48,10 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
 
   const handleToggleForvaltningsplan = () => {
     setOpenForvaltningsplan((prev) => !prev);
+  };
+
+  const handleToggleOvrigt = () => {
+    setOpenOvrigt((prev) => !prev);
   };
 
   return (
@@ -274,6 +281,65 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                       primary: {
                         fontWeight:
                           location.pathname === "/management-plan" ? 700 : 400,
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              </List>
+            </Collapse>
+            <ListItemButton onClick={handleToggleOvrigt}>
+              <ListItemText
+                primary="Övrigt"
+                slotProps={{ primary: { fontWeight: 600 } }}
+              />
+              {openOvrigt ? <ExpandLess /> : <ExpandMore />}
+            </ListItemButton>
+            <Collapse in={openOvrigt} timeout="auto" unmountOnExit>
+              <List component="div" disablePadding sx={{ px: 1, pt: 1 }}>
+                <ListItemButton
+                  component="a"
+                  href={config.metadataPortal || undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  disabled={!config.metadataPortal}
+                  sx={{
+                    pl: 4,
+                    mb: 1,
+                    borderRadius: 2,
+                    "&:hover": {
+                      bgcolor: (theme) => theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary="Metadataportalen"
+                    slotProps={{
+                      primary: {
+                        fontWeight: 400,
+                      },
+                    }}
+                  />
+                </ListItemButton>
+                <ListItemButton
+                  component="a"
+                  href={config.orderSummaryList || undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  disabled={!config.orderSummaryList}
+                  sx={{
+                    pl: 4,
+                    mb: 1,
+                    borderRadius: 2,
+                    "&:hover": {
+                      bgcolor: (theme) => theme.palette.action.hover,
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary="Beställningslistan"
+                    slotProps={{
+                      primary: {
+                        fontWeight: 400,
                       },
                     }}
                   />
