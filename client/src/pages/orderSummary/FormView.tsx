@@ -323,7 +323,7 @@ export default function FormView() {
               >
                 <IconButton
                   onClick={async () => {
-                    const url = `${window.location.origin}${location.pathname}`;
+                    const url = `${window.location.origin}/FormApp/client${location.pathname}`;
                     try {
                       await navigator.clipboard.writeText(url);
                       setLinkCopied(true);
