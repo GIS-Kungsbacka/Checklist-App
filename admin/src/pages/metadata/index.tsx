@@ -850,6 +850,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 ["tidsperiodStartdatum", "Tidsperiod startdatum (YYYY-MM-DD)"],
                 ["tidsperiodSlutdatum", "Tidsperiod slutdatum (YYYY-MM-DD)"],
                 ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
+                ["metod", "Metod"],
                 ["metodUrl", "Metod URL"],
                 ["projekt", "Projekt"],
                 ["kolumnBeskrivningUrl", "Kolumnbeskrivning URL"],
@@ -859,7 +860,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 ],
                 ["syfte", "Syfte"],
                 ["beskrivning", "Beskrivning"],
-                ["metod", "Metod"],
               ] as const
             ).map(([key, label]) =>
               key === "kategori" ? (
@@ -909,7 +909,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                   minRows={
                     key === "syfte" ||
                     key === "beskrivning" ||
-                    key === "metod" ||
                     key === "anvandarBegransningLicensText"
                       ? 2
                       : undefined
