@@ -11,12 +11,16 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControl,
   FormControlLabel,
+  InputLabel,
   Link,
   ListItemText,
   Menu,
   MenuItem,
+  OutlinedInput,
   Paper,
+  Select,
   TextField,
   Tooltip,
   Typography,
@@ -54,6 +58,7 @@ import { useManagementPlans } from "../../hooks/useManagementPlan";
 import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
 import { useGridPrefs } from "../../utils/gridPrefs";
 import { buildArendeUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
+import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -65,6 +70,27 @@ const toArray = (value: string): string[] | undefined => {
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
 const GRID_PREFS_STORAGE_KEY = "metadata-grid-prefs";
+const KATEGORI_OPTIONS = [
+  "Administrativa gränser",
+  "Arealtäckande bilder och bakgrundskartor",
+  "Areella näringar",
+  "Atmosfär, klimatologi och meteorologi",
+  "Biologi och ekologi",
+  "Byggnader och byggnadskonstruktioner",
+  "Ekonomi",
+  "Fastigheter och fysisk planering",
+  "Försvar",
+  "Geovetenskap",
+  "Hälsa",
+  "Höjddata",
+  "Kust och hav",
+  "Miljö",
+  "Positionering",
+  "Samhälle och kultur",
+  "Sjöar och vattendrag",
+  "Tekniska försörjningssystem",
+  "Transporter",
+] as const;
 const defaultColumnVisibility = {
   gid: true,
   namn: true,
@@ -345,7 +371,8 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   fullstandighet: item.fullstandighet ?? "",
   skalniva: item.skalniva ?? "",
   nyckelOrd: fromArray(item.nyckelOrd),
-  kategori: item.kategori ?? "",
+  // Normalize to match select options (avoids "blank" when value differs by whitespace/format).
+  kategori: String(item.kategori ?? "").trim(),
   tidsperiod: item.tidsperiod ?? false,
   tidsperiodStartdatum: item.tidsperiodStartdatum ?? "",
   tidsperiodSlutdatum: item.tidsperiodSlutdatum ?? "",
@@ -379,7 +406,7 @@ const toDto = (state: MetadataFormState): UpdateMetadataDto => ({
   fullstandighet: state.fullstandighet || undefined,
   skalniva: state.skalniva || undefined,
   nyckelOrd: toArray(state.nyckelOrd),
-  kategori: state.kategori || undefined,
+  kategori: state.kategori.trim() || undefined,
   tidsperiod: state.tidsperiod,
   tidsperiodStartdatum: state.tidsperiodStartdatum || undefined,
   tidsperiodSlutdatum: state.tidsperiodSlutdatum || undefined,
@@ -783,7 +810,9 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         fullWidth
       >
         <DialogTitle>
-          {openCreate ? "Skapa metadata" : `Redigera metadata ${openEdit?.gid}`}
+          {openCreate
+            ? "Skapa metadata"
+            : `Redigera metadata ${openEdit?.arendeNummerOpenE}`}
         </DialogTitle>
         <DialogContent>
           <Box
@@ -821,7 +850,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 ["tidsperiodStartdatum", "Tidsperiod startdatum (YYYY-MM-DD)"],
                 ["tidsperiodSlutdatum", "Tidsperiod slutdatum (YYYY-MM-DD)"],
                 ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
-                ["metod", "Metod"],
                 ["metodUrl", "Metod URL"],
                 ["projekt", "Projekt"],
                 ["kolumnBeskrivningUrl", "Kolumnbeskrivning URL"],
@@ -831,30 +859,66 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 ],
                 ["syfte", "Syfte"],
                 ["beskrivning", "Beskrivning"],
+                ["metod", "Metod"],
               ] as const
-            ).map(([key, label]) => (
-              <TextField
-                key={key}
-                label={label}
-                value={form[key]}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, [key]: e.target.value }))
-                }
-                multiline={
-                  key === "syfte" ||
-                  key === "beskrivning" ||
-                  key === "anvandarBegransningLicensText"
-                }
-                minRows={
-                  key === "syfte" ||
-                  key === "beskrivning" ||
-                  key === "anvandarBegransningLicensText"
-                    ? 2
-                    : undefined
-                }
-              />
-            ))}
+            ).map(([key, label]) =>
+              key === "kategori" ? (
+                <FormControl key={key} fullWidth>
+                  <InputLabel id="metadata-kategori-label">Kategori</InputLabel>
+                  <Select
+                    labelId="metadata-kategori-label"
+                    label="Kategori"
+                    value={form.kategori}
+                    displayEmpty
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        kategori: String(e.target.value ?? "").trim(),
+                      }))
+                    }
+                    input={<OutlinedInput label="Kategori" />}
+                  >
+                    <MenuItem value="">
+                      <em>Välj kategori</em>
+                    </MenuItem>
+                    {form.kategori &&
+                    !KATEGORI_OPTIONS.includes(form.kategori as any) ? (
+                      <MenuItem value={form.kategori}>{form.kategori}</MenuItem>
+                    ) : null}
+                    {KATEGORI_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <TextField
+                  key={key}
+                  label={label}
+                  value={form[key]}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, [key]: e.target.value }))
+                  }
+                  multiline={
+                    key === "syfte" ||
+                    key === "beskrivning" ||
+                    key === "metod" ||
+                    key === "anvandarBegransningLicensText"
+                  }
+                  minRows={
+                    key === "syfte" ||
+                    key === "beskrivning" ||
+                    key === "metod" ||
+                    key === "anvandarBegransningLicensText"
+                      ? 2
+                      : undefined
+                  }
+                />
+              )
+            )}
           </Box>
+          <Divider sx={{ mt: 3 }} />
           <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
             <FormControlLabel
               control={
@@ -905,7 +969,19 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
 
               updateMutation.mutate(
                 { gid: openEdit.gid, data: dto },
-                { onSuccess: () => setOpenEdit(null) }
+                {
+                  onSuccess: () => {
+                    setOpenEdit(null);
+                    toast.success("Ändringar sparade.");
+                  },
+                  onError: (err) => {
+                    const message =
+                      err instanceof Error
+                        ? err.message
+                        : "Kunde inte spara. Försök igen.";
+                    toast.error(message);
+                  },
+                }
               );
             }}
           >
@@ -939,7 +1015,17 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 return;
               }
               deleteMutation.mutate(deleteItem.gid, {
-                onSuccess: () => setDeleteItem(null),
+                onSuccess: () => {
+                  setDeleteItem(null);
+                  toast.success("Objekt borttagen.");
+                },
+                onError: (err) => {
+                  const message =
+                    err instanceof Error
+                      ? err.message
+                      : "Kunde inte ta bort. Försök igen.";
+                  toast.error(message);
+                },
               });
             }}
           >

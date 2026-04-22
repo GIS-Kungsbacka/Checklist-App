@@ -20,6 +20,7 @@ import type { Checklist, UpdateChecklistDto } from "../../types/checklist";
 import { getPrioritetChipColor } from "./checklist-data-grid";
 import { useNavigate } from "react-router-dom";
 import { useGridPrefs } from "../../utils/gridPrefs";
+import { toast } from "react-toastify";
 import {
   ColumnsPanelTrigger,
   DataGrid,
@@ -301,6 +302,7 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
       {
         onSuccess: () => {
           // Query invalidation happens automatically in the hook
+          toast.success("Ångrat. Posten flyttades tillbaka till beställningslistan.");
         },
       }
     );

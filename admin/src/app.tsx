@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ChecklistGrid from "./pages/checklist/checklist-data-grid";
 import Idebanken from "./pages/checklist/Idebanken";
 import Avslutade from "./pages/checklist/Avslutade";
@@ -81,6 +83,17 @@ function AppContent() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <ToastContainer
+        position="bottom-left"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={mode === "dark" ? "dark" : "light"}
+      />
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Box
           sx={{

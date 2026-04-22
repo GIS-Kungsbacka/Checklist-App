@@ -11,7 +11,7 @@
     "Kategori": "Utbildningsanalys",
     "KategoriTyp": "Avancerad",
     "Prioritet": "H\u00F6g",
-    "AntagenJaNej": "Ja",
+    "AntagenJaNej": "ja",
     "AntagenJaNejMotivering": "Hog verksamhetsnytta och tydlig bestallning",
     "Handlaggare": "Test1",
     "Tabell": null,
@@ -72,7 +72,7 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": true
+    "Levererad": false
   },
   {
     "Gid": 4,
@@ -88,7 +88,7 @@
     "Prioritet": "Medel",
     "AntagenJaNej": "ja",
     "AntagenJaNejMotivering": "Datatillgang och ansvarsfordelning ar tydlig",
-    "Handlaggare": "Test4",
+    "Handlaggare": "Test44",
     "Tabell": null,
     "Wms": null,
     "Fme": null,
@@ -97,7 +97,7 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": false
+    "Levererad": true
   },
   {
     "Gid": 5,

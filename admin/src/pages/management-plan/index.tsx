@@ -56,6 +56,7 @@ import type {
 } from "../../types/managementPlan";
 import { useGridPrefs } from "../../utils/gridPrefs";
 import { buildArendeUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
+import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -701,7 +702,9 @@ export default function ManagementPlanPage({
       >
         <DataGrid
           columnVisibilityModel={columnVisibilityModel}
-          onColumnVisibilityModelChange={(model) => setColumnVisibilityModel(model)}
+          onColumnVisibilityModelChange={(model) =>
+            setColumnVisibilityModel(model)
+          }
           rows={rows}
           columns={columns}
           localeText={GRID_DEFAULT_LOCALE_TEXT}
@@ -780,7 +783,7 @@ export default function ManagementPlanPage({
         <DialogTitle>
           {openCreate
             ? "Skapa förvaltningsplan"
-            : `Redigera förvaltningsplan ${openEdit?.gid}`}
+            : `Redigera förvaltningsplan ${openEdit?.arendeNummberOpenE}`}
         </DialogTitle>
         <DialogContent>
           <Box
@@ -808,7 +811,6 @@ export default function ManagementPlanPage({
                 ["redigeringsKalla", "Redigeringskälla (kommaseparerat)"],
                 ["dokumentSkUrl", "Dokument SK URL"],
                 ["dokuementInfoUrl", "Dokument info URL"],
-                ["ovrigInformation", "Övrig information"],
                 ["arkivering", "Arkivering"],
                 ["arkiveringTidpunkt", "Arkivering tidpunkt"],
                 ["publicerad", "Publicerad (kommaseparerat)"],
@@ -821,6 +823,7 @@ export default function ManagementPlanPage({
                 ["skapadAv", "Skapad av"],
                 ["andradTidPunkt", "Ändrad tidpunkt (ISO datetime)"],
                 ["andradAv", "Ändrad av"],
+                ["ovrigInformation", "Övrig information"],
               ] as const
             ).map(([key, label]) => (
               <TextField
@@ -835,6 +838,7 @@ export default function ManagementPlanPage({
               />
             ))}
           </Box>
+          <Divider sx={{ mt: 3 }} />
           <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
             <FormControlLabel
               control={
@@ -898,7 +902,19 @@ export default function ManagementPlanPage({
               }
               updateMutation.mutate(
                 { gid: openEdit.gid, data: dto },
-                { onSuccess: () => setOpenEdit(null) }
+                {
+                  onSuccess: () => {
+                    setOpenEdit(null);
+                    toast.success("Ändringar sparade.");
+                  },
+                  onError: (err) => {
+                    const message =
+                      err instanceof Error
+                        ? err.message
+                        : "Kunde inte spara. Försök igen.";
+                    toast.error(message);
+                  },
+                }
               );
             }}
           >
@@ -932,7 +948,17 @@ export default function ManagementPlanPage({
                 return;
               }
               deleteMutation.mutate(deleteItem.gid, {
-                onSuccess: () => setDeleteItem(null),
+                onSuccess: () => {
+                  setDeleteItem(null);
+                  toast.success("Objekt borttagen.");
+                },
+                onError: (err) => {
+                  const message =
+                    err instanceof Error
+                      ? err.message
+                      : "Kunde inte ta bort. Försök igen.";
+                  toast.error(message);
+                },
               });
             }}
           >

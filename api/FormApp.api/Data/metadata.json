@@ -9,17 +9,26 @@
     "SchemaNamn": "sk0_schema_test",
     "Namn": "lekplatser_test_123",
     "Beskrivning": "Test beskrivning",
-    "Ursprung": ["Extern", "Organisation"],
+    "Ursprung": [
+      "Extern",
+      "Organisation"
+    ],
     "Syfte": "Att identifiera alla lekplatser och ta en kopp kaffe",
-    "Metod": "Fjärranalys",
+    "Metod": "Fj\u00E4rranalys",
     "MetodUrl": "https://example.com/metod",
     "Projekt": "Testprojekt",
-    "GeografiskBegransning": ["tätort", "test"],
-    "UppdateringsFrekvens": "Årligen",
-    "Fullstandighet": "Fullständig",
+    "GeografiskBegransning": [
+      "t\u00E4tort",
+      "test"
+    ],
+    "UppdateringsFrekvens": "\u00C5rligen",
+    "Fullstandighet": "Fullst\u00E4ndig",
     "Skalniva": "2",
-    "NyckelOrd": ["Tätortsmiljö", "Test"],
-    "Kategori": "Nybyggnation",
+    "NyckelOrd": [
+      "T\u00E4tortsmilj\u00F6",
+      "Test"
+    ],
+    "Kategori": "Byggnader och byggnadskonstruktioner",
     "Tidsperiod": false,
     "TidsperiodStartdatum": "2026-04-15",
     "TidsperiodSlutdatum": "2026-04-15",
@@ -27,7 +36,9 @@
     "SkapelseDatum": "2026-04-14",
     "AnvandarBegransningLicens": false,
     "AnvandarBegransningLicensText": "Test",
-    "RelateradeResurser": ["Nej"],
+    "RelateradeResurser": [
+      "Nej"
+    ],
     "KolumnBeskrivningUrl": "https://example.com/kolumner",
     "Status": "granskas",
     "Handlaggare": "Jag",

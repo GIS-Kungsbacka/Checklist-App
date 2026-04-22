@@ -55,7 +55,7 @@ using System.Text.Json;
                 Fullstandighet = "Fullständig",
                 Skalniva = "2",
                 NyckelOrd = ["Tätortsmiljö","Test"],
-                Kategori = "Nybyggnation",
+                Kategori = "Byggnader och byggnadskonstruktioner",
                 Tidsperiod = false,
                 TidsperiodStartdatum = new DateOnly(2026, 4, 15),
                 TidsperiodSlutdatum = new DateOnly(2026, 4, 15),

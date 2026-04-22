@@ -61,6 +61,7 @@ import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 import { useForm, Controller } from "react-hook-form";
+import { toast } from "react-toastify";
 
 import {
   useChecklists,
@@ -632,6 +633,12 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       onSuccess: () => {
         setOpenCreate(false);
         resetCreateForm();
+        toast.success("Ny rad skapad.");
+      },
+      onError: (err) => {
+        const message =
+          err instanceof Error ? err.message : "Kunde inte skapa. Försök igen.";
+        toast.error(message);
       },
     });
   };
@@ -663,6 +670,14 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       {
         onSuccess: () => {
           setOpenEdit(null);
+          toast.success("Ändringar sparade.");
+        },
+        onError: (err) => {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Kunde inte uppdatera. Försök igen.";
+          toast.error(message);
         },
       }
     );
@@ -673,6 +688,14 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       deleteMutation.mutate(deleteConfirm.gid, {
         onSuccess: () => {
           setDeleteConfirm(null);
+          toast.success("Objekt borttagen.");
+        },
+        onError: (err) => {
+          const message =
+            err instanceof Error
+              ? err.message
+              : "Kunde inte ta bort. Försök igen.";
+          toast.error(message);
         },
       });
     }
