@@ -62,3 +62,14 @@ export function buildArendeUrl(baseUrl: string | undefined, arende: string) {
   return `${cleaned}/${encodeURIComponent(arende)}`;
 }
 
+export function buildSchemaNamnUrl(
+  baseUrl: string | undefined,
+  schemaNamn: string,
+  namn: string
+) {
+  const schema = String(schemaNamn ?? "").trim();
+  const name = String(namn ?? "").trim();
+  if (!schema || !name) return "";
+  return buildArendeUrl(baseUrl, `${schema}_${name}`);
+}
+

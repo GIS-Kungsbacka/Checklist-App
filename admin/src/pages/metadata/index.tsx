@@ -57,7 +57,7 @@ import {
 import { useManagementPlans } from "../../hooks/useManagementPlan";
 import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
 import { useGridPrefs } from "../../utils/gridPrefs";
-import { buildArendeUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
+import { buildSchemaNamnUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
 import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
@@ -494,7 +494,11 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
           return "-";
         }
 
-        const href = buildArendeUrl(metadataCatalogBaseUrl, value);
+        const href = buildSchemaNamnUrl(
+          metadataCatalogBaseUrl,
+          String(params.row?.schemaNamn ?? ""),
+          String(params.row?.namn ?? "")
+        );
         if (!href) return value;
         return (
           <Link

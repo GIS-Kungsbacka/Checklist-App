@@ -1219,7 +1219,7 @@ export default function OrderSummaryDataGrid({
         <Paper
           elevation={0}
           sx={{
-            height: 560,
+            height: 630,
             width: "100%",
             borderRadius: 3,
             border: "1px solid",

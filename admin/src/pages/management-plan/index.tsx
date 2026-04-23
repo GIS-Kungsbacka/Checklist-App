@@ -55,7 +55,7 @@ import type {
   UpdateManagementPlanDto,
 } from "../../types/managementPlan";
 import { useGridPrefs } from "../../utils/gridPrefs";
-import { buildArendeUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
+import { buildSchemaNamnUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
 import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
@@ -460,7 +460,11 @@ export default function ManagementPlanPage({
           return "-";
         }
 
-        const href = buildArendeUrl(managementPlanCatalogBaseUrl, value);
+        const href = buildSchemaNamnUrl(
+          managementPlanCatalogBaseUrl,
+          String((params.row as ManagementPlan | undefined)?.schemaNamn ?? ""),
+          String((params.row as ManagementPlan | undefined)?.namn ?? "")
+        );
         if (!href) return value;
         return (
           <Link
