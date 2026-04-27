@@ -1,4 +1,11 @@
-import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+  Button,
+} from "@mui/material";
 import { Checklist } from "@mui/icons-material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
@@ -18,7 +25,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
       elevation={2}
       sx={{ bgcolor: "background.paper", color: "text.primary" }}
     >
-      <Toolbar>
+      <Toolbar sx={{ display: "flex", alignItems: "center" }}>
         <Checklist sx={{ mr: 2, fontSize: 28 }} />
         <Typography
           variant="h6"
@@ -26,9 +33,30 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
           sx={{ fontWeight: 600, cursor: "pointer", width: "fit-content" }}
           onClick={() => navigate("/")}
         >
-          Geodata - beställningslista
+          Geodata - utvecklingsvy
         </Typography>
-        <Box sx={{ flexGrow: 1 }} />
+        <Box
+          sx={{
+            display: "flex",
+            gap: 5,
+            mx: "auto", // centers this box horizontally
+            justifyContent: "center",
+          }}
+        >
+          <Button color="inherit" onClick={() => navigate("/")}>
+            Beställningslista
+          </Button>
+          <Button color="inherit" onClick={() => navigate("/metadata")}>
+            Metadata
+          </Button>
+          <Button
+            sx={{ mr: "200px" }}
+            color="inherit"
+            onClick={() => navigate("/managementplan")}
+          >
+            Förvaltningsplan
+          </Button>
+        </Box>
         <IconButton
           onClick={() => onToggleMode()}
           color="inherit"

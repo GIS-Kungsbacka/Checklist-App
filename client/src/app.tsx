@@ -6,6 +6,8 @@ import FormView from "./pages/orderSummary/FormView";
 import OrderSummaryDataGrid from "./pages/orderSummary/orderSummary-data-grid";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Metadata from "./pages/metadata";
+import ManagementPlan from "./pages/management-plan";
 import { queryConfig } from "../lib/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useBroadcastSync } from "../lib/useBroadcastSync";
@@ -51,6 +53,13 @@ function AppContent() {
           borderRadius: 8,
         },
         components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              body: {
+                overflowY: "scroll",
+              },
+            },
+          },
           MuiButton: {
             styleOverrides: {
               root: {
@@ -102,6 +111,11 @@ function AppContent() {
                 }
               />
               <Route path="/form/:id" element={<FormView />} />
+              <Route path="/metadata" element={<Metadata mode={mode} />} />
+              <Route
+                path="/managementplan"
+                element={<ManagementPlan mode={mode} />}
+              />
             </Routes>
           </Box>
           <Footer />

@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace FormApp.api.Controllers;
 [ApiController]
 [Route("admin/managementplan")]
+[Route("client/managementplan")]
 [Authorize(Policy = "AdminOnly")]
 public class ManagementPlanController : ControllerBase
     {
@@ -18,6 +19,7 @@ public class ManagementPlanController : ControllerBase
     /// Get all records
     /// </summary>
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<ManagementPlan>>> GetAll()
     {
         try
@@ -36,6 +38,7 @@ public class ManagementPlanController : ControllerBase
     /// Get a specific record by GID
     /// </summary>
     [HttpGet("{gid}")]
+    [AllowAnonymous]
     public async Task<ActionResult<ManagementPlan>> GetById(int gid)
     {
         try

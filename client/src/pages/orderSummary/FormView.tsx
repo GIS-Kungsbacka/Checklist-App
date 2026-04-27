@@ -20,6 +20,10 @@ import { ArrowBack, Download, Link } from "@mui/icons-material";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import { useOrderById } from "../../hooks/useOrders";
 import type { OrderSummary } from "../../types/orderSummary";
+import { useMetadataById } from "../../hooks/useMetadata";
+import type { Metadata } from "../../types/metadata";
+import { useManagementPlanById } from "../../hooks/useManagementPlan";
+import type { ManagementPlan } from "../../types/management-plan";
 import jsPDF from "jspdf";
 import { getPrioritetChipColor } from "./orderSummary-data-grid";
 import { useAuth } from "../../hooks/useAuth";
@@ -172,8 +176,25 @@ export default function FormView() {
   const location = useLocation();
   const [linkCopied, setLinkCopied] = React.useState(false);
 
+  const entity = (location.state as { entity?: string } | null)?.entity ?? "order";
+
   const orderId = id ? id : "";
-  const { data: item, isLoading, error } = useOrderById(orderId);
+  const gid = Number(id);
+
+  const orderQuery = useOrderById(orderId);
+  const metadataQuery = useMetadataById(Number.isFinite(gid) ? gid : -1);
+  const managementPlanQuery = useManagementPlanById(Number.isFinite(gid) ? gid : -1);
+
+  const activeQuery =
+    entity === "metadata"
+      ? metadataQuery
+      : entity === "managementplan"
+      ? managementPlanQuery
+      : orderQuery;
+
+  const item = activeQuery.data as OrderSummary | Metadata | ManagementPlan | undefined;
+  const isLoading = activeQuery.isLoading;
+  const error = activeQuery.error;
   const { isAdmin } = useAuth();
 
   if (isLoading) {
@@ -221,7 +242,11 @@ export default function FormView() {
       <Container maxWidth="md">
         <Box sx={{ mt: 4 }}>
           <Alert severity="info">
-            Beställningsspecifikationen hittades inte.
+            {entity === "metadata"
+              ? "Metadata hittades inte."
+              : entity === "managementplan"
+              ? "Förvaltningsplanen hittades inte."
+              : "Beställningsspecifikationen hittades inte."}
           </Alert>
           {isAdmin && (
             <Button
@@ -237,9 +262,13 @@ export default function FormView() {
     );
   }
 
-  const displayKeys = Object.keys(fieldLabels) as (keyof typeof item)[];
+  const isOrderSummary = entity === "order";
 
-  const checklistKeys: (keyof typeof item)[] = [
+  const displayKeys = isOrderSummary
+    ? (Object.keys(fieldLabels) as (keyof OrderSummary)[])
+    : (Object.keys(item) as (keyof typeof item)[]);
+
+  const checklistKeys: (keyof OrderSummary)[] = [
     "dataunderlag",
     "dataadministrator",
     "malgrupper",
@@ -263,15 +292,19 @@ export default function FormView() {
     "levererad",
   ];
 
-  const orderSummaryKeys = displayKeys.filter(
-    (key) => !checklistKeys.includes(key)
-  );
+  const orderSummaryKeys = isOrderSummary
+    ? (displayKeys as (keyof OrderSummary)[]).filter(
+        (key) => !checklistKeys.includes(key)
+      )
+    : [];
 
-  const renderField = (key: keyof typeof item) => {
-    const label = fieldLabels[key];
-    if (label === undefined) return null;
+  const renderField = (key: string) => {
+    const label =
+      isOrderSummary && key in fieldLabels
+        ? fieldLabels[key]
+        : key;
 
-    const value = item[key];
+    const value = (item as unknown as Record<string, unknown>)[key];
     const display = formatValue(value);
 
     return (
@@ -313,8 +346,12 @@ export default function FormView() {
               gutterBottom
               fontWeight={600}
             >
-              {item.arendenummerArtvise ||
-                `Beställning ${item.arendenummerArtvise}`}
+              {entity === "metadata"
+                ? `Metadata ${String((item as Metadata).gid)}`
+                : entity === "managementplan"
+                ? `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
+                : ((item as OrderSummary).arendenummerArtvise ||
+                    `Beställning ${(item as OrderSummary).arendenummerArtvise}`)}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Tooltip
@@ -341,7 +378,10 @@ export default function FormView() {
 
               <Tooltip title="Ladda ner som PDF">
                 <IconButton
-                  onClick={() => generatePDF(item, fieldLabels)}
+                  onClick={() => {
+                    if (entity !== "order") return;
+                    generatePDF(item as OrderSummary, fieldLabels);
+                  }}
                   color="primary"
                   sx={{ ml: 1 }}
                 >
@@ -350,51 +390,62 @@ export default function FormView() {
               </Tooltip>
             </Box>
           </Box>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{ mt: 2 }}
-            flexWrap="wrap"
-            useFlexGap
-          >
-            {item.kategori && (
-              <Chip
-                label={item.kategori}
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
-            )}
-            {item.prioritet && (
-              <Chip
-                color={getPrioritetChipColor(item.prioritet)}
-                label={item.prioritet}
-                size="small"
-              />
-            )}
-          </Stack>
-          <Divider sx={{ my: 1.5 }} />
-          <Typography
-            variant="body1"
-            sx={{ mt: 2, mb: 2, fontSize: 17, fontWeight: 600 }}
-          >
-            Beställningsunderlag
-          </Typography>
+          {isOrderSummary ? (
+            <>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ mt: 2 }}
+                flexWrap="wrap"
+                useFlexGap
+              >
+                {(item as OrderSummary).kategori && (
+                  <Chip
+                    label={(item as OrderSummary).kategori}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                )}
+                {(item as OrderSummary).prioritet && (
+                  <Chip
+                    color={getPrioritetChipColor((item as OrderSummary).prioritet)}
+                    label={(item as OrderSummary).prioritet}
+                    size="small"
+                  />
+                )}
+              </Stack>
+              <Divider sx={{ my: 1.5 }} />
+              <Typography
+                variant="body1"
+                sx={{ mt: 2, mb: 2, fontSize: 17, fontWeight: 600 }}
+              >
+                Beställningsunderlag
+              </Typography>
 
-          <Grid container spacing={2}>
-            {orderSummaryKeys.map((key) => renderField(key))}
-          </Grid>
-          <Divider sx={{ my: 2, mt: 4 }} />
-          <Typography
-            variant="body1"
-            sx={{ mt: 3, mb: 2, fontSize: 17, fontWeight: 600 }}
-          >
-            Checklista
-          </Typography>
+              <Grid container spacing={2}>
+                {orderSummaryKeys.map((key) => renderField(String(key)))}
+              </Grid>
+              <Divider sx={{ my: 2, mt: 4 }} />
+              <Typography
+                variant="body1"
+                sx={{ mt: 3, mb: 2, fontSize: 17, fontWeight: 600 }}
+              >
+                Checklista
+              </Typography>
 
-          <Grid container spacing={2}>
-            {checklistKeys.map((key) => renderField(key))}
-          </Grid>
+              <Grid container spacing={2}>
+                {checklistKeys.map((key) => renderField(String(key)))}
+              </Grid>
+            </>
+          ) : (
+            <>
+              <Divider sx={{ my: 1.5 }} />
+              <Grid container spacing={2}>
+                {displayKeys.map((key) => renderField(String(key)))}
+              </Grid>
+            </>
+          )}
         </CardContent>
       </Card>
     </Container>

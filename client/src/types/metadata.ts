@@ -1,0 +1,34 @@
+export interface Metadata {
+  gid: number;
+  arendeNummerOpenE?: string;
+  bestallareNamn?: string;
+  bestallareEpost?: string;
+  sakerhetsKlass?: string;
+  dataKallaTyp?: string;
+  schemaNamn?: string;
+  namn?: string;
+  beskrivning?: string;
+  ursprung?: string[];
+  syfte?: string;
+  metod?: string;
+  metodUrl?: string;
+  projekt?: string;
+  geografiskBegransning?: string[];
+  uppdateringsFrekvens?: string;
+  fullstandighet?: string;
+  skalniva?: string;
+  nyckelOrd?: string[];
+  kategori?: string;
+  tidsperiod?: boolean;
+  tidsperiodStartdatum?: string;
+  tidsperiodSlutdatum?: string;
+  tidsUpplosning?: string;
+  skapelseDatum?: string;
+  anvandarBegransningLicens?: boolean;
+  anvandarBegransningLicensText?: string;
+  relateradeResurser?: string[];
+  kolumnBeskrivningUrl?: string;
+  status?: string;
+  handlaggare?: string;
+  metaDataVersion?: string;
+}

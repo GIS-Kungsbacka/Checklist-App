@@ -7,6 +7,7 @@ namespace FormApp.api.Controllers;
 
 [ApiController]
 [Route("admin/metadata")]
+[Route("client/metadata")]
 [Authorize(Policy = "AdminOnly")]
 public class MetadataController : ControllerBase
 {
@@ -17,6 +18,7 @@ public class MetadataController : ControllerBase
     /// Get all metadata records
     /// </summary>
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Metadata>>> GetAll()
     {
         try
@@ -35,6 +37,7 @@ public class MetadataController : ControllerBase
     /// Get a metadata record by GID
     /// </summary>
     [HttpGet("{gid}")]
+    [AllowAnonymous]
     public async Task<ActionResult<Metadata>> GetById(int gid)
     {
         try
