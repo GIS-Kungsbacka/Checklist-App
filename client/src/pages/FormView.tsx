@@ -15,12 +15,32 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
 } from "@mui/material";
-import { ArrowBack, Download, Link } from "@mui/icons-material";
+import {
+  ArrowBack,
+  Download,
+  Link,
+  OpenInNew,
+  TableView,
+} from "@mui/icons-material";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import { useOrderById } from "../hooks/useOrders";
 import type { OrderSummary } from "../types/orderSummary";
-import { useMetadata } from "../hooks/useMetadata";
+import {
+  useMetadata,
+  useMetadataColumnDescription,
+} from "../hooks/useMetadata";
 import type { Metadata } from "../types/metadata";
 import { useManagementPlan } from "../hooks/useManagementPlan";
 import type { ManagementPlan } from "../types/management-plan";
@@ -64,9 +84,101 @@ const fieldLabels: Record<string, string> = {
   levererad: "Levererad",
 };
 
+const metadataFieldLabels: Partial<Record<keyof Metadata, string>> = {
+  namn: "Namn",
+  schemaNamn: "Schema",
+  beskrivning: "Beskrivning",
+  ursprung: "Ursprung",
+  syfte: "Syfte",
+  kategori: "Kategori",
+  status: "Status",
+  handlaggare: "Handläggare",
+  arendeNummerOpenE: "Ärendenummer",
+  bestallareNamn: "Beställare",
+  bestallareEpost: "Beställare e-post",
+  sakerhetsKlass: "Säkerhetsklass",
+  dataKallaTyp: "Datakälla typ",
+  metod: "Metod",
+  metodUrl: "Metod URL",
+  projekt: "Projekt",
+  geografiskBegransning: "Geografisk begränsning",
+  uppdateringsFrekvens: "Uppdateringsfrekvens",
+  fullstandighet: "Fullständighet",
+  skalniva: "Skalnivå",
+  nyckelOrd: "Nyckelord",
+  tidsperiod: "Tidsperiod",
+  tidsperiodStartdatum: "Startdatum",
+  tidsperiodSlutdatum: "Slutdatum",
+  tidsUpplosning: "Tidsupplösning",
+  skapelseDatum: "Skapelsedatum",
+  anvandarBegransningLicens: "Licensbegränsning",
+  anvandarBegransningLicensText: "Licenstext",
+  relateradeResurser: "Relaterade resurser",
+  kolumnBeskrivningUrl: "Kolumnbeskrivning URL",
+  metaDataVersion: "Version",
+};
+
+const metadataSections: Array<{
+  title: string;
+  keys: (keyof Metadata)[];
+}> = [
+  {
+    title: "Grundläggande identitet",
+    keys: ["schemaNamn", "namn", "metaDataVersion"],
+  },
+  {
+    title: "Beskrivning och syfte",
+    keys: ["beskrivning", "syfte", "kategori", "nyckelOrd", "projekt"],
+  },
+  {
+    title: "Ursprung och datakälla",
+    keys: ["dataKallaTyp", "ursprung", "metod", "metodUrl"],
+  },
+  {
+    title: "Geografisk och detaljnivå",
+    keys: ["geografiskBegransning", "skalniva"],
+  },
+  {
+    title: "Tidsinformation",
+    keys: [
+      "skapelseDatum",
+      "tidsperiodStartdatum",
+      "tidsperiodSlutdatum",
+      "tidsUpplosning",
+    ],
+  },
+  {
+    title: "Kvalitet och uppdatering",
+    keys: ["uppdateringsFrekvens", "fullstandighet"],
+  },
+  {
+    title: "Åtkomst, licens och säkerhet",
+    keys: [
+      "anvandarBegransningLicens",
+      "anvandarBegransningLicensText",
+      "sakerhetsKlass",
+    ],
+  },
+  {
+    title: "Struktur och relationer",
+    keys: ["kolumnBeskrivningUrl", "relateradeResurser"],
+  },
+  {
+    title: "Status",
+    keys: [
+      "arendeNummerOpenE",
+      "bestallareNamn",
+      "bestallareEpost",
+      "handlaggare",
+      "status",
+    ],
+  },
+];
+
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) return "-";
   if (typeof value === "boolean") return value ? "Ja" : "Nej";
+  if (Array.isArray(value)) return value.filter(Boolean).join(", ") || "-";
   return String(value);
 }
 
@@ -186,6 +298,11 @@ function parseSchemaKey(schemaKey: string | undefined): {
   };
 }
 
+type PublicConfig = {
+  metadataCatalogUrl?: string;
+  managementCatalogUrl?: string;
+};
+
 export default function FormView({ entity }: { entity: FormEntity }) {
   const { arendeNummer, schemaKey } = useParams<{
     arendeNummer?: string;
@@ -194,6 +311,11 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [linkCopied, setLinkCopied] = React.useState(false);
+  const [columnDialogOpen, setColumnDialogOpen] = React.useState(false);
+  const [tableViewClicked, setTableViewClicked] = React.useState(false);
+  const [publicConfig, setPublicConfig] = React.useState<PublicConfig | null>(
+    null
+  );
 
   const decodedSchemaKey = schemaKey ? decodeURIComponent(schemaKey) : "";
   const { schemaNamn, namn } = parseSchemaKey(schemaKey);
@@ -204,6 +326,9 @@ export default function FormView({ entity }: { entity: FormEntity }) {
 
   const orderQuery = useOrderById(arendeNummer ?? "");
   const metadataListQuery = useMetadata();
+  const metadataColumnDescriptionsQuery = useMetadataColumnDescription({
+    enabled: columnDialogOpen && entity === "metadata",
+  });
   const managementPlanListQuery = useManagementPlan();
 
   const activeQuery =
@@ -216,6 +341,26 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   const isLoading = activeQuery.isLoading;
   const error = activeQuery.error;
 
+  React.useEffect(() => {
+    let cancelled = false;
+    const url = `${import.meta.env.BASE_URL ?? "/"}config.json`;
+
+    fetch(url)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => {
+        if (cancelled) return;
+        setPublicConfig((json ?? {}) as PublicConfig);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPublicConfig({});
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const item = React.useMemo<
     OrderSummary | Metadata | ManagementPlan | undefined
   >(() => {
@@ -223,8 +368,8 @@ export default function FormView({ entity }: { entity: FormEntity }) {
 
     const list =
       entity === "metadata"
-        ? (metadataListQuery.data ?? [])
-        : (managementPlanListQuery.data ?? []);
+        ? metadataListQuery.data ?? []
+        : managementPlanListQuery.data ?? [];
 
     if (!schemaKey) return undefined;
 
@@ -242,7 +387,8 @@ export default function FormView({ entity }: { entity: FormEntity }) {
       if (s && n) return `${s}_${n}` === decodedNorm;
       return n === decodedNorm || s === decodedNorm;
     });
-    if (byComputedKey) return byComputedKey as unknown as Metadata | ManagementPlan;
+    if (byComputedKey)
+      return byComputedKey as unknown as Metadata | ManagementPlan;
 
     const match = list.find((x) => {
       const rec = x as { schemaNamn?: string; namn?: string };
@@ -269,6 +415,29 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     decodedNorm,
   ]);
   const { isAdmin } = useAuth();
+
+  const openInNewUrl =
+    entity === "metadata" || entity === "managementplan"
+      ? (() => {
+          const base =
+            entity === "metadata"
+              ? (publicConfig?.metadataCatalogUrl ?? "").trim()
+              : (publicConfig?.managementCatalogUrl ?? "").trim();
+          if (!base) return undefined;
+
+          const schema = String(
+            (item as { schemaNamn?: unknown } | undefined)?.schemaNamn ?? ""
+          ).trim();
+          const name = String(
+            (item as { namn?: unknown } | undefined)?.namn ?? ""
+          ).trim();
+          if (!schema || !name) return undefined;
+
+          const key = encodeURIComponent(`${schema}_${name}`);
+          const baseTrimmed = base.replace(/\/+$/, "");
+          return `${baseTrimmed}/${key}`;
+        })()
+      : undefined;
 
   if (isLoading) {
     return (
@@ -389,6 +558,42 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     );
   };
 
+  const renderMetadataField = (key: keyof Metadata) => {
+    const label = metadataFieldLabels[key] ?? String(key);
+    const value = (item as Metadata)?.[key];
+    const display = formatValue(value);
+
+    return (
+      <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+          sx={{ fontWeight: 900 }}
+        >
+          {label}
+        </Typography>
+        <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
+          {display}
+        </Typography>
+      </Grid>
+    );
+  };
+
+  const columnDescriptionsForCurrentMetadata =
+    entity === "metadata"
+      ? (() => {
+          const schemaNamn = ((item as Metadata).schemaNamn ?? "").trim();
+          const namn = ((item as Metadata).namn ?? "").trim();
+          const all = metadataColumnDescriptionsQuery.data ?? [];
+          return all.filter(
+            (x) =>
+              (x.tableSchema ?? "").trim() === schemaNamn &&
+              (x.tableName ?? "").trim() === namn
+          );
+        })()
+      : [];
+
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       {isAdmin && (
@@ -417,13 +622,83 @@ export default function FormView({ entity }: { entity: FormEntity }) {
               fontWeight={600}
             >
               {entity === "metadata"
-                ? `Metadata ${String((item as Metadata).gid)}`
+                ? ((item as Metadata).namn ?? "").trim() ||
+                  `Metadata ${String((item as Metadata).gid)}`
                 : entity === "managementplan"
                 ? `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
                 : (item as OrderSummary).arendenummerArtvise ||
                   `Checklist ${(item as OrderSummary).arendenummerArtvise}`}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
+              {entity === "metadata" ? (
+                <Tooltip title="Visa attributtabell">
+                  <IconButton
+                    onClick={() => {
+                      setTableViewClicked(true);
+                      setColumnDialogOpen(true);
+                    }}
+                    color="primary"
+                    sx={{
+                      ml: 2,
+                      border: "1px solid",
+                      borderColor: "primary.main",
+                      bgcolor: "rgba(25, 118, 210, 0.08)",
+                      animation: tableViewClicked
+                        ? "none"
+                        : "tableViewPulse 1.6s ease-in-out infinite",
+                      "@keyframes tableViewPulse": {
+                        "0%": {
+                          transform: "scale(1)",
+                          boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.45)",
+                        },
+                        "65%": {
+                          transform: "scale(1.06)",
+                          boxShadow: "0 0 0 10px rgba(25, 118, 210, 0)",
+                        },
+                        "100%": {
+                          transform: "scale(1)",
+                          boxShadow: "0 0 0 0 rgba(25, 118, 210, 0)",
+                        },
+                      },
+                      "@media (prefers-reduced-motion: reduce)": {
+                        animation: "none",
+                      },
+                      "&:hover": {
+                        bgcolor: "rgba(25, 118, 210, 0.14)",
+                      },
+                    }}
+                  >
+                    <TableView />
+                  </IconButton>
+                </Tooltip>
+              ) : null}
+              {entity === "metadata" || entity === "managementplan" ? (
+                <Tooltip
+                  title={
+                    openInNewUrl
+                      ? "Öppna i metadataportalen"
+                      : "Saknar konfiguration"
+                  }
+                >
+                  <span>
+                    <IconButton
+                      onClick={() => {
+                        if (!openInNewUrl) return;
+                        window.open(
+                          openInNewUrl,
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
+                      }}
+                      disabled={!openInNewUrl}
+                      color="primary"
+                      sx={{ ml: 2 }}
+                    >
+                      <OpenInNew />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              ) : null}
               <Tooltip
                 title={linkCopied ? "Länk kopierad" : "Kopiera länk"}
                 disableInteractive
@@ -513,13 +788,88 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           ) : (
             <>
               <Divider sx={{ my: 1.5 }} />
-              <Grid container spacing={2}>
-                {displayKeys.map((key) => renderField(String(key)))}
-              </Grid>
+              {entity === "metadata" ? (
+                <Box sx={{ mt: 1 }}>
+                  {metadataSections.map((section) => (
+                    <Box key={section.title} sx={{ mt: 5 }}>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
+                      >
+                        {section.title}
+                      </Typography>
+                      <Divider sx={{ mb: 1.5 }} />
+                      <Grid container spacing={2}>
+                        {section.keys.map((k) => renderMetadataField(k))}
+                      </Grid>
+                    </Box>
+                  ))}
+                </Box>
+              ) : (
+                <Grid container spacing={2}>
+                  {displayKeys.map((key) => renderField(String(key)))}
+                </Grid>
+              )}
             </>
           )}
         </CardContent>
       </Card>
+
+      <Dialog
+        open={columnDialogOpen}
+        onClose={() => setColumnDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Attributtabell</DialogTitle>
+        <DialogContent dividers>
+          {metadataColumnDescriptionsQuery.isLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : metadataColumnDescriptionsQuery.error ? (
+            <Alert severity="error">
+              {metadataColumnDescriptionsQuery.error instanceof Error
+                ? metadataColumnDescriptionsQuery.error.message
+                : "Kunde inte ladda attributtabell."}
+            </Alert>
+          ) : columnDescriptionsForCurrentMetadata.length === 0 ? (
+            <Alert severity="info">
+              Inga attribut hittades för{" "}
+              <strong>{(item as Metadata).schemaNamn}</strong> /{" "}
+              <strong>{(item as Metadata).namn}</strong>.
+            </Alert>
+          ) : (
+            <TableContainer component={Paper} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Namn</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Titel</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Beskrivning</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {columnDescriptionsForCurrentMetadata.map((row) => (
+                    <TableRow key={row.gid}>
+                      <TableCell sx={{ fontFamily: "monospace" }}>
+                        {row.columnName}
+                      </TableCell>
+                      <TableCell>{row.columnTitle}</TableCell>
+                      <TableCell sx={{ whiteSpace: "pre-wrap" }}>
+                        {row.columnDescription}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setColumnDialogOpen(false)}>Stäng</Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

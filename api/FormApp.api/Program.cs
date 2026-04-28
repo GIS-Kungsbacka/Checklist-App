@@ -2,8 +2,8 @@ using FormApp.Api.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +43,7 @@ if (useJsonFile)
     builder.Services.AddScoped<IOrderSummaryRepository, JsonOrderSummaryRepository>();
     builder.Services.AddScoped<IMetadataRepository, JsonMetadataRepository>();
     builder.Services.AddScoped<IManagementPlanRepository, JsonManagementPlanRepository>();
+    builder.Services.AddScoped<IMetadataColumnDescriptionRepository, JsonMetadataColumnDescriptionRepository>();
     Console.WriteLine("INFO: Using JSON file storage for forms data");
 }
 else
@@ -55,6 +56,7 @@ else
     builder.Services.AddScoped<IOrderSummaryRepository, DbContextOrderSummaryRepository>();
     builder.Services.AddScoped<IManagementPlanRepository, DbContextManagementPlanRepository>();
     builder.Services.AddScoped<IMetadataRepository, DbContextMetadataRepository>();
+    builder.Services.AddScoped<IMetadataColumnDescriptionRepository, DbContextMetadataColumnDescriptionRepository>();
     Console.WriteLine("INFO: Using Postgres database for forms data");
 }
 

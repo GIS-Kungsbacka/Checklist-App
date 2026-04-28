@@ -68,6 +68,7 @@ import { useOrders } from "../../hooks/useOrders";
 import type { OrderSummary } from "../../types/orderSummary";
 import { useNavigate } from "react-router-dom";
 import { useGridPrefs } from "../../utils/gridPrefs";
+import { useAuth } from "../../hooks/useAuth";
 
 type ViewMode = "cards" | "list";
 
@@ -354,13 +355,14 @@ export default function OrderSummaryDataGrid({
   mode: "light" | "dark";
 }) {
   const navigate = useNavigate();
+  const { isAdmin, isLoading: authLoading } = useAuth();
   const {
     data: items = [],
     isLoading,
     isError,
     failureCount,
     isRefetchError,
-  } = useOrders();
+  } = useOrders({ enabled: isAdmin });
 
   const [viewMode, setViewMode] = React.useState<ViewMode>(getInitialViewMode);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -558,6 +560,31 @@ export default function OrderSummaryDataGrid({
 
   const cardTotalPages =
     Math.ceil(filteredItems.length / CARD_ITEMS_PER_PAGE) || 1;
+
+  if (authLoading) {
+    return (
+      <Container maxWidth="xl">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "60vh",
+          }}
+        >
+          <CircularProgress size={60} />
+        </Box>
+      </Container>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4, mb: 6 }}>
+        <Alert severity="error">Du har inte behörighet att se denna vy.</Alert>
+      </Container>
+    );
+  }
 
   if (isLoading) {
     return (
