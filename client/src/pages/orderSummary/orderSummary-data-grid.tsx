@@ -73,7 +73,7 @@ type ViewMode = "cards" | "list";
 
 const STORAGE_KEY = "orderSummaryViewMode";
 const STORAGE_KEY_CARD_PAGINATION = "orderSummaryCardPagination";
-const GRID_PREFS_STORAGE_KEY = "orderSummary-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "orderSummary-default-prefs-dev";
 const CARD_ITEMS_PER_PAGE = 8;
 
 const PRIORITET_OPTIONS = ["Hög", "Medel", "Låg"] as const;
@@ -1079,7 +1079,7 @@ export default function OrderSummaryDataGrid({
                       },
                     }}
                     onClick={() =>
-                      navigate(`/form/${item.arendenummerArtvise}`)
+                      navigate(`/checklist/${item.arendenummerArtvise}`)
                     }
                   >
                     <CardContent sx={{ flexGrow: 1, p: 2 }}>
@@ -1181,7 +1181,7 @@ export default function OrderSummaryDataGrid({
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/form/${item.arendenummerArtvise}`);
+                          navigate(`/checklist/${item.arendenummerArtvise}`);
                         }}
                       >
                         Visa detaljer
@@ -1219,7 +1219,7 @@ export default function OrderSummaryDataGrid({
         <Paper
           elevation={0}
           sx={{
-            height: 630,
+            height: { xs: 300, md: 400, lg: 500, xl: 700 },
             width: "100%",
             borderRadius: 3,
             border: "1px solid",
@@ -1247,7 +1247,7 @@ export default function OrderSummaryDataGrid({
               const id = (params.row as OrderSummary | undefined)
                 ?.arendenummerArtvise;
               if (!id) return;
-              navigate(`/form/${id}`);
+              navigate(`/checklist/${id}`);
             }}
             slotProps={{
               loadingOverlay: {

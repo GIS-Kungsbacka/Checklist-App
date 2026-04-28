@@ -18,15 +18,15 @@ import {
 } from "@mui/material";
 import { ArrowBack, Download, Link } from "@mui/icons-material";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import { useOrderById } from "../../hooks/useOrders";
-import type { OrderSummary } from "../../types/orderSummary";
-import { useMetadataById } from "../../hooks/useMetadata";
-import type { Metadata } from "../../types/metadata";
-import { useManagementPlanById } from "../../hooks/useManagementPlan";
-import type { ManagementPlan } from "../../types/management-plan";
+import { useOrderById } from "../hooks/useOrders";
+import type { OrderSummary } from "../types/orderSummary";
+import { useMetadata } from "../hooks/useMetadata";
+import type { Metadata } from "../types/metadata";
+import { useManagementPlan } from "../hooks/useManagementPlan";
+import type { ManagementPlan } from "../types/management-plan";
 import jsPDF from "jspdf";
-import { getPrioritetChipColor } from "./orderSummary-data-grid";
-import { useAuth } from "../../hooks/useAuth";
+import { getPrioritetChipColor } from "./orderSummary/orderSummary-data-grid";
+import { useAuth } from "../hooks/useAuth";
 
 const fieldLabels: Record<string, string> = {
   arendenummerArtvise: "Ärendenummer",
@@ -170,31 +170,104 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
   doc.save(filename);
 }
 
-export default function FormView() {
-  const { id } = useParams<{ id: string }>();
+type FormEntity = "checklist" | "metadata" | "managementplan";
+
+function parseSchemaKey(schemaKey: string | undefined): {
+  schemaNamn?: string;
+  namn?: string;
+} {
+  if (!schemaKey) return {};
+  const decoded = decodeURIComponent(schemaKey);
+  const idx = decoded.lastIndexOf("_");
+  if (idx === -1) return { namn: decoded };
+  return {
+    schemaNamn: decoded.slice(0, idx),
+    namn: decoded.slice(idx + 1),
+  };
+}
+
+export default function FormView({ entity }: { entity: FormEntity }) {
+  const { arendeNummer, schemaKey } = useParams<{
+    arendeNummer?: string;
+    schemaKey?: string;
+  }>();
   const navigate = useNavigate();
   const location = useLocation();
   const [linkCopied, setLinkCopied] = React.useState(false);
 
-  const entity = (location.state as { entity?: string } | null)?.entity ?? "order";
+  const decodedSchemaKey = schemaKey ? decodeURIComponent(schemaKey) : "";
+  const { schemaNamn, namn } = parseSchemaKey(schemaKey);
 
-  const orderId = id ? id : "";
-  const gid = Number(id);
+  const norm = (s: string | undefined) => (s ?? "").trim().toLowerCase();
+  const gidCandidate = Number(decodedSchemaKey);
+  const decodedNorm = norm(decodedSchemaKey);
 
-  const orderQuery = useOrderById(orderId);
-  const metadataQuery = useMetadataById(Number.isFinite(gid) ? gid : -1);
-  const managementPlanQuery = useManagementPlanById(Number.isFinite(gid) ? gid : -1);
+  const orderQuery = useOrderById(arendeNummer ?? "");
+  const metadataListQuery = useMetadata();
+  const managementPlanListQuery = useManagementPlan();
 
   const activeQuery =
     entity === "metadata"
-      ? metadataQuery
+      ? metadataListQuery
       : entity === "managementplan"
-      ? managementPlanQuery
+      ? managementPlanListQuery
       : orderQuery;
 
-  const item = activeQuery.data as OrderSummary | Metadata | ManagementPlan | undefined;
   const isLoading = activeQuery.isLoading;
   const error = activeQuery.error;
+
+  const item = React.useMemo<
+    OrderSummary | Metadata | ManagementPlan | undefined
+  >(() => {
+    if (entity === "checklist") return orderQuery.data;
+
+    const list =
+      entity === "metadata"
+        ? (metadataListQuery.data ?? [])
+        : (managementPlanListQuery.data ?? []);
+
+    if (!schemaKey) return undefined;
+
+    if (Number.isFinite(gidCandidate)) {
+      const byGid = list.find(
+        (x) => (x as { gid?: number }).gid === gidCandidate
+      );
+      if (byGid) return byGid as unknown as Metadata | ManagementPlan;
+    }
+
+    const byComputedKey = list.find((x) => {
+      const rec = x as { schemaNamn?: string; namn?: string };
+      const s = norm(rec.schemaNamn);
+      const n = norm(rec.namn);
+      if (s && n) return `${s}_${n}` === decodedNorm;
+      return n === decodedNorm || s === decodedNorm;
+    });
+    if (byComputedKey) return byComputedKey as unknown as Metadata | ManagementPlan;
+
+    const match = list.find((x) => {
+      const rec = x as { schemaNamn?: string; namn?: string };
+      if (schemaNamn && namn) {
+        return (
+          norm(rec.schemaNamn) === norm(schemaNamn) &&
+          norm(rec.namn) === norm(namn)
+        );
+      }
+      const single = namn ?? schemaNamn;
+      return norm(rec.namn) === norm(single);
+    });
+
+    return match as unknown as Metadata | ManagementPlan | undefined;
+  }, [
+    entity,
+    orderQuery.data,
+    metadataListQuery.data,
+    managementPlanListQuery.data,
+    schemaKey,
+    schemaNamn,
+    namn,
+    gidCandidate,
+    decodedNorm,
+  ]);
   const { isAdmin } = useAuth();
 
   if (isLoading) {
@@ -246,7 +319,7 @@ export default function FormView() {
               ? "Metadata hittades inte."
               : entity === "managementplan"
               ? "Förvaltningsplanen hittades inte."
-              : "Beställningsspecifikationen hittades inte."}
+              : "Checklistan hittades inte."}
           </Alert>
           {isAdmin && (
             <Button
@@ -262,7 +335,7 @@ export default function FormView() {
     );
   }
 
-  const isOrderSummary = entity === "order";
+  const isOrderSummary = entity === "checklist";
 
   const displayKeys = isOrderSummary
     ? (Object.keys(fieldLabels) as (keyof OrderSummary)[])
@@ -299,10 +372,7 @@ export default function FormView() {
     : [];
 
   const renderField = (key: string) => {
-    const label =
-      isOrderSummary && key in fieldLabels
-        ? fieldLabels[key]
-        : key;
+    const label = isOrderSummary && key in fieldLabels ? fieldLabels[key] : key;
 
     const value = (item as unknown as Record<string, unknown>)[key];
     const display = formatValue(value);
@@ -350,8 +420,8 @@ export default function FormView() {
                 ? `Metadata ${String((item as Metadata).gid)}`
                 : entity === "managementplan"
                 ? `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
-                : ((item as OrderSummary).arendenummerArtvise ||
-                    `Beställning ${(item as OrderSummary).arendenummerArtvise}`)}
+                : (item as OrderSummary).arendenummerArtvise ||
+                  `Checklist ${(item as OrderSummary).arendenummerArtvise}`}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Tooltip
@@ -379,7 +449,7 @@ export default function FormView() {
               <Tooltip title="Ladda ner som PDF">
                 <IconButton
                   onClick={() => {
-                    if (entity !== "order") return;
+                    if (entity !== "checklist") return;
                     generatePDF(item as OrderSummary, fieldLabels);
                   }}
                   color="primary"
@@ -409,7 +479,9 @@ export default function FormView() {
                 )}
                 {(item as OrderSummary).prioritet && (
                   <Chip
-                    color={getPrioritetChipColor((item as OrderSummary).prioritet)}
+                    color={getPrioritetChipColor(
+                      (item as OrderSummary).prioritet
+                    )}
                     label={(item as OrderSummary).prioritet}
                     size="small"
                   />

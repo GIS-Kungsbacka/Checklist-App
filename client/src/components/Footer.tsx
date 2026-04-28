@@ -40,7 +40,7 @@ export default function Footer() {
           <Typography variant="body2" color="text.secondary">
             © {currentYear} Geodataavdelningen
           </Typography>
-          <Box sx={{ display: "flex", gap: 4 }}>
+          {/* <Box sx={{ display: "flex", gap: 4 }}>
             <Link
               component="button"
               onClick={() => setOpenInfo(true)}
@@ -60,7 +60,7 @@ export default function Footer() {
             >
               Kontakt
             </Link>
-          </Box>
+          </Box> */}
         </Box>
       </Container>
       <Dialog open={openInfo} onClose={() => setOpenInfo(false)}>

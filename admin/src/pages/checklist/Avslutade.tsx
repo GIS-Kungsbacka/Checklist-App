@@ -43,7 +43,7 @@ import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import DensityMediumOutlinedIcon from "@mui/icons-material/DensityMediumOutlined";
 import CancelIcon from "@mui/icons-material/Cancel";
 
-const GRID_PREFS_STORAGE_KEY = "avslutade-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "avslutade-default-prefs-dev-admin";
 const defaultColumnVisibility = {
   gid: true,
   arendenummerArtvise: true,
@@ -301,7 +301,9 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       {
         onSuccess: () => {
           // Query invalidation happens automatically in the hook
-          toast.success("Ångrat. Posten flyttades tillbaka till beställningslistan.");
+          toast.success(
+            "Ångrat. Posten flyttades tillbaka till beställningslistan."
+          );
         },
       }
     );

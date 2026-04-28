@@ -190,7 +190,7 @@ const KATEGORI_OPTIONS = [
 ] as const;
 const KATEGORI_TYP_OPTIONS = ["ny", "förändring"] as const;
 const ANTAGEN_OPTIONS = ["ja", "nej"] as const;
-const GRID_PREFS_STORAGE_KEY = "checklist-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "checklist-default-prefs-dev-admin";
 
 function normalizeAntagenJaNej(value: string | undefined): string {
   const v = (value ?? "").trim();

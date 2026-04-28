@@ -55,7 +55,10 @@ import type {
   UpdateManagementPlanDto,
 } from "../../types/managementPlan";
 import { useGridPrefs } from "../../utils/gridPrefs";
-import { buildSchemaNamnUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
+import {
+  buildSchemaNamnUrl,
+  useRuntimeConfig,
+} from "../../utils/runtimeConfig";
 import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
@@ -67,7 +70,7 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
-const GRID_PREFS_STORAGE_KEY = "management-plan-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev-admin";
 const defaultColumnVisibility = {
   gid: true,
   namn: true,

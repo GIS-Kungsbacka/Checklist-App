@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
-import FormView from "./pages/orderSummary/FormView";
+import FormView from "./pages/FormView";
 import OrderSummaryDataGrid from "./pages/orderSummary/orderSummary-data-grid";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -110,7 +110,18 @@ function AppContent() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/form/:id" element={<FormView />} />
+              <Route
+                path="/checklist/:arendeNummer"
+                element={<FormView entity="checklist" />}
+              />
+              <Route
+                path="/metadata/:schemaKey"
+                element={<FormView entity="metadata" />}
+              />
+              <Route
+                path="/managementplan/:schemaKey"
+                element={<FormView entity="managementplan" />}
+              />
               <Route path="/metadata" element={<Metadata mode={mode} />} />
               <Route
                 path="/managementplan"

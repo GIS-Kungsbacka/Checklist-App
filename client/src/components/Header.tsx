@@ -9,7 +9,7 @@ import {
 import { Checklist } from "@mui/icons-material";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 type HeaderProps = {
   mode: "light" | "dark";
@@ -18,6 +18,29 @@ type HeaderProps = {
 
 export default function Header({ mode, onToggleMode }: HeaderProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (kind: "orders" | "metadata" | "managementplan") => {
+    const p = location.pathname;
+    if (kind === "orders") return p === "/" || p.startsWith("/checklist/");
+    if (kind === "metadata")
+      return p === "/metadata" || p.startsWith("/metadata/");
+    return p === "/managementplan" || p.startsWith("/managementplan/");
+  };
+
+  const navButtonSx = (active: boolean) => ({
+    px: 1.5,
+    borderRadius: 1.5,
+    borderBottom: "2px solid",
+    borderBottomColor: active ? "primary.main" : "transparent",
+    fontWeight: active ? 700 : 500,
+    opacity: active ? 1 : 0.9,
+    "&:hover": {
+      opacity: 1,
+      borderBottomColor: "primary.main",
+      backgroundColor: "action.hover",
+    },
+  });
 
   return (
     <AppBar
@@ -33,7 +56,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
           sx={{ fontWeight: 600, cursor: "pointer", width: "fit-content" }}
           onClick={() => navigate("/")}
         >
-          Geodata - utvecklingsvy
+          Geodata - utvecklingsportalen
         </Typography>
         <Box
           sx={{
@@ -43,14 +66,22 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
             justifyContent: "center",
           }}
         >
-          <Button color="inherit" onClick={() => navigate("/")}>
+          <Button
+            color="inherit"
+            sx={navButtonSx(isActive("orders"))}
+            onClick={() => navigate("/")}
+          >
             Beställningslista
           </Button>
-          <Button color="inherit" onClick={() => navigate("/metadata")}>
+          <Button
+            color="inherit"
+            sx={navButtonSx(isActive("metadata"))}
+            onClick={() => navigate("/metadata")}
+          >
             Metadata
           </Button>
           <Button
-            sx={{ mr: "200px" }}
+            sx={{ ...navButtonSx(isActive("managementplan")), mr: "200px" }}
             color="inherit"
             onClick={() => navigate("/managementplan")}
           >

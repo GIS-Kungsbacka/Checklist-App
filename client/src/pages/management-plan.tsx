@@ -40,10 +40,19 @@ import type { ManagementPlan } from "../types/management-plan";
 import { useGridPrefs } from "../utils/gridPrefs";
 import { useNavigate } from "react-router-dom";
 
-const GRID_PREFS_STORAGE_KEY = "management-plan-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev";
 
 const renderJaNej = (value: boolean | undefined) =>
   value ? "Ja" : value === false ? "Nej" : "-";
+
+const buildSchemaKey = (schemaNamn?: string, namn?: string, gid?: number) => {
+  const s = (schemaNamn ?? "").trim();
+  const n = (namn ?? "").trim();
+  if (s && n) return encodeURIComponent(`${s}_${n}`);
+  if (n) return encodeURIComponent(n);
+  if (s) return encodeURIComponent(s);
+  return encodeURIComponent(String(gid ?? ""));
+};
 
 const ColumnsToolbarButton = React.forwardRef<
   HTMLButtonElement,
@@ -63,10 +72,14 @@ function ManagementPlanToolbar({
   density: GridDensity;
   onDensityChange: (d: GridDensity) => void;
 }) {
-  const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(null);
+  const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
   const exportOpen = Boolean(exportAnchor);
 
-  const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(null);
+  const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
   const densityOpen = Boolean(densityAnchor);
 
   return (
@@ -101,26 +114,28 @@ function ManagementPlanToolbar({
           open={densityOpen}
           onClose={() => setDensityAnchor(null)}
         >
-          {(["compact", "standard", "comfortable"] as GridDensity[]).map((d) => (
-            <MenuItem
-              key={d}
-              selected={density === d}
-              onClick={() => {
-                onDensityChange(d);
-                setDensityAnchor(null);
-              }}
-            >
-              <ListItemText
-                primary={
-                  d === "compact"
-                    ? "Kompakt"
-                    : d === "standard"
-                    ? "Standard"
-                    : "Komfortabelt"
-                }
-              />
-            </MenuItem>
-          ))}
+          {(["compact", "standard", "comfortable"] as GridDensity[]).map(
+            (d) => (
+              <MenuItem
+                key={d}
+                selected={density === d}
+                onClick={() => {
+                  onDensityChange(d);
+                  setDensityAnchor(null);
+                }}
+              >
+                <ListItemText
+                  primary={
+                    d === "compact"
+                      ? "Kompakt"
+                      : d === "standard"
+                      ? "Standard"
+                      : "Komfortabelt"
+                  }
+                />
+              </MenuItem>
+            )
+          )}
         </Menu>
 
         <ColumnsPanelTrigger render={<ColumnsToolbarButton />} />
@@ -203,7 +218,9 @@ function ManagementPlanToolbar({
         </Menu>
 
         <QuickFilter defaultExpanded={false}>
-          <Box sx={{ ml: 1, display: "flex", alignItems: "center", width: 260 }}>
+          <Box
+            sx={{ ml: 1, display: "flex", alignItems: "center", width: 260 }}
+          >
             <QuickFilterControl
               render={({ ref, ...props }) => (
                 <TextField
@@ -237,13 +254,18 @@ function ManagementPlanToolbar({
   );
 }
 
-export default function ManagementPlan(
-  { mode }: { mode?: "light" | "dark" } = {}
-) {
+export default function ManagementPlan({
+  mode,
+}: { mode?: "light" | "dark" } = {}) {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data: items = [], isLoading, isError, failureCount, isRefetchError } =
-    useManagementPlan();
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    failureCount,
+    isRefetchError,
+  } = useManagementPlan();
 
   const {
     columnVisibilityModel,
@@ -535,7 +557,7 @@ export default function ManagementPlan(
       <Paper
         elevation={0}
         sx={{
-          height: 630,
+          height: { xs: 300, md: 400, lg: 500, xl: 700 },
           width: "100%",
           borderRadius: 3,
           border: "1px solid",
@@ -564,7 +586,9 @@ export default function ManagementPlan(
           onRowClick={(params) => {
             const gid = (params.row as ManagementPlan | undefined)?.gid;
             if (gid == null) return;
-            navigate(`/form/${gid}`, { state: { entity: "managementplan" } });
+            const row = params.row as ManagementPlan;
+            const key = buildSchemaKey(row.schemaNamn, row.namn, row.gid);
+            navigate(`/managementplan/${key}`);
           }}
           density={density}
           showToolbar

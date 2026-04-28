@@ -40,10 +40,19 @@ import type { Metadata } from "../types/metadata";
 import { useGridPrefs } from "../utils/gridPrefs";
 import { useNavigate } from "react-router-dom";
 
-const GRID_PREFS_STORAGE_KEY = "metadata-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "metadata-default-prefs-dev";
 
 const renderJaNej = (value: boolean | undefined) =>
   value ? "Ja" : value === false ? "Nej" : "-";
+
+const buildSchemaKey = (schemaNamn?: string, namn?: string, gid?: number) => {
+  const s = (schemaNamn ?? "").trim();
+  const n = (namn ?? "").trim();
+  if (s && n) return encodeURIComponent(`${s}_${n}`);
+  if (n) return encodeURIComponent(n);
+  if (s) return encodeURIComponent(s);
+  return encodeURIComponent(String(gid ?? ""));
+};
 
 const ColumnsToolbarButton = React.forwardRef<
   HTMLButtonElement,
@@ -63,10 +72,14 @@ function MetadataToolbar({
   density: GridDensity;
   onDensityChange: (d: GridDensity) => void;
 }) {
-  const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(null);
+  const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
   const exportOpen = Boolean(exportAnchor);
 
-  const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(null);
+  const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
   const densityOpen = Boolean(densityAnchor);
 
   return (
@@ -101,26 +114,28 @@ function MetadataToolbar({
           open={densityOpen}
           onClose={() => setDensityAnchor(null)}
         >
-          {(["compact", "standard", "comfortable"] as GridDensity[]).map((d) => (
-            <MenuItem
-              key={d}
-              selected={density === d}
-              onClick={() => {
-                onDensityChange(d);
-                setDensityAnchor(null);
-              }}
-            >
-              <ListItemText
-                primary={
-                  d === "compact"
-                    ? "Kompakt"
-                    : d === "standard"
-                    ? "Standard"
-                    : "Komfortabelt"
-                }
-              />
-            </MenuItem>
-          ))}
+          {(["compact", "standard", "comfortable"] as GridDensity[]).map(
+            (d) => (
+              <MenuItem
+                key={d}
+                selected={density === d}
+                onClick={() => {
+                  onDensityChange(d);
+                  setDensityAnchor(null);
+                }}
+              >
+                <ListItemText
+                  primary={
+                    d === "compact"
+                      ? "Kompakt"
+                      : d === "standard"
+                      ? "Standard"
+                      : "Komfortabelt"
+                  }
+                />
+              </MenuItem>
+            )
+          )}
         </Menu>
 
         <ColumnsPanelTrigger render={<ColumnsToolbarButton />} />
@@ -201,7 +216,9 @@ function MetadataToolbar({
         </Menu>
 
         <QuickFilter defaultExpanded={false}>
-          <Box sx={{ ml: 1, display: "flex", alignItems: "center", width: 260 }}>
+          <Box
+            sx={{ ml: 1, display: "flex", alignItems: "center", width: 260 }}
+          >
             <QuickFilterControl
               render={({ ref, ...props }) => (
                 <TextField
@@ -220,11 +237,7 @@ function MetadataToolbar({
                 />
               )}
             />
-            <QuickFilterClear
-              edge="end"
-              size="small"
-              aria-label="Clear search"
-            >
+            <QuickFilterClear edge="end" size="small" aria-label="Clear search">
               <CancelIcon fontSize="small" />
             </QuickFilterClear>
           </Box>
@@ -237,8 +250,13 @@ function MetadataToolbar({
 export default function Metdata({ mode }: { mode?: "light" | "dark" } = {}) {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { data: items = [], isLoading, isError, failureCount, isRefetchError } =
-    useMetadata();
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    failureCount,
+    isRefetchError,
+  } = useMetadata();
 
   const {
     columnVisibilityModel,
@@ -247,45 +265,44 @@ export default function Metdata({ mode }: { mode?: "light" | "dark" } = {}) {
     setDensity,
     pageSize,
     setPageSize,
-  } =
-    useGridPrefs(GRID_PREFS_STORAGE_KEY, {
-      columnVisibilityModel: {
-        gid: true,
-        arendeNummerOpenE: false,
-        namn: true,
-        schemaNamn: true,
-        status: true,
-        handlaggare: true,
-        metaDataVersion: true,
-        bestallareNamn: false,
-        bestallareEpost: false,
-        sakerhetsKlass: false,
-        dataKallaTyp: false,
-        beskrivning: false,
-        ursprung: false,
-        syfte: false,
-        metod: false,
-        metodUrl: false,
-        projekt: false,
-        geografiskBegransning: false,
-        uppdateringsFrekvens: false,
-        fullstandighet: false,
-        skalniva: false,
-        nyckelOrd: false,
-        kategori: false,
-        tidsperiod: false,
-        tidsperiodStartdatum: false,
-        tidsperiodSlutdatum: false,
-        tidsUpplosning: false,
-        skapelseDatum: false,
-        anvandarBegransningLicens: false,
-        anvandarBegransningLicensText: false,
-        relateradeResurser: false,
-        kolumnBeskrivningUrl: false,
-      },
-      density: "standard",
-      pageSize: 25,
-    });
+  } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
+    columnVisibilityModel: {
+      gid: true,
+      arendeNummerOpenE: false,
+      namn: true,
+      schemaNamn: true,
+      status: true,
+      handlaggare: true,
+      metaDataVersion: true,
+      bestallareNamn: false,
+      bestallareEpost: false,
+      sakerhetsKlass: false,
+      dataKallaTyp: false,
+      beskrivning: false,
+      ursprung: false,
+      syfte: false,
+      metod: false,
+      metodUrl: false,
+      projekt: false,
+      geografiskBegransning: false,
+      uppdateringsFrekvens: false,
+      fullstandighet: false,
+      skalniva: false,
+      nyckelOrd: false,
+      kategori: false,
+      tidsperiod: false,
+      tidsperiodStartdatum: false,
+      tidsperiodSlutdatum: false,
+      tidsUpplosning: false,
+      skapelseDatum: false,
+      anvandarBegransningLicens: false,
+      anvandarBegransningLicensText: false,
+      relateradeResurser: false,
+      kolumnBeskrivningUrl: false,
+    },
+    density: "standard",
+    pageSize: 25,
+  });
 
   const [paginationModel, setPaginationModel] = React.useState(() => ({
     page: 0,
@@ -351,7 +368,12 @@ export default function Metdata({ mode }: { mode?: "light" | "dark" } = {}) {
       minWidth: 140,
       flex: 0.8,
     },
-    { field: "beskrivning", headerName: "Beskrivning", minWidth: 240, flex: 1.4 },
+    {
+      field: "beskrivning",
+      headerName: "Beskrivning",
+      minWidth: 240,
+      flex: 1.4,
+    },
     { field: "syfte", headerName: "Syfte", minWidth: 220, flex: 1.2 },
     { field: "metod", headerName: "Metod", minWidth: 200, flex: 1.1 },
     { field: "metodUrl", headerName: "Metod URL", minWidth: 220, flex: 1.1 },
@@ -504,7 +526,7 @@ export default function Metdata({ mode }: { mode?: "light" | "dark" } = {}) {
       <Paper
         elevation={0}
         sx={{
-          height: 630,
+          height: { xs: 300, md: 400, lg: 500, xl: 700 },
           width: "100%",
           borderRadius: 3,
           border: "1px solid",
@@ -533,7 +555,9 @@ export default function Metdata({ mode }: { mode?: "light" | "dark" } = {}) {
           onRowClick={(params) => {
             const gid = (params.row as Metadata | undefined)?.gid;
             if (gid == null) return;
-            navigate(`/form/${gid}`, { state: { entity: "metadata" } });
+            const row = params.row as Metadata;
+            const key = buildSchemaKey(row.schemaNamn, row.namn, row.gid);
+            navigate(`/metadata/${key}`);
           }}
           density={density}
           showToolbar

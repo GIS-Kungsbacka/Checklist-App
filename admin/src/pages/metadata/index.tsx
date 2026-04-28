@@ -57,7 +57,10 @@ import {
 import { useManagementPlans } from "../../hooks/useManagementPlan";
 import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
 import { useGridPrefs } from "../../utils/gridPrefs";
-import { buildSchemaNamnUrl, useRuntimeConfig } from "../../utils/runtimeConfig";
+import {
+  buildSchemaNamnUrl,
+  useRuntimeConfig,
+} from "../../utils/runtimeConfig";
 import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
@@ -69,7 +72,7 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
-const GRID_PREFS_STORAGE_KEY = "metadata-grid-prefs";
+const GRID_PREFS_STORAGE_KEY = "metadata-default-prefs-dev-admin";
 const KATEGORI_OPTIONS = [
   "Administrativa gränser",
   "Arealtäckande bilder och bakgrundskartor",
