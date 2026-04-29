@@ -227,11 +227,7 @@ function GridToolbar({
 }
 
 export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
-  const arendenummerLinkBaseUrl = React.useMemo(() => {
-    // Use the current domain (dev/test/prod) automatically.
-    return `${window.location.origin}/FormApp/client/form`;
-  }, []);
-
+  
   const { data: allItems = [], isLoading, isError } = useChecklists();
   const updateMutation = useUpdateChecklist();
   const navigate = useNavigate();
@@ -325,27 +321,6 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       minWidth: 140,
       flex: 0.8,
       hideable: false,
-      renderCell: (params: GridRenderCellParams<Checklist>) => {
-        const value = String(params.value ?? "").trim();
-        if (!value) return "-";
-
-        const href = `${arendenummerLinkBaseUrl}/${encodeURIComponent(value)}`;
-        return (
-          <Link
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            onClick={(e) => {
-              // Prevent row click navigation when user clicks the link.
-              e.stopPropagation();
-            }}
-            sx={{ fontWeight: 600 }}
-          >
-            {value}
-          </Link>
-        );
-      },
     },
     {
       field: "dataunderlag",
