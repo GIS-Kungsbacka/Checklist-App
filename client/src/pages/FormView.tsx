@@ -175,8 +175,129 @@ const metadataSections: Array<{
   },
 ];
 
-function formatValue(value: unknown): string {
+const managementPlanFieldLabels: Partial<Record<keyof ManagementPlan, string>> =
+  {
+    namn: "Namn",
+    titel: "Titel",
+    schemaNamn: "Schema",
+    status: "Status",
+    handlaggare: "Handläggare",
+    arendeNummberOpenE: "Ärendenummer",
+    bestallareNamn: "Beställare",
+    bestallareEpost: "Beställare e-post",
+    sakerhetsklass: "Säkerhetsklass",
+    datakallaTyp: "Datakälla typ",
+    dataAgare: "Dataägare",
+    dataForvaltare: "Dataförvaltare",
+    dataAdministrator: "Dataadministratör",
+    dataKonsument: "Datakonsument",
+    redigeringsKalla: "Redigeringskälla",
+    publicerad: "Publicerad",
+    oppnaData: "Öppna data",
+    dokumentSkUrl: "Dokument SK URL",
+    dokuementInfoUrl: "Dokument info URL",
+    ovrigInformation: "Övrig information",
+    kritiskDatamangd: "Kritisk datamängd",
+    arkivering: "Arkivering",
+    arkiveringTidpunkt: "Arkivering tidpunkt",
+    atkomst: "Åtkomst",
+    integration: "Integration",
+    forvaltningsplanVersion: "Version",
+    skapadTidPunkt: "Skapad",
+    skapadAv: "Skapad av",
+    andradTidPunkt: "Ändrad",
+    andradAv: "Ändrad av",
+  };
+
+const managementPlanSections: Array<{
+  title: string;
+  keys: (keyof ManagementPlan)[];
+}> = [
+  {
+    title: "Grundläggande identitet",
+    keys: ["titel", "namn", "schemaNamn", "forvaltningsplanVersion"],
+  },
+  {
+    title: "Ansvar och roller",
+    keys: [
+      "dataAgare",
+      "dataForvaltare",
+      "dataAdministrator",
+      "dataKonsument",
+      "handlaggare",
+    ],
+  },
+  {
+    title: "Publicering och åtkomst",
+    keys: [
+      "publicerad",
+      "oppnaData",
+      "atkomst",
+      "integration",
+      "redigeringsKalla",
+    ],
+  },
+  {
+    title: "Dokumentation och information",
+    keys: ["dokumentSkUrl", "dokuementInfoUrl", "ovrigInformation"],
+  },
+  {
+    title: "Livscykel och arkivering",
+    keys: [
+      "kritiskDatamangd",
+      "arkivering",
+      "arkiveringTidpunkt",
+      "skapadTidPunkt",
+      "skapadAv",
+      "andradTidPunkt",
+      "andradAv",
+    ],
+  },
+  {
+    title: "Status",
+    keys: [
+      "arendeNummberOpenE",
+      "bestallareNamn",
+      "bestallareEpost",
+      "sakerhetsklass",
+      "datakallaTyp",
+      "status",
+    ],
+  },
+];
+
+function formatDateOnly(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+
+    const date = new Date(trimmed);
+    if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+    return undefined;
+  }
+
+  if (typeof value === "number") {
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+    return undefined;
+  }
+
+  if (value instanceof Date) {
+    if (!Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function formatValue(value: unknown, key?: string): string {
   if (value === null || value === undefined) return "-";
+  if (key === "skapadTidPunkt" || key === "andradTidPunkt") {
+    return formatDateOnly(value) ?? "-";
+  }
   if (typeof value === "boolean") return value ? "Ja" : "Nej";
   if (Array.isArray(value)) return value.filter(Boolean).join(", ") || "-";
   return String(value);
@@ -439,6 +560,41 @@ export default function FormView({ entity }: { entity: FormEntity }) {
         })()
       : undefined;
 
+  const managementPlanHeaderByName = React.useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of managementPlanListQuery.data ?? []) {
+      const name = norm(p.namn);
+      if (!name) continue;
+      const title = (p.titel ?? p.namn ?? "").trim();
+      if (!title) continue;
+      if (!map.has(name)) map.set(name, title);
+    }
+    return map;
+  }, [managementPlanListQuery.data]);
+
+  const metadataHeaderTitle =
+    entity === "metadata"
+      ? (() => {
+          const metadata = item as Metadata | undefined;
+          const metadataName = norm(metadata?.namn);
+          const managementPlanTitle = metadataName
+            ? managementPlanHeaderByName.get(metadataName)
+            : undefined;
+          return (
+            (managementPlanTitle ?? "").trim() ||
+            (metadata?.namn ?? "").trim() ||
+            (metadata ? `Metadata ${String(metadata.gid)}` : "Metadata")
+          );
+        })()
+      : "";
+
+  const backPath =
+    entity === "metadata"
+      ? "/metadata"
+      : entity === "managementplan"
+      ? "/managementplan"
+      : "/";
+
   if (isLoading) {
     return (
       <Container maxWidth="md">
@@ -493,7 +649,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           {isAdmin && (
             <Button
               startIcon={<ArrowBack />}
-              onClick={() => navigate("/")}
+              onClick={() => navigate(backPath)}
               sx={{ mt: 2 }}
             >
               Tillbaka till listan
@@ -544,7 +700,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     const label = isOrderSummary && key in fieldLabels ? fieldLabels[key] : key;
 
     const value = (item as unknown as Record<string, unknown>)[key];
-    const display = formatValue(value);
+    const display = formatValue(value, key);
 
     return (
       <Grid size={{ xs: 12, sm: 6 }} key={key}>
@@ -561,7 +717,29 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   const renderMetadataField = (key: keyof Metadata) => {
     const label = metadataFieldLabels[key] ?? String(key);
     const value = (item as Metadata)?.[key];
-    const display = formatValue(value);
+    const display = formatValue(value, String(key));
+
+    return (
+      <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+          sx={{ fontWeight: 900 }}
+        >
+          {label}
+        </Typography>
+        <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
+          {display}
+        </Typography>
+      </Grid>
+    );
+  };
+
+  const renderManagementPlanField = (key: keyof ManagementPlan) => {
+    const label = managementPlanFieldLabels[key] ?? String(key);
+    const value = (item as ManagementPlan)?.[key];
+    const display = formatValue(value, String(key));
 
     return (
       <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
@@ -599,7 +777,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
       {isAdmin && (
         <Button
           startIcon={<ArrowBack />}
-          onClick={() => navigate("/")}
+          onClick={() => navigate(backPath)}
           sx={{ mb: 3 }}
         >
           Tillbaka till listan
@@ -622,10 +800,13 @@ export default function FormView({ entity }: { entity: FormEntity }) {
               fontWeight={600}
             >
               {entity === "metadata"
-                ? ((item as Metadata).namn ?? "").trim() ||
-                  `Metadata ${String((item as Metadata).gid)}`
+                ? metadataHeaderTitle
                 : entity === "managementplan"
-                ? `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
+                ? (
+                    (item as ManagementPlan).titel ??
+                    (item as ManagementPlan).namn
+                  )?.trim() ||
+                  `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
                 : (item as OrderSummary).arendenummerArtvise ||
                   `Checklist ${(item as OrderSummary).arendenummerArtvise}`}
             </Typography>
@@ -801,6 +982,23 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                       <Divider sx={{ mb: 1.5 }} />
                       <Grid container spacing={2}>
                         {section.keys.map((k) => renderMetadataField(k))}
+                      </Grid>
+                    </Box>
+                  ))}
+                </Box>
+              ) : entity === "managementplan" ? (
+                <Box sx={{ mt: 1 }}>
+                  {managementPlanSections.map((section) => (
+                    <Box key={section.title} sx={{ mt: 5 }}>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
+                      >
+                        {section.title}
+                      </Typography>
+                      <Divider sx={{ mb: 1.5 }} />
+                      <Grid container spacing={2}>
+                        {section.keys.map((k) => renderManagementPlanField(k))}
                       </Grid>
                     </Box>
                   ))}

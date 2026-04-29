@@ -790,7 +790,9 @@ export default function ManagementPlanPage({
         <DialogTitle>
           {openCreate
             ? "Skapa förvaltningsplan"
-            : `Redigera förvaltningsplan ${openEdit?.arendeNummberOpenE}`}
+            : `Redigera förvaltningsplan ${openEdit?.arendeNummberOpenE} (${
+                openEdit?.titel ?? openEdit?.namn
+              })`}
         </DialogTitle>
         <DialogContent>
           <Box

@@ -819,7 +819,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         <DialogTitle>
           {openCreate
             ? "Skapa metadata"
-            : `Redigera metadata ${openEdit?.arendeNummerOpenE}`}
+            : `Redigera metadata ${openEdit?.arendeNummerOpenE} (${openEdit?.namn})`}
         </DialogTitle>
         <DialogContent>
           <Box

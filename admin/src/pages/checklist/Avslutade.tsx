@@ -7,7 +7,6 @@ import {
   CircularProgress,
   Alert,
   Chip,
-  Link,
   Tooltip,
   ListItemText,
   Menu,
@@ -227,7 +226,6 @@ function GridToolbar({
 }
 
 export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
-  
   const { data: allItems = [], isLoading, isError } = useChecklists();
   const updateMutation = useUpdateChecklist();
   const navigate = useNavigate();

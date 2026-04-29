@@ -7,7 +7,6 @@ import {
   CircularProgress,
   Alert,
   Chip,
-  Link,
   TextField,
   Tooltip,
   ListItemText,
@@ -227,7 +226,6 @@ function GridToolbar({
 }
 
 export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
-
   const { data: allItems = [], isLoading, isError } = useChecklists();
   const updateMutation = useUpdateChecklist();
   const navigate = useNavigate();
@@ -321,7 +319,7 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
       headerName: "Ärendenummer",
       minWidth: 140,
       flex: 0.8,
-      hideable: false
+      hideable: false,
     },
     {
       field: "dataunderlag",

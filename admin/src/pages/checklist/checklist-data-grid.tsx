@@ -457,7 +457,7 @@ function ScreenshotToolbar({
 export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
   const arendenummerLinkBaseUrl = React.useMemo(() => {
     // Use the current domain (dev/test/prod) automatically.
-    return `${window.location.origin}/FormApp/client/form`;
+    return `${window.location.origin}/FormApp/client/checklist`;
   }, []);
 
   const {

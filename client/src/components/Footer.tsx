@@ -3,7 +3,6 @@ import {
   Box,
   Container,
   Typography,
-  Link,
   Dialog,
   DialogTitle,
   DialogContent,
