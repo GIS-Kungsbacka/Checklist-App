@@ -15,9 +15,7 @@ export function statusChipColor(
 
   if (v === "granskas") return "warning";
   if (v === "godkand" || v === "godkänd") return "success";
-  if (v === "nekad") return "error";
   if (v === "klar") return "success";
 
   return "default";
 }
-

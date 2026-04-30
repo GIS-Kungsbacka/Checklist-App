@@ -73,7 +73,7 @@ const toArray = (value: string): string[] | undefined => {
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
 const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev-admin";
-const STATUS_OPTIONS = ["granskas", "godkänd", "nekad"] as const;
+const STATUS_OPTIONS = ["granskas", "godkänd"] as const;
 const defaultColumnVisibility = {
   gid: true,
   namn: true,
