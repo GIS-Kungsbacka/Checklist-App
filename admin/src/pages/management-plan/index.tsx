@@ -20,6 +20,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  Chip,
 } from "@mui/material";
 import {
   ColumnsPanelTrigger,
@@ -59,6 +60,7 @@ import {
   buildSchemaNamnUrl,
   useRuntimeConfig,
 } from "../../utils/runtimeConfig";
+import { statusChipColor } from "../../utils/status-chip";
 import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
@@ -71,6 +73,7 @@ const toArray = (value: string): string[] | undefined => {
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
 const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev-admin";
+const STATUS_OPTIONS = ["granskas", "godkänd", "nekad"] as const;
 const defaultColumnVisibility = {
   gid: true,
   namn: true,
@@ -610,7 +613,24 @@ export default function ManagementPlanPage({
       flex: 1,
       valueGetter: (_value, row) => row.integration?.join(", ") ?? "-",
     },
-    { field: "status", headerName: "Status", minWidth: 140, flex: 1 },
+    {
+      field: "status",
+      headerName: "Status",
+      minWidth: 140,
+      flex: 1,
+      renderCell: (params: GridRenderCellParams<ManagementPlan>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+        return (
+          <Chip
+            label={value}
+            size="small"
+            color={statusChipColor(value)}
+            variant="filled"
+          />
+        );
+      },
+    },
     { field: "handlaggare", headerName: "Handläggare", minWidth: 150, flex: 1 },
     {
       field: "forvaltningsplanVersion",
@@ -834,18 +854,42 @@ export default function ManagementPlanPage({
                 ["andradAv", "Ändrad av"],
                 ["ovrigInformation", "Övrig information"],
               ] as const
-            ).map(([key, label]) => (
-              <TextField
-                key={key}
-                label={label}
-                value={form[key]}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, [key]: e.target.value }))
-                }
-                multiline={key === "ovrigInformation"}
-                minRows={key === "ovrigInformation" ? 2 : undefined}
-              />
-            ))}
+            ).map(([key, label]) =>
+              key === "status" ? (
+                <TextField
+                  key={key}
+                  select
+                  label={label}
+                  value={form.status}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      status: String(e.target.value ?? ""),
+                    }))
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Välj status</em>
+                  </MenuItem>
+                  {STATUS_OPTIONS.map((opt) => (
+                    <MenuItem key={opt} value={opt}>
+                      {opt}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ) : (
+                <TextField
+                  key={key}
+                  label={label}
+                  value={form[key]}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, [key]: e.target.value }))
+                  }
+                  multiline={key === "ovrigInformation"}
+                  minRows={key === "ovrigInformation" ? 2 : undefined}
+                />
+              )
+            )}
           </Box>
           <Divider sx={{ mt: 3 }} />
           <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>

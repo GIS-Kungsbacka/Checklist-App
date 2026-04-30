@@ -56,7 +56,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
           sx={{ fontWeight: 600, cursor: "pointer", width: "fit-content" }}
           onClick={() => navigate("/")}
         >
-          Geodata - utvecklingsportalen
+          GSF - utvecklingsportalen
         </Typography>
         <Box
           sx={{

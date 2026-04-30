@@ -6,6 +6,7 @@ import {
   CircularProgress,
   Alert,
   Typography,
+  Chip,
   Menu,
   MenuItem,
   ListItemText,
@@ -39,6 +40,7 @@ import { useManagementPlan } from "../hooks/useManagementPlan";
 import type { ManagementPlan } from "../types/management-plan";
 import { useGridPrefs } from "../utils/gridPrefs";
 import { useNavigate } from "react-router-dom";
+import { statusChipColor } from "../utils/status-chip";
 
 const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev";
 
@@ -369,7 +371,24 @@ export default function ManagementPlan({
     },
     { field: "namn", headerName: "Namn", minWidth: 200, flex: 1.2 },
     { field: "schemaNamn", headerName: "Schema", minWidth: 160, flex: 0.9 },
-    { field: "status", headerName: "Status", minWidth: 140, flex: 0.8 },
+    {
+      field: "status",
+      headerName: "Status",
+      minWidth: 140,
+      flex: 0.8,
+      renderCell: (params: GridRenderCellParams<ManagementPlan>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+        return (
+          <Chip
+            label={value}
+            size="small"
+            color={statusChipColor(value)}
+            variant="filled"
+          />
+        );
+      },
+    },
     { field: "handlaggare", headerName: "Handläggare", minWidth: 170, flex: 1 },
     {
       field: "dataAgare",

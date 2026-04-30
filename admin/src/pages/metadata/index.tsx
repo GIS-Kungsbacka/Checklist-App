@@ -24,6 +24,7 @@ import {
   TextField,
   Tooltip,
   Typography,
+  Chip,
 } from "@mui/material";
 import {
   ColumnsPanelTrigger,
@@ -61,6 +62,7 @@ import {
   buildSchemaNamnUrl,
   useRuntimeConfig,
 } from "../../utils/runtimeConfig";
+import { statusChipColor } from "../../utils/status-chip";
 import { toast } from "react-toastify";
 
 const toArray = (value: string): string[] | undefined => {
@@ -73,6 +75,7 @@ const toArray = (value: string): string[] | undefined => {
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
 const GRID_PREFS_STORAGE_KEY = "metadata-default-prefs-dev-admin";
+const STATUS_OPTIONS = ["granskas", "godkänd", "nekad"] as const;
 const KATEGORI_OPTIONS = [
   "Administrativa gränser",
   "Arealtäckande bilder och bakgrundskartor",
@@ -659,7 +662,24 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       minWidth: 220,
       flex: 1,
     },
-    { field: "status", headerName: "Status", minWidth: 140, flex: 0.9 },
+    {
+      field: "status",
+      headerName: "Status",
+      minWidth: 140,
+      flex: 0.9,
+      renderCell: (params: GridRenderCellParams<Metadata>) => {
+        const value = String(params.value ?? "").trim();
+        if (!value) return "-";
+        return (
+          <Chip
+            label={value}
+            size="small"
+            color={statusChipColor(value)}
+            variant="filled"
+          />
+        );
+      },
+    },
     { field: "handlaggare", headerName: "Handläggare", minWidth: 150, flex: 1 },
     {
       field: "metaDataVersion",
@@ -893,6 +913,32 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                       <MenuItem value={form.kategori}>{form.kategori}</MenuItem>
                     ) : null}
                     {KATEGORI_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : key === "status" ? (
+                <FormControl key={key} fullWidth>
+                  <InputLabel id="metadata-status-label">Status</InputLabel>
+                  <Select
+                    labelId="metadata-status-label"
+                    label="Status"
+                    value={form.status}
+                    displayEmpty
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        status: String(e.target.value ?? ""),
+                      }))
+                    }
+                    input={<OutlinedInput label="Status" />}
+                  >
+                    <MenuItem value="">
+                      <em>Välj status</em>
+                    </MenuItem>
+                    {STATUS_OPTIONS.map((opt) => (
                       <MenuItem key={opt} value={opt}>
                         {opt}
                       </MenuItem>

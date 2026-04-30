@@ -47,6 +47,7 @@ import type { ManagementPlan } from "../types/management-plan";
 import jsPDF from "jspdf";
 import { getPrioritetChipColor } from "./orderSummary/orderSummary-data-grid";
 import { useAuth } from "../hooks/useAuth";
+import { statusChipColor } from "../utils/status-chip";
 
 const fieldLabels: Record<string, string> = {
   arendenummerArtvise: "Ärendenummer",
@@ -661,6 +662,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   }
 
   const isOrderSummary = entity === "checklist";
+  const entityHeading = entity === "metadata" ? "Metadata" : "Förvaltningsplan";
 
   const displayKeys = isOrderSummary
     ? (Object.keys(fieldLabels) as (keyof OrderSummary)[])
@@ -968,6 +970,36 @@ export default function FormView({ entity }: { entity: FormEntity }) {
             </>
           ) : (
             <>
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ mt: 2 }}
+                flexWrap="wrap"
+                useFlexGap
+              >
+                {"kategori" in item && (item as any).kategori ? (
+                  <Chip
+                    label={(item as any).kategori}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                ) : null}
+                {"status" in item && (item as any).status ? (
+                  <Chip
+                    label={(item as any).status}
+                    size="small"
+                    color={statusChipColor((item as any).status)}
+                    variant="outlined"
+                  />
+                ) : null}
+                <Chip
+                  label={entityHeading}
+                  size="small"
+                  variant="outlined"
+                  sx={{ ml: "auto" }}
+                />
+              </Stack>
               <Divider sx={{ my: 1.5 }} />
               {entity === "metadata" ? (
                 <Box sx={{ mt: 1 }}>
