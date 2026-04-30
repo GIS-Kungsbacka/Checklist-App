@@ -1061,7 +1061,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           <DialogTitle>Skapa ny post</DialogTitle>
           <DialogContent>
             <Typography variant="body2">
-              Värdet 'Ja' i fältet 'Antagen' skickar automatiskt objektet till
+              Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
               idebanken.
             </Typography>
             <Typography variant="body2">
@@ -1427,7 +1427,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           </DialogTitle>
           <DialogContent>
             <Typography variant="body2">
-              Värdet 'Ja' i fältet 'Antagen' skickar automatiskt objektet till
+              Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
               idebanken.
             </Typography>
             <Typography variant="body2">
