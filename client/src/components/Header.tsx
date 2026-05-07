@@ -6,7 +6,7 @@ import {
   Box,
   Button,
 } from "@mui/material";
-import { Checklist } from "@mui/icons-material";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -49,7 +49,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
       sx={{ bgcolor: "background.paper", color: "text.primary" }}
     >
       <Toolbar sx={{ display: "flex", alignItems: "center" }}>
-        <Checklist sx={{ mr: 2, fontSize: 28 }} />
+        <FactCheckOutlinedIcon sx={{ mr: 1, fontSize: 36 }} />
         <Typography
           variant="h6"
           component="div"

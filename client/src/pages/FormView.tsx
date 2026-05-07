@@ -304,32 +304,53 @@ function formatValue(value: unknown, key?: string): string {
   return String(value);
 }
 
-function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
-  const doc = new jsPDF();
+function sanitizeFilenamePart(input: string): string {
+  const cleaned = input.trim().replace(/[^a-z0-9\-_]+/gi, "_");
+  return cleaned.replace(/^_+|_+$/g, "") || "export";
+}
+
+function createPdfTextWriter(doc: jsPDF) {
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   const maxWidth = pageWidth - 2 * margin;
   let yPosition = margin;
 
-  // Helper function to add text with word wrapping
+  const ensurePageSpace = () => {
+    if (yPosition > pageHeight - margin) {
+      doc.addPage();
+      yPosition = margin;
+    }
+  };
+
   const addText = (text: string, fontSize: number, isBold = false) => {
     doc.setFontSize(fontSize);
     doc.setFont("helvetica", isBold ? "bold" : "normal");
     const lines = doc.splitTextToSize(text, maxWidth);
     doc.text(lines, margin, yPosition);
     yPosition += lines.length * (fontSize * 0.4) + 5;
-
-    // Check if we need a new page
-    if (yPosition > doc.internal.pageSize.getHeight() - margin) {
-      doc.addPage();
-      yPosition = margin;
-    }
+    ensurePageSpace();
   };
+
+  const addSpacer = (height = 5) => {
+    yPosition += height;
+    ensurePageSpace();
+  };
+
+  return { addText, addSpacer };
+}
+
+function generateChecklistPDF(
+  item: OrderSummary,
+  fieldLabels: Record<string, string>,
+) {
+  const doc = new jsPDF();
+  const { addText, addSpacer } = createPdfTextWriter(doc);
 
   // Title
   const title = item.arendenummerArtvise || "Beställningsspecifikation";
   addText(title, 18, true);
-  yPosition += 5;
+  addSpacer(5);
 
   // Add chips info if available
   const chipsInfo: string[] = [];
@@ -337,10 +358,10 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
   if (item.prioritet) chipsInfo.push(`Prioritet: ${item.prioritet}`);
   if (chipsInfo.length > 0) {
     addText(chipsInfo.join(" | "), 12);
-    yPosition += 5;
+    addSpacer(5);
   }
 
-  yPosition += 5;
+  addSpacer(5);
 
   // Beställningsunderlag section
   const checklistKeys: (keyof OrderSummary)[] = [
@@ -369,11 +390,11 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
 
   const displayKeys = Object.keys(fieldLabels) as (keyof OrderSummary)[];
   const orderSummaryKeys = displayKeys.filter(
-    (key) => !checklistKeys.includes(key)
+    (key) => !checklistKeys.includes(key),
   );
 
   addText("Beställningsunderlag", 14, true);
-  yPosition += 3;
+  addSpacer(3);
 
   orderSummaryKeys.forEach((key) => {
     const label = fieldLabels[key];
@@ -383,9 +404,9 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
     }
   });
 
-  yPosition += 5;
+  addSpacer(5);
   addText("Checklista", 14, true);
-  yPosition += 3;
+  addSpacer(3);
 
   checklistKeys.forEach((key) => {
     const label = fieldLabels[key];
@@ -396,11 +417,90 @@ function generatePDF(item: OrderSummary, fieldLabels: Record<string, string>) {
   });
 
   // Generate filename
-  const filename = `${title.replace(/[^a-z0-9]/gi, "_")}_${
+  const filename = `${sanitizeFilenamePart(title)}_${
     new Date().toISOString().split("T")[0]
   }.pdf`;
 
   // Save the PDF
+  doc.save(filename);
+}
+
+function generateMetadataPDF(metadata: Metadata) {
+  const doc = new jsPDF();
+  const { addText, addSpacer } = createPdfTextWriter(doc);
+
+  const title =
+    (metadata.namn ?? "").trim() || `Metadata ${String(metadata.gid)}`;
+  addText(title, 18, true);
+  addSpacer(5);
+
+  const chipsInfo: string[] = [];
+  if (metadata.kategori)
+    chipsInfo.push(`Kategori: ${String(metadata.kategori)}`);
+  if (metadata.status) chipsInfo.push(`Status: ${String(metadata.status)}`);
+  if (chipsInfo.length > 0) {
+    addText(chipsInfo.join(" | "), 12);
+    addSpacer(5);
+  }
+
+  for (const section of metadataSections) {
+    addText(section.title, 14, true);
+    addSpacer(3);
+
+    for (const key of section.keys) {
+      const label = metadataFieldLabels[key] ?? String(key);
+      const value = formatValue(metadata[key], String(key));
+      addText(`${label}: ${value}`, 11);
+    }
+
+    addSpacer(5);
+  }
+
+  const keySuffix =
+    `${(metadata.schemaNamn ?? "").trim()}_${(metadata.namn ?? "").trim()}`.trim() ||
+    title;
+  const filename = `${sanitizeFilenamePart(keySuffix)}_${
+    new Date().toISOString().split("T")[0]
+  }.pdf`;
+  doc.save(filename);
+}
+
+function generateManagementPlanPDF(plan: ManagementPlan) {
+  const doc = new jsPDF();
+  const { addText, addSpacer } = createPdfTextWriter(doc);
+
+  const title =
+    (plan.titel ?? plan.namn ?? "").trim() ||
+    `Förvaltningsplan ${String(plan.gid)}`;
+  addText(title, 18, true);
+  addSpacer(5);
+
+  const chipsInfo: string[] = [];
+  if (plan.status) chipsInfo.push(`Status: ${String(plan.status)}`);
+  if (chipsInfo.length > 0) {
+    addText(chipsInfo.join(" | "), 12);
+    addSpacer(5);
+  }
+
+  for (const section of managementPlanSections) {
+    addText(section.title, 14, true);
+    addSpacer(3);
+
+    for (const key of section.keys) {
+      const label = managementPlanFieldLabels[key] ?? String(key);
+      const value = formatValue(plan[key], String(key));
+      addText(`${label}: ${value}`, 11);
+    }
+
+    addSpacer(5);
+  }
+
+  const keySuffix =
+    `${(plan.schemaNamn ?? "").trim()}_${(plan.namn ?? "").trim()}`.trim() ||
+    title;
+  const filename = `${sanitizeFilenamePart(keySuffix)}_${
+    new Date().toISOString().split("T")[0]
+  }.pdf`;
   doc.save(filename);
 }
 
@@ -434,9 +534,8 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   const location = useLocation();
   const [linkCopied, setLinkCopied] = React.useState(false);
   const [columnDialogOpen, setColumnDialogOpen] = React.useState(false);
-  const [tableViewClicked, setTableViewClicked] = React.useState(false);
   const [publicConfig, setPublicConfig] = React.useState<PublicConfig | null>(
-    null
+    null,
   );
 
   const decodedSchemaKey = schemaKey ? decodeURIComponent(schemaKey) : "";
@@ -457,8 +556,8 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     entity === "metadata"
       ? metadataListQuery
       : entity === "managementplan"
-      ? managementPlanListQuery
-      : orderQuery;
+        ? managementPlanListQuery
+        : orderQuery;
 
   const isLoading = activeQuery.isLoading;
   const error = activeQuery.error;
@@ -490,14 +589,14 @@ export default function FormView({ entity }: { entity: FormEntity }) {
 
     const list =
       entity === "metadata"
-        ? metadataListQuery.data ?? []
-        : managementPlanListQuery.data ?? [];
+        ? (metadataListQuery.data ?? [])
+        : (managementPlanListQuery.data ?? []);
 
     if (!schemaKey) return undefined;
 
     if (Number.isFinite(gidCandidate)) {
       const byGid = list.find(
-        (x) => (x as { gid?: number }).gid === gidCandidate
+        (x) => (x as { gid?: number }).gid === gidCandidate,
       );
       if (byGid) return byGid as unknown as Metadata | ManagementPlan;
     }
@@ -548,10 +647,10 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           if (!base) return undefined;
 
           const schema = String(
-            (item as { schemaNamn?: unknown } | undefined)?.schemaNamn ?? ""
+            (item as { schemaNamn?: unknown } | undefined)?.schemaNamn ?? "",
           ).trim();
           const name = String(
-            (item as { namn?: unknown } | undefined)?.namn ?? ""
+            (item as { namn?: unknown } | undefined)?.namn ?? "",
           ).trim();
           if (!schema || !name) return undefined;
 
@@ -593,8 +692,8 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     entity === "metadata"
       ? "/metadata"
       : entity === "managementplan"
-      ? "/managementplan"
-      : "/";
+        ? "/managementplan"
+        : "/";
 
   if (isLoading) {
     return (
@@ -644,8 +743,8 @@ export default function FormView({ entity }: { entity: FormEntity }) {
             {entity === "metadata"
               ? "Metadata hittades inte."
               : entity === "managementplan"
-              ? "Förvaltningsplanen hittades inte."
-              : "Checklistan hittades inte."}
+                ? "Förvaltningsplanen hittades inte."
+                : "Checklistan hittades inte."}
           </Alert>
           {isAdmin && (
             <Button
@@ -694,7 +793,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
 
   const orderSummaryKeys = isOrderSummary
     ? (displayKeys as (keyof OrderSummary)[]).filter(
-        (key) => !checklistKeys.includes(key)
+        (key) => !checklistKeys.includes(key),
       )
     : [];
 
@@ -769,7 +868,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           return all.filter(
             (x) =>
               (x.tableSchema ?? "").trim() === schemaNamn &&
-              (x.tableName ?? "").trim() === namn
+              (x.tableName ?? "").trim() === namn,
           );
         })()
       : [];
@@ -804,52 +903,22 @@ export default function FormView({ entity }: { entity: FormEntity }) {
               {entity === "metadata"
                 ? metadataHeaderTitle
                 : entity === "managementplan"
-                ? (
-                    (item as ManagementPlan).titel ??
-                    (item as ManagementPlan).namn
-                  )?.trim() ||
-                  `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
-                : (item as OrderSummary).arendenummerArtvise ||
-                  `Checklist ${(item as OrderSummary).arendenummerArtvise}`}
+                  ? (
+                      (item as ManagementPlan).titel ??
+                      (item as ManagementPlan).namn
+                    )?.trim() ||
+                    `Förvaltningsplan ${String((item as ManagementPlan).gid)}`
+                  : (item as OrderSummary).arendenummerArtvise ||
+                    `Checklist ${(item as OrderSummary).arendenummerArtvise}`}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {entity === "metadata" ? (
                 <Tooltip title="Visa attributtabell">
                   <IconButton
                     onClick={() => {
-                      setTableViewClicked(true);
                       setColumnDialogOpen(true);
                     }}
                     color="primary"
-                    sx={{
-                      ml: 2,
-                      border: "1px solid",
-                      borderColor: "primary.main",
-                      bgcolor: "rgba(25, 118, 210, 0.08)",
-                      animation: tableViewClicked
-                        ? "none"
-                        : "tableViewPulse 1.6s ease-in-out infinite",
-                      "@keyframes tableViewPulse": {
-                        "0%": {
-                          transform: "scale(1)",
-                          boxShadow: "0 0 0 0 rgba(25, 118, 210, 0.45)",
-                        },
-                        "65%": {
-                          transform: "scale(1.06)",
-                          boxShadow: "0 0 0 10px rgba(25, 118, 210, 0)",
-                        },
-                        "100%": {
-                          transform: "scale(1)",
-                          boxShadow: "0 0 0 0 rgba(25, 118, 210, 0)",
-                        },
-                      },
-                      "@media (prefers-reduced-motion: reduce)": {
-                        animation: "none",
-                      },
-                      "&:hover": {
-                        bgcolor: "rgba(25, 118, 210, 0.14)",
-                      },
-                    }}
                   >
                     <TableView />
                   </IconButton>
@@ -870,12 +939,12 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                         window.open(
                           openInNewUrl,
                           "_blank",
-                          "noopener,noreferrer"
+                          "noopener,noreferrer",
                         );
                       }}
                       disabled={!openInNewUrl}
                       color="primary"
-                      sx={{ ml: 2 }}
+                      sx={{ ml: 1 }}
                     >
                       <OpenInNew />
                     </IconButton>
@@ -898,7 +967,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                     }
                   }}
                   color={linkCopied ? "primary" : "primary"}
-                  sx={{ ml: 2 }}
+                  sx={{ ml: 1 }}
                 >
                   {linkCopied ? <CheckCircleOutlinedIcon /> : <Link />}
                 </IconButton>
@@ -907,8 +976,15 @@ export default function FormView({ entity }: { entity: FormEntity }) {
               <Tooltip title="Ladda ner som PDF">
                 <IconButton
                   onClick={() => {
-                    if (entity !== "checklist") return;
-                    generatePDF(item as OrderSummary, fieldLabels);
+                    if (entity === "checklist") {
+                      generateChecklistPDF(item as OrderSummary, fieldLabels);
+                      return;
+                    }
+                    if (entity === "metadata") {
+                      generateMetadataPDF(item as Metadata);
+                      return;
+                    }
+                    generateManagementPlanPDF(item as ManagementPlan);
                   }}
                   color="primary"
                   sx={{ ml: 1 }}
@@ -938,7 +1014,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                 {(item as OrderSummary).prioritet && (
                   <Chip
                     color={getPrioritetChipColor(
-                      (item as OrderSummary).prioritet
+                      (item as OrderSummary).prioritet,
                     )}
                     label={(item as OrderSummary).prioritet}
                     size="small"
