@@ -607,7 +607,7 @@ export default function ManagementPlan({
             if (gid == null) return;
             const row = params.row as ManagementPlan;
             const key = buildSchemaKey(row.schemaNamn, row.namn, row.gid);
-            navigate(`/managementplan/${key}`);
+            navigate(`/forvaltningsplan/${key}`);
           }}
           density={density}
           showToolbar

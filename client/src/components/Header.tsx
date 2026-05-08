@@ -25,7 +25,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
     if (kind === "orders") return p === "/" || p.startsWith("/checklist/");
     if (kind === "metadata")
       return p === "/metadata" || p.startsWith("/metadata/");
-    return p === "/managementplan" || p.startsWith("/managementplan/");
+    return p === "/forvaltningsplan" || p.startsWith("/forvaltningsplan/");
   };
 
   const navButtonSx = (active: boolean) => ({
@@ -83,7 +83,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
           <Button
             sx={{ ...navButtonSx(isActive("managementplan")), mr: "200px" }}
             color="inherit"
-            onClick={() => navigate("/managementplan")}
+            onClick={() => navigate("/forvaltningsplan")}
           >
             Förvaltningsplan
           </Button>

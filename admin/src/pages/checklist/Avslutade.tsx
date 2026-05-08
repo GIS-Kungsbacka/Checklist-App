@@ -418,7 +418,11 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       getActions: (params) => [
         <GridActionsCellItem
           key="undo"
-          icon={<Undo />}
+          icon={
+            <Tooltip title="Ångra">
+              <Undo />
+            </Tooltip>
+          }
           label="Ångra"
           disabled={updateMutation.isPending}
           onClick={(e) => {

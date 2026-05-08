@@ -692,7 +692,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     entity === "metadata"
       ? "/metadata"
       : entity === "managementplan"
-        ? "/managementplan"
+        ? "/forvaltningsplan"
         : "/";
 
   if (isLoading) {

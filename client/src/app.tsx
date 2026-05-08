@@ -119,12 +119,12 @@ function AppContent() {
                 element={<FormView entity="metadata" />}
               />
               <Route
-                path="/managementplan/:schemaKey"
+                path="/forvaltningsplan/:schemaKey"
                 element={<FormView entity="managementplan" />}
               />
               <Route path="/metadata" element={<Metadata mode={mode} />} />
               <Route
-                path="/managementplan"
+                path="/forvaltningsplan"
                 element={<ManagementPlan mode={mode} />}
               />
             </Routes>

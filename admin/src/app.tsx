@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -179,12 +179,16 @@ function AppContent() {
                 }
               />
               <Route
-                path="/management-plan"
+                path="/forvaltningsplan"
                 element={
                   <ProtectedRoute>
                     <ManagementPlanPage mode={mode} />
                   </ProtectedRoute>
                 }
+              />
+              <Route
+                path="/management-plan"
+                element={<Navigate to="/forvaltningsplan" replace />}
               />
             </Routes>
           </Box>

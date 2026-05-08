@@ -260,8 +260,11 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
               <List component="div" disablePadding sx={{ px: 1, pt: 1 }}>
                 <ListItemButton
                   component={Link}
-                  to="/management-plan"
-                  selected={location.pathname === "/management-plan"}
+                  to="/forvaltningsplan"
+                  selected={
+                    location.pathname === "/forvaltningsplan" ||
+                    location.pathname === "/management-plan"
+                  }
                   sx={{
                     pl: 4,
                     mb: 1,
@@ -280,7 +283,10 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                     slotProps={{
                       primary: {
                         fontWeight:
-                          location.pathname === "/management-plan" ? 700 : 400,
+                          location.pathname === "/forvaltningsplan" ||
+                          location.pathname === "/management-plan"
+                            ? 700
+                            : 400,
                       },
                     }}
                   />
