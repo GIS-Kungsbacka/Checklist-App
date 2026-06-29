@@ -69,18 +69,17 @@ const defaultColumnVisibility = {
   levererad: true,
 };
 
-const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
-  props,
-  _ref
-) {
-  return (
-    <Tooltip title="Kolumner">
-      <ToolbarButton aria-label="Columns" {...props}>
-        <ViewColumnOutlinedIcon fontSize="small" />
-      </ToolbarButton>
-    </Tooltip>
-  );
-});
+const ColumnsToolbarButton = React.forwardRef(
+  function ColumnsToolbarButton(props, _ref) {
+    return (
+      <Tooltip title="Kolumner">
+        <ToolbarButton aria-label="Columns" {...props}>
+          <ViewColumnOutlinedIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+    );
+  },
+);
 
 function GridToolbar({
   density,
@@ -90,11 +89,11 @@ function GridToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -142,12 +141,12 @@ function GridToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -236,7 +235,7 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
       allItems
         .filter((item) => item.antagenJaNej?.toLowerCase() === "nej")
         .sort((a, b) => a.gid - b.gid),
-    [allItems]
+    [allItems],
   );
 
   const {
@@ -297,10 +296,10 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
         onSuccess: () => {
           // Query invalidation happens automatically in the hook
           toast.success(
-            "Ångrat. Posten flyttades tillbaka till beställningslistan."
+            "Ångrat. Posten flyttades tillbaka till beställningslistan.",
           );
         },
-      }
+      },
     );
   };
 
@@ -481,7 +480,7 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
       {items.length === 0 ? (
         <Paper elevation={2} sx={{ p: 4, textAlign: "center" }}>
           <Typography variant="body1" color="text.secondary">
-            Inga poster i idebanken.
+            Inga poster i idébanken.
           </Typography>
         </Paper>
       ) : (

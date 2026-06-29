@@ -88,7 +88,7 @@ const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
   kategoriTyp: "Typ av kategori: ny eller förändring.",
   prioritet: "Prioritet: Hög/Medel/Låg.",
   antagenJaNej:
-    "Om posten är antagen. Värdet 'ja' skickar automatiskt objektet till idebanken.",
+    "Om posten är antagen. Värdet 'nej' skickar automatiskt objektet till idébanken.",
   antagenJaNejMotivering: "Motivering till 'Antagen' (särskilt vid 'nej').",
   handlaggare: "Ansvarig handläggare.",
   tabell: "Information om tabell(er) som berörs.",
@@ -106,7 +106,7 @@ const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
 
 function helpAdornment(
   key: keyof CreateChecklistDto,
-  opts?: { offsetForSelectIcon?: boolean }
+  opts?: { offsetForSelectIcon?: boolean },
 ) {
   const title = FIELD_TOOLTIPS[key];
   if (!title) return null;
@@ -141,7 +141,7 @@ function helpAdornment(
 
 function mergeEndAdornment(
   existing: React.ReactNode,
-  help: React.ReactNode
+  help: React.ReactNode,
 ): React.ReactNode {
   if (!help) return existing ?? null;
   if (!existing) return help;
@@ -171,7 +171,7 @@ function helpIconInline(key: keyof CreateChecklistDto) {
 }
 
 export const getPrioritetChipColor = (
-  p: string | undefined
+  p: string | undefined,
 ): "error" | "success" | "info" | "default" => {
   if (p === "Hög") return "error";
   if (p === "Medel") return "success";
@@ -202,7 +202,7 @@ function normalizeAntagenJaNej(value: string | undefined): string {
 
 function addUnknownOption<T extends readonly string[]>(
   options: T,
-  currentValue: string | undefined
+  currentValue: string | undefined,
 ): string[] {
   const v = (currentValue ?? "").trim();
   if (!v) return [...options];
@@ -236,18 +236,17 @@ const defaultColumnVisibility = {
   verksamhetskritiskData: true,
   levererad: true,
 };
-const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
-  props,
-  _ref
-) {
-  return (
-    <Tooltip title="Kolumner">
-      <ToolbarButton aria-label="Columns" {...props}>
-        <ViewColumnOutlinedIcon fontSize="small" />
-      </ToolbarButton>
-    </Tooltip>
-  );
-});
+const ColumnsToolbarButton = React.forwardRef(
+  function ColumnsToolbarButton(props, _ref) {
+    return (
+      <Tooltip title="Kolumner">
+        <ToolbarButton aria-label="Columns" {...props}>
+          <ViewColumnOutlinedIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+    );
+  },
+);
 
 function ScreenshotToolbar({
   density,
@@ -257,12 +256,12 @@ function ScreenshotToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
 
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -321,12 +320,12 @@ function ScreenshotToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -473,9 +472,9 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
     () =>
       allItems.filter(
         (item) =>
-          item.levererad !== true && item.antagenJaNej?.toLowerCase() !== "nej"
+          item.levererad !== true && item.antagenJaNej?.toLowerCase() !== "nej",
       ),
-    [allItems]
+    [allItems],
   );
 
   const createMutation = useCreateChecklist();
@@ -485,7 +484,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState<Checklist | null>(null);
   const [deleteConfirm, setDeleteConfirm] = React.useState<Checklist | null>(
-    null
+    null,
   );
 
   const {
@@ -557,10 +556,10 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
     const used = new Set(
       items
         .map((c) => c.arendenummerArtvise?.toLowerCase().trim())
-        .filter((v): v is string => !!v)
+        .filter((v): v is string => !!v),
     );
     return orderSummaries.filter(
-      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim())
+      (o) => !used.has(o.arendenummerArtvise.toLowerCase().trim()),
     );
   }, [items, orderSummaries]);
 
@@ -616,7 +615,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       const duplicateExists = items.some(
         (item) =>
           item.arendenummerArtvise?.toLowerCase().trim() ===
-          arendenummerArtvise.toLowerCase().trim()
+          arendenummerArtvise.toLowerCase().trim(),
       );
 
       if (duplicateExists) {
@@ -652,7 +651,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
         (item) =>
           item.gid !== openEdit.gid &&
           item.arendenummerArtvise?.toLowerCase().trim() ===
-            arendenummerArtvise.toLowerCase().trim()
+            arendenummerArtvise.toLowerCase().trim(),
       );
 
       if (duplicateExists) {
@@ -679,7 +678,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               : "Kunde inte uppdatera. Försök igen.";
           toast.error(message);
         },
-      }
+      },
     );
   };
 
@@ -1062,7 +1061,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           <DialogContent>
             <Typography variant="body2">
               Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
-              idebanken.
+              idébanken.
             </Typography>
             <Typography variant="body2">
               Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt
@@ -1268,7 +1267,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                           loading={isLoadingOrderSummaries}
                           value={
                             availableOrderSummariesForCreate.find(
-                              (o) => o.arendenummerArtvise === field.value
+                              (o) => o.arendenummerArtvise === field.value,
                             ) ?? null
                           }
                           onChange={(_e, value) => {
@@ -1298,7 +1297,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                                       ) : null}
                                       {params.InputProps.endAdornment}
                                     </>,
-                                    helpAdornment("arendenummerArtvise")
+                                    helpAdornment("arendenummerArtvise"),
                                   ),
                                 },
                               }}
@@ -1331,7 +1330,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                           slotProps={{
                             input: {
                               endAdornment: helpAdornment(
-                                key as keyof CreateChecklistDto
+                                key as keyof CreateChecklistDto,
                               ),
                             },
                           }}
@@ -1428,7 +1427,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           <DialogContent>
             <Typography variant="body2">
               Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
-              idebanken.
+              idébanken.
             </Typography>
             <Typography variant="body2">
               Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt
@@ -1477,7 +1476,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                       render={({ field }) => {
                         const options = addUnknownOption(
                           PRIORITET_OPTIONS,
-                          field.value ?? openEdit?.prioritet
+                          field.value ?? openEdit?.prioritet,
                         );
                         return (
                           <FormControl fullWidth>
@@ -1518,7 +1517,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                       render={({ field }) => {
                         const options = addUnknownOption(
                           KATEGORI_OPTIONS,
-                          field.value ?? openEdit?.kategori
+                          field.value ?? openEdit?.kategori,
                         );
                         return (
                           <FormControl fullWidth>
@@ -1559,7 +1558,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                       render={({ field }) => {
                         const options = addUnknownOption(
                           KATEGORI_TYP_OPTIONS,
-                          field.value ?? openEdit?.kategoriTyp
+                          field.value ?? openEdit?.kategoriTyp,
                         );
                         return (
                           <FormControl fullWidth>
@@ -1599,11 +1598,11 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                       control={editControl}
                       render={({ field }) => {
                         const normalizedValue = normalizeAntagenJaNej(
-                          field.value ?? openEdit?.antagenJaNej
+                          field.value ?? openEdit?.antagenJaNej,
                         );
                         const options = addUnknownOption(
                           ANTAGEN_OPTIONS,
-                          normalizedValue
+                          normalizedValue,
                         );
                         return (
                           <FormControl fullWidth>
@@ -1617,7 +1616,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                               value={normalizedValue}
                               onChange={(e) =>
                                 field.onChange(
-                                  normalizeAntagenJaNej(String(e.target.value))
+                                  normalizeAntagenJaNej(String(e.target.value)),
                                 )
                               }
                               input={
@@ -1654,21 +1653,21 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                           items
                             .filter((c) => c.gid !== openEdit?.gid)
                             .map((c) =>
-                              c.arendenummerArtvise?.toLowerCase().trim()
+                              c.arendenummerArtvise?.toLowerCase().trim(),
                             )
-                            .filter((v): v is string => !!v)
+                            .filter((v): v is string => !!v),
                         );
                         const options = orderSummaries.filter(
                           (o) =>
                             !usedByOthers.has(
-                              o.arendenummerArtvise.toLowerCase().trim()
-                            )
+                              o.arendenummerArtvise.toLowerCase().trim(),
+                            ),
                         );
                         const currentValue =
                           field.value ?? openEdit?.arendenummerArtvise ?? "";
                         const currentOption =
                           options.find(
-                            (o) => o.arendenummerArtvise === currentValue
+                            (o) => o.arendenummerArtvise === currentValue,
                           ) ??
                           (currentValue
                             ? ({
@@ -1712,7 +1711,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                                         ) : null}
                                         {params.InputProps.endAdornment}
                                       </>,
-                                      helpAdornment("arendenummerArtvise")
+                                      helpAdornment("arendenummerArtvise"),
                                     ),
                                   },
                                 }}
@@ -1744,7 +1743,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                           slotProps={{
                             input: {
                               endAdornment: helpAdornment(
-                                key as keyof CreateChecklistDto
+                                key as keyof CreateChecklistDto,
                               ),
                             },
                           }}

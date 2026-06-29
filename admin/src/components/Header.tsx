@@ -171,7 +171,7 @@ export default function Header({ mode, onToggleMode }: HeaderProps) {
                   }}
                 >
                   <ListItemText
-                    primary="Idebanken"
+                    primary="Idébanken"
                     slotProps={{
                       primary: {
                         fontWeight:
