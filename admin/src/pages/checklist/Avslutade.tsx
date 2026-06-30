@@ -69,18 +69,17 @@ const defaultColumnVisibility = {
   levererad: true,
 };
 
-const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
-  props,
-  _ref
-) {
-  return (
-    <Tooltip title="Kolumner">
-      <ToolbarButton aria-label="Columns" {...props}>
-        <ViewColumnOutlinedIcon fontSize="small" />
-      </ToolbarButton>
-    </Tooltip>
-  );
-});
+const ColumnsToolbarButton = React.forwardRef(
+  function ColumnsToolbarButton(props, _ref) {
+    return (
+      <Tooltip title="Kolumner">
+        <ToolbarButton aria-label="Columns" {...props}>
+          <ViewColumnOutlinedIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+    );
+  },
+);
 
 function GridToolbar({
   density,
@@ -90,11 +89,11 @@ function GridToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -142,12 +141,12 @@ function GridToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -236,7 +235,7 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       allItems
         .filter((item) => item.levererad === true)
         .sort((a, b) => a.gid - b.gid),
-    [allItems]
+    [allItems],
   );
   const {
     columnVisibilityModel,
@@ -296,10 +295,10 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
         onSuccess: () => {
           // Query invalidation happens automatically in the hook
           toast.success(
-            "Ångrat. Posten flyttades tillbaka till beställningslistan."
+            "Ångrat. Posten flyttades tillbaka till beställningslistan.",
           );
         },
-      }
+      },
     );
   };
 
@@ -466,8 +465,8 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       <Box mb={3}>
         <Typography variant="body2" fontWeight={600}>
           Här listas objekt med levererad satt till "true". Klicka på ångra för
-          att flytta tillbaka till beställningslistan. <br /> Klicka på
-          ärendenummer för att öppna checklistan i client.
+          att flytta tillbaka till beställningslistan. <br /> Klicka på ett
+          ärendenummer för att öppna en detaljerad vy
         </Typography>
       </Box>
 

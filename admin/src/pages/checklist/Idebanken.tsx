@@ -466,8 +466,8 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
       <Box mb={3}>
         <Typography variant="body2" fontWeight={600}>
           Här listas objekt med antagen satt till "nej". Klicka på ångra för att
-          flytta tillbaka till beställningslistan. <br /> Klicka på ärendenummer
-          för att öppna checklistan i client.
+          flytta tillbaka till beställningslistan. <br /> Klicka på ett
+          ärendenummer för att öppna en detaljerad vy
         </Typography>
       </Box>
 
