@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<ManagementPlan> ManagementPlans => Set<ManagementPlan>();
 
     public DbSet<MetadataColumnDescription> MetadataColumnDescriptions => Set<MetadataColumnDescription>();
+    public DbSet<MetadataTechDescription> MetadataTechDescriptions => Set<MetadataTechDescription>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -322,5 +324,26 @@ public class AppDbContext : DbContext
             .Property(x => x.AndradTidPunkt).HasColumnName("andrad_tidpunkt");
         modelBuilder.Entity<ManagementPlan>()
             .Property(x => x.AndradAv).HasColumnName("andrad_av");
+
+        // Configure MetadataTechDescription entity
+        modelBuilder.Entity<MetadataTechDescription>()
+            .ToTable("geodata_metadata", "metadata")
+            .HasKey(x => x.Gid);
+        modelBuilder.Entity<MetadataTechDescription>()
+           .Property(x => x.Gid).HasColumnName("gid");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.Schema).HasColumnName("schema");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.Name).HasColumnName("name");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.Datatype).HasColumnName("datatype");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.Srid).HasColumnName("srid");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.GeometryDimension).HasColumnName("geometry_dimension");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.GeometryType).HasColumnName("geometry_type");
+        modelBuilder.Entity<MetadataTechDescription>()
+            .Property(x => x.GeometryColumn).HasColumnName("geometry_column");
     }
 }

@@ -136,6 +136,16 @@ namespace FormApp.Api.Data
             return Task.FromResult(data.FirstOrDefault(x => x.Gid == gid));
         }
 
+        public Task<ManagementPlan> CreateAsync(ManagementPlan item)
+        {
+            var data = LoadData();
+            var maxGid = data.Any() ? data.Max(x => x.Gid) : 0;
+            item.Gid = maxGid + 1;
+            data.Add(item);
+            SaveData(data);
+            return Task.FromResult(item);
+        }
+
         public Task<ManagementPlan?> UpdateAsync(int gid, ManagementPlan item)
         {
             var data = LoadData();

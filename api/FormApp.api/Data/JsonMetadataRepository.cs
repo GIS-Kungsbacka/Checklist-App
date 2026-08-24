@@ -136,6 +136,16 @@ using System.Text.Json;
             return Task.FromResult(data.FirstOrDefault(x => x.Gid == gid));
         }
 
+        public Task<Metadata> CreateAsync(Metadata item)
+        {
+            var data = LoadData();
+            var maxGid = data.Any() ? data.Max(x => x.Gid) : 0;
+            item.Gid = maxGid + 1;
+            data.Add(item);
+            SaveData(data);
+            return Task.FromResult(item);
+        }
+
         public Task<Metadata?> UpdateAsync(int gid, Metadata item)
         {
             var data = LoadData();

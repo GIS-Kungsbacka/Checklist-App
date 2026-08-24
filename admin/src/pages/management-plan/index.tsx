@@ -47,13 +47,14 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
+  useCreateManagementPlan,
   useDeleteManagementPlan,
   useManagementPlans,
   useUpdateManagementPlan,
 } from "../../hooks/useManagementPlan";
 import type {
+  CreateManagementPlanDto,
   ManagementPlan,
-  UpdateManagementPlanDto,
 } from "../../types/managementPlan";
 import { useGridPrefs } from "../../utils/gridPrefs";
 import {
@@ -368,7 +369,7 @@ const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
   andradAv: item.andradAv ?? "",
 });
 
-const toDto = (state: ManagementPlanFormState): UpdateManagementPlanDto => ({
+const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
   arendeNummberOpenE: state.arendeNummberOpenE || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
@@ -411,6 +412,7 @@ export default function ManagementPlanPage({
   const managementPlanCatalogBaseUrl = config.managementPlanBaseUrl;
 
   const { data = [], isLoading, isError } = useManagementPlans();
+  const createMutation = useCreateManagementPlan();
   const updateMutation = useUpdateManagementPlan();
   const deleteMutation = useDeleteManagementPlan();
   const [openCreate, setOpenCreate] = React.useState(false);
@@ -678,7 +680,10 @@ export default function ManagementPlanPage({
     },
   ];
 
-  const isSubmitting = updateMutation.isPending || deleteMutation.isPending;
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   if (isLoading) {
     return (
@@ -707,12 +712,25 @@ export default function ManagementPlanPage({
         justifyContent="space-between"
         alignItems="center"
         mb={2}
+        flexWrap="wrap"
+        gap={2}
       >
         <Typography variant="body2" fontWeight={600}>
           Här skapas och listas förvaltningsplaner automatiskt som kommer från
           e-tjänsten. Redigera eller ta bort objekt. <br /> Klicka på
           ärendenummer för att öppna förvaltningsplanen i metadatakatalogen.
         </Typography>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setForm(emptyForm);
+            setOpenEdit(null);
+            setOpenCreate(true);
+          }}
+          sx={{ height: 42 }}
+        >
+          Skapa förvaltningsplan
+        </Button>
       </Box>
 
       <Paper
@@ -861,6 +879,10 @@ export default function ManagementPlanPage({
                   select
                   label={label}
                   value={form.status}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    select: { displayEmpty: true },
+                  }}
                   onChange={(e) =>
                     setForm((prev) => ({
                       ...prev,
@@ -950,6 +972,23 @@ export default function ManagementPlanPage({
             disabled={isSubmitting}
             onClick={() => {
               const dto = toDto(form);
+              if (openCreate) {
+                createMutation.mutate(dto, {
+                  onSuccess: () => {
+                    setOpenCreate(false);
+                    setForm(emptyForm);
+                    toast.success("Förvaltningsplan skapad.");
+                  },
+                  onError: (err) => {
+                    const message =
+                      err instanceof Error
+                        ? err.message
+                        : "Kunde inte skapa. Försök igen.";
+                    toast.error(message);
+                  },
+                });
+                return;
+              }
               if (!openEdit) {
                 return;
               }
@@ -971,7 +1010,7 @@ export default function ManagementPlanPage({
               );
             }}
           >
-            Spara
+            {openCreate ? "Skapa" : "Spara"}
           </Button>
         </DialogActions>
       </Dialog>

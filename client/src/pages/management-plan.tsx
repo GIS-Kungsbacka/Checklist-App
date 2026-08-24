@@ -6,7 +6,6 @@ import {
   CircularProgress,
   Alert,
   Typography,
-  Chip,
   Menu,
   MenuItem,
   ListItemText,
@@ -40,8 +39,6 @@ import { useManagementPlan } from "../hooks/useManagementPlan";
 import type { ManagementPlan } from "../types/management-plan";
 import { useGridPrefs } from "../utils/gridPrefs";
 import { useNavigate } from "react-router-dom";
-import { statusChipColor } from "../utils/status-chip";
-
 const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev";
 
 const renderJaNej = (value: boolean | undefined) =>
@@ -279,37 +276,31 @@ export default function ManagementPlan({
   } = useGridPrefs(GRID_PREFS_STORAGE_KEY, {
     columnVisibilityModel: {
       gid: true,
-      arendeNummberOpenE: false,
-      bestallareNamn: false,
-      bestallareEpost: false,
-      sakerhetsklass: false,
-      datakallaTyp: false,
       titel: true,
       namn: true,
       schemaNamn: true,
-      status: true,
+      datakallaTyp: true,
+      forvaltningsplanVersion: true,
+      dataAgare: true,
+      dataForvaltare: true,
+      dataAdministrator: true,
+      dataKonsument: true,
+      oppnaData: true,
+      publiceradOppnaData: true,
+      redigeringsKalla: true,
+      kritiskDatamangd: true,
+      arkivering: true,
+      arkiveringTidpunkt: true,
+      ovrigInformation: true,
+      bestallareNamn: true,
+      bestallareEpost: true,
       handlaggare: true,
-      dataAgare: false,
-      dataForvaltare: false,
-      dataAdministrator: false,
-      dataKonsument: false,
-      redigeringsKalla: false,
-      oppnaData: false,
-      dokumentSkUrl: false,
-      dokuementInfoUrl: false,
-      ovrigInformation: false,
-      kritiskDatamangd: false,
-      arkivering: false,
-      arkiveringTidpunkt: false,
-      publicerad: false,
-      publiceradOppnaData: false,
-      atkomst: false,
-      integration: false,
-      forvaltningsplanVersion: false,
-      skapadTidPunkt: false,
-      skapadAv: false,
-      andradTidPunkt: false,
-      andradAv: false,
+      arendeNummberOpenE: true,
+      dokumentSkUrl: true,
+      skapadTidPunkt: true,
+      skapadAv: true,
+      andradTidPunkt: true,
+      andradAv: true,
     },
     density: "standard",
     pageSize: 25,
@@ -334,36 +325,6 @@ export default function ManagementPlan({
       ),
     },
     {
-      field: "arendeNummberOpenE",
-      headerName: "Ärendenummer OpenE",
-      minWidth: 190,
-      flex: 1,
-    },
-    {
-      field: "bestallareNamn",
-      headerName: "Beställare",
-      minWidth: 170,
-      flex: 1,
-    },
-    {
-      field: "bestallareEpost",
-      headerName: "Beställare e-post",
-      minWidth: 200,
-      flex: 1,
-    },
-    {
-      field: "sakerhetsklass",
-      headerName: "Säkerhetsklass",
-      minWidth: 160,
-      flex: 0.9,
-    },
-    {
-      field: "datakallaTyp",
-      headerName: "Datakälla typ",
-      minWidth: 160,
-      flex: 0.9,
-    },
-    {
       field: "titel",
       headerName: "Titel",
       minWidth: 200,
@@ -372,39 +333,32 @@ export default function ManagementPlan({
     { field: "namn", headerName: "Namn", minWidth: 200, flex: 1.2 },
     { field: "schemaNamn", headerName: "Schema", minWidth: 160, flex: 0.9 },
     {
-      field: "status",
-      headerName: "Status",
-      minWidth: 140,
-      flex: 0.8,
-      renderCell: (params: GridRenderCellParams<ManagementPlan>) => {
-        const value = String(params.value ?? "").trim();
-        if (!value) return "-";
-        return (
-          <Chip
-            label={value}
-            size="small"
-            color={statusChipColor(value)}
-            variant="filled"
-          />
-        );
-      },
+      field: "datakallaTyp",
+      headerName: "Typ av datakälla",
+      minWidth: 170,
+      flex: 0.9,
     },
-    { field: "handlaggare", headerName: "Handläggare", minWidth: 170, flex: 1 },
+    {
+      field: "forvaltningsplanVersion",
+      headerName: "Version",
+      minWidth: 120,
+      flex: 0.7,
+    },
     {
       field: "dataAgare",
-      headerName: "Dataägare",
+      headerName: "Geodataägare",
       minWidth: 170,
       flex: 1,
     },
     {
       field: "dataForvaltare",
-      headerName: "Dataförvaltare",
+      headerName: "Geodataförvaltare",
       minWidth: 190,
       flex: 1,
     },
     {
       field: "dataAdministrator",
-      headerName: "Dataadministratör",
+      headerName: "Geodataadministratör",
       minWidth: 220,
       flex: 1.2,
       sortable: false,
@@ -419,39 +373,30 @@ export default function ManagementPlan({
       valueGetter: (_value, row) => row.dataKonsument?.join(", ") ?? "",
     },
     {
+      field: "oppnaData",
+      headerName: "Önskas publiceras som öppna data",
+      minWidth: 240,
+      flex: 1,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams<ManagementPlan>) =>
+        renderJaNej(params.value),
+    },
+    {
+      field: "publiceradOppnaData",
+      headerName: "Publicerad som öppna data",
+      minWidth: 220,
+      flex: 1,
+      type: "boolean",
+      renderCell: (params: GridRenderCellParams<ManagementPlan>) =>
+        renderJaNej(params.value),
+    },
+    {
       field: "redigeringsKalla",
       headerName: "Redigeringskälla",
       minWidth: 220,
       flex: 1.2,
       sortable: false,
       valueGetter: (_value, row) => row.redigeringsKalla?.join(", ") ?? "",
-    },
-    {
-      field: "oppnaData",
-      headerName: "Öppna data",
-      minWidth: 130,
-      flex: 0.7,
-      type: "boolean",
-      renderCell: (params: GridRenderCellParams<ManagementPlan>) =>
-        renderJaNej(params.value),
-    },
-    {
-      field: "dokumentSkUrl",
-      headerName: "Dokument (SK) URL",
-      minWidth: 240,
-      flex: 1.2,
-    },
-    {
-      field: "dokuementInfoUrl",
-      headerName: "Dokument info URL",
-      minWidth: 240,
-      flex: 1.2,
-    },
-    {
-      field: "ovrigInformation",
-      headerName: "Övrig information",
-      minWidth: 240,
-      flex: 1.4,
     },
     {
       field: "kritiskDatamangd",
@@ -462,51 +407,48 @@ export default function ManagementPlan({
       renderCell: (params: GridRenderCellParams<ManagementPlan>) =>
         renderJaNej(params.value),
     },
-    { field: "arkivering", headerName: "Arkivering", minWidth: 170, flex: 1 },
+    {
+      field: "arkivering",
+      headerName: "Arkiveras/Gallras",
+      minWidth: 170,
+      flex: 1,
+    },
     {
       field: "arkiveringTidpunkt",
-      headerName: "Arkivering tidpunkt",
+      headerName: "Tidpunkt för Arkivering/Gallring",
+      minWidth: 240,
+      flex: 1,
+    },
+    {
+      field: "ovrigInformation",
+      headerName: "Övrig information",
+      minWidth: 240,
+      flex: 1.4,
+    },
+    {
+      field: "bestallareNamn",
+      headerName: "Beställare",
+      minWidth: 170,
+      flex: 1,
+    },
+    {
+      field: "bestallareEpost",
+      headerName: "Beställare E-post",
+      minWidth: 200,
+      flex: 1,
+    },
+    { field: "handlaggare", headerName: "Handläggare", minWidth: 170, flex: 1 },
+    {
+      field: "arendeNummberOpenE",
+      headerName: "Ärendenummer (OpenE)",
       minWidth: 190,
       flex: 1,
     },
     {
-      field: "publicerad",
-      headerName: "Publicerad",
-      minWidth: 220,
+      field: "dokumentSkUrl",
+      headerName: "Dokument Informationsklassning",
+      minWidth: 240,
       flex: 1.2,
-      sortable: false,
-      valueGetter: (_value, row) => row.publicerad?.join(", ") ?? "",
-    },
-    {
-      field: "publiceradOppnaData",
-      headerName: "Publicerad (Öppna data)",
-      minWidth: 210,
-      flex: 0.9,
-      type: "boolean",
-      renderCell: (params: GridRenderCellParams<ManagementPlan>) =>
-        renderJaNej(params.value),
-    },
-    {
-      field: "atkomst",
-      headerName: "Åtkomst",
-      minWidth: 220,
-      flex: 1.2,
-      sortable: false,
-      valueGetter: (_value, row) => row.atkomst?.join(", ") ?? "",
-    },
-    {
-      field: "integration",
-      headerName: "Integration",
-      minWidth: 220,
-      flex: 1.2,
-      sortable: false,
-      valueGetter: (_value, row) => row.integration?.join(", ") ?? "",
-    },
-    {
-      field: "forvaltningsplanVersion",
-      headerName: "Version",
-      minWidth: 120,
-      flex: 0.7,
     },
     {
       field: "skapadTidPunkt",

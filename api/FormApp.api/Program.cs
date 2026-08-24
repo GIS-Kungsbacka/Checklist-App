@@ -44,6 +44,7 @@ if (useJsonFile)
     builder.Services.AddScoped<IMetadataRepository, JsonMetadataRepository>();
     builder.Services.AddScoped<IManagementPlanRepository, JsonManagementPlanRepository>();
     builder.Services.AddScoped<IMetadataColumnDescriptionRepository, JsonMetadataColumnDescriptionRepository>();
+    builder.Services.AddScoped<IMetadataTechDescriptionRepository, JsonMetadataTechDescriptionRepository>();
     Console.WriteLine("INFO: Using JSON file storage for forms data");
 }
 else
@@ -57,6 +58,7 @@ else
     builder.Services.AddScoped<IManagementPlanRepository, DbContextManagementPlanRepository>();
     builder.Services.AddScoped<IMetadataRepository, DbContextMetadataRepository>();
     builder.Services.AddScoped<IMetadataColumnDescriptionRepository, DbContextMetadataColumnDescriptionRepository>();
+    builder.Services.AddScoped<IMetadataTechDescriptionRepository, DbContextMetadataTechDescriptionRepository>();
     Console.WriteLine("INFO: Using Postgres database for forms data");
 }
 

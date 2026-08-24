@@ -33,4 +33,5 @@ export interface Metadata {
   metaDataVersion?: string;
 }
 
+export type CreateMetadataDto = Omit<Metadata, "gid">;
 export type UpdateMetadataDto = Omit<Metadata, "gid">;

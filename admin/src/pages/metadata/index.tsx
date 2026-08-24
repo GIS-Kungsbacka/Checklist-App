@@ -11,16 +11,12 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   FormControlLabel,
-  InputLabel,
   Link,
   ListItemText,
   Menu,
   MenuItem,
-  OutlinedInput,
   Paper,
-  Select,
   TextField,
   Tooltip,
   Typography,
@@ -51,12 +47,16 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
+  useCreateMetadata,
   useDeleteMetadata,
   useMetadatas,
   useUpdateMetadata,
 } from "../../hooks/useMetadata";
 import { useManagementPlans } from "../../hooks/useManagementPlan";
-import type { Metadata, UpdateMetadataDto } from "../../types/metadata";
+import type {
+  CreateMetadataDto,
+  Metadata,
+} from "../../types/metadata";
 import { useGridPrefs } from "../../utils/gridPrefs";
 import {
   buildSchemaNamnUrl,
@@ -393,7 +393,7 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   metaDataVersion: item.metaDataVersion ?? "",
 });
 
-const toDto = (state: MetadataFormState): UpdateMetadataDto => ({
+const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   arendeNummerOpenE: state.arendeNummerOpenE || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
@@ -434,6 +434,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
 
   const { data = [], isLoading, isError } = useMetadatas();
   const { data: managementPlans = [] } = useManagementPlans();
+  const createMutation = useCreateMetadata();
   const updateMutation = useUpdateMetadata();
   const deleteMutation = useDeleteMetadata();
   const [openCreate, setOpenCreate] = React.useState(false);
@@ -713,7 +714,10 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
     },
   ];
 
-  const isSubmitting = updateMutation.isPending || deleteMutation.isPending;
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
 
   if (isLoading) {
     return (
@@ -742,12 +746,25 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         justifyContent="space-between"
         alignItems="center"
         mb={2}
+        flexWrap="wrap"
+        gap={2}
       >
         <Typography variant="body2" fontWeight={600}>
           Här skapas och listas metadata automatiskt som kommer från e-tjänsten.
           Redigera eller ta bort objekt. <br /> Klicka på ärendenummer för att
           öppna geodatamängden i metadatakatalogen.
         </Typography>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setForm(emptyForm);
+            setOpenEdit(null);
+            setOpenCreate(true);
+          }}
+          sx={{ height: 42 }}
+        >
+          Skapa metadata
+        </Button>
       </Box>
 
       <Paper
@@ -890,61 +907,61 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
               ] as const
             ).map(([key, label]) =>
               key === "kategori" ? (
-                <FormControl key={key} fullWidth>
-                  <InputLabel id="metadata-kategori-label">Kategori</InputLabel>
-                  <Select
-                    labelId="metadata-kategori-label"
-                    label="Kategori"
-                    value={form.kategori}
-                    displayEmpty
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        kategori: String(e.target.value ?? "").trim(),
-                      }))
-                    }
-                    input={<OutlinedInput label="Kategori" />}
-                  >
-                    <MenuItem value="">
-                      <em>Välj kategori</em>
+                <TextField
+                  key={key}
+                  select
+                  label={label}
+                  value={form.kategori}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    select: { displayEmpty: true },
+                  }}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      kategori: String(e.target.value ?? "").trim(),
+                    }))
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Välj kategori</em>
+                  </MenuItem>
+                  {form.kategori &&
+                  !KATEGORI_OPTIONS.includes(form.kategori as any) ? (
+                    <MenuItem value={form.kategori}>{form.kategori}</MenuItem>
+                  ) : null}
+                  {KATEGORI_OPTIONS.map((opt) => (
+                    <MenuItem key={opt} value={opt}>
+                      {opt}
                     </MenuItem>
-                    {form.kategori &&
-                    !KATEGORI_OPTIONS.includes(form.kategori as any) ? (
-                      <MenuItem value={form.kategori}>{form.kategori}</MenuItem>
-                    ) : null}
-                    {KATEGORI_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                  ))}
+                </TextField>
               ) : key === "status" ? (
-                <FormControl key={key} fullWidth>
-                  <InputLabel id="metadata-status-label">Status</InputLabel>
-                  <Select
-                    labelId="metadata-status-label"
-                    label="Status"
-                    value={form.status}
-                    displayEmpty
-                    onChange={(e) =>
-                      setForm((prev) => ({
-                        ...prev,
-                        status: String(e.target.value ?? ""),
-                      }))
-                    }
-                    input={<OutlinedInput label="Status" />}
-                  >
-                    <MenuItem value="">
-                      <em>Välj status</em>
+                <TextField
+                  key={key}
+                  select
+                  label={label}
+                  value={form.status}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    select: { displayEmpty: true },
+                  }}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      status: String(e.target.value ?? ""),
+                    }))
+                  }
+                >
+                  <MenuItem value="">
+                    <em>Välj status</em>
+                  </MenuItem>
+                  {STATUS_OPTIONS.map((opt) => (
+                    <MenuItem key={opt} value={opt}>
+                      {opt}
                     </MenuItem>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                  ))}
+                </TextField>
               ) : (
                 <TextField
                   key={key}
@@ -1015,6 +1032,24 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             disabled={isSubmitting}
             onClick={() => {
               const dto = toDto(form);
+              if (openCreate) {
+                createMutation.mutate(dto, {
+                  onSuccess: () => {
+                    setOpenCreate(false);
+                    setForm(emptyForm);
+                    toast.success("Metadata skapad.");
+                  },
+                  onError: (err) => {
+                    const message =
+                      err instanceof Error
+                        ? err.message
+                        : "Kunde inte skapa. Försök igen.";
+                    toast.error(message);
+                  },
+                });
+                return;
+              }
+
               if (!openEdit) {
                 return;
               }
@@ -1037,7 +1072,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
               );
             }}
           >
-            Spara
+            {openCreate ? "Skapa" : "Spara"}
           </Button>
         </DialogActions>
       </Dialog>

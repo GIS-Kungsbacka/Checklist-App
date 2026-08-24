@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { metadataRequests } from "../api/metadataRequests";
-import type { UpdateMetadataDto } from "../types/metadata";
+import type {
+  CreateMetadataDto,
+  UpdateMetadataDto,
+} from "../types/metadata";
 import { broadcastQueryInvalidation } from "../../lib/broadcastChannel";
 
 export const useMetadatas = () =>
@@ -13,6 +16,17 @@ export const useMetadatas = () =>
     refetchOnWindowFocus: true,
     staleTime: 0,
   });
+
+export const useCreateMetadata = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateMetadataDto) => metadataRequests.create(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["metadatas"] });
+      broadcastQueryInvalidation(["metadatas"]);
+    },
+  });
+};
 
 export const useUpdateMetadata = () => {
   const queryClient = useQueryClient();

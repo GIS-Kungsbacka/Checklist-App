@@ -40,8 +40,10 @@ import type { OrderSummary } from "../types/orderSummary";
 import {
   useMetadata,
   useMetadataColumnDescription,
+  useMetadataTechDescription,
 } from "../hooks/useMetadata";
 import type { Metadata } from "../types/metadata";
+import type { MetadataTechDescription } from "../types/metadataTechDescription";
 import { useManagementPlan } from "../hooks/useManagementPlan";
 import type { ManagementPlan } from "../types/management-plan";
 import jsPDF from "jspdf";
@@ -176,33 +178,46 @@ const metadataSections: Array<{
   },
 ];
 
+const metadataTechDescriptionFieldLabels: Partial<
+  Record<keyof MetadataTechDescription, string>
+> = {
+  datatype: "Datatyp",
+  srid: "Srid",
+  geometryDimension: "Geometri dimension",
+  geometryType: "Geometri typ",
+  geometryColumn: "Geometri kolumn",
+};
+
+const metadataTechDescriptionKeys: (keyof MetadataTechDescription)[] = [
+  "datatype",
+  "srid",
+  "geometryDimension",
+  "geometryType",
+  "geometryColumn",
+];
+
 const managementPlanFieldLabels: Partial<Record<keyof ManagementPlan, string>> =
   {
     namn: "Namn",
     titel: "Titel",
     schemaNamn: "Schema",
-    status: "Status",
     handlaggare: "Handläggare",
-    arendeNummberOpenE: "Ärendenummer",
+    arendeNummberOpenE: "Ärendenummer (OpenE)",
     bestallareNamn: "Beställare",
-    bestallareEpost: "Beställare e-post",
-    sakerhetsklass: "Säkerhetsklass",
-    datakallaTyp: "Datakälla typ",
-    dataAgare: "Dataägare",
-    dataForvaltare: "Dataförvaltare",
-    dataAdministrator: "Dataadministratör",
+    bestallareEpost: "Beställare E-post",
+    datakallaTyp: "Typ av datakälla",
+    dataAgare: "Geodataägare",
+    dataForvaltare: "Geodataförvaltare",
+    dataAdministrator: "Geodataadministratör",
     dataKonsument: "Datakonsument",
     redigeringsKalla: "Redigeringskälla",
-    publicerad: "Publicerad",
-    oppnaData: "Öppna data",
-    dokumentSkUrl: "Dokument SK URL",
-    dokuementInfoUrl: "Dokument info URL",
+    oppnaData: "Önskas publiceras som öppna data",
+    publiceradOppnaData: "Publicerad som öppna data",
+    dokumentSkUrl: "Dokument Informationsklassning",
     ovrigInformation: "Övrig information",
     kritiskDatamangd: "Kritisk datamängd",
-    arkivering: "Arkivering",
-    arkiveringTidpunkt: "Arkivering tidpunkt",
-    atkomst: "Åtkomst",
-    integration: "Integration",
+    arkivering: "Arkiveras/Gallras",
+    arkiveringTidpunkt: "Tidpunkt för Arkivering/Gallring",
     forvaltningsplanVersion: "Version",
     skapadTidPunkt: "Skapad",
     skapadAv: "Skapad av",
@@ -216,7 +231,13 @@ const managementPlanSections: Array<{
 }> = [
   {
     title: "Grundläggande identitet",
-    keys: ["titel", "namn", "schemaNamn", "forvaltningsplanVersion"],
+    keys: [
+      "titel",
+      "namn",
+      "schemaNamn",
+      "datakallaTyp",
+      "forvaltningsplanVersion",
+    ],
   },
   {
     title: "Ansvar och roller",
@@ -225,44 +246,37 @@ const managementPlanSections: Array<{
       "dataForvaltare",
       "dataAdministrator",
       "dataKonsument",
-      "handlaggare",
     ],
   },
   {
     title: "Publicering och åtkomst",
     keys: [
-      "publicerad",
       "oppnaData",
-      "atkomst",
-      "integration",
+      "publiceradOppnaData",
       "redigeringsKalla",
+      "kritiskDatamangd",
     ],
   },
   {
-    title: "Dokumentation och information",
-    keys: ["dokumentSkUrl", "dokuementInfoUrl", "ovrigInformation"],
+    title: "Livscykel och arkivering",
+    keys: ["arkivering", "arkiveringTidpunkt"],
   },
   {
-    title: "Livscykel och arkivering",
+    title: "Övrig information",
+    keys: ["ovrigInformation"],
+  },
+  {
+    title: "Ärendeuppgifter",
     keys: [
-      "kritiskDatamangd",
-      "arkivering",
-      "arkiveringTidpunkt",
+      "bestallareNamn",
+      "bestallareEpost",
+      "handlaggare",
+      "arendeNummberOpenE",
+      "dokumentSkUrl",
       "skapadTidPunkt",
       "skapadAv",
       "andradTidPunkt",
       "andradAv",
-    ],
-  },
-  {
-    title: "Status",
-    keys: [
-      "arendeNummberOpenE",
-      "bestallareNamn",
-      "bestallareEpost",
-      "sakerhetsklass",
-      "datakallaTyp",
-      "status",
     ],
   },
 ];
@@ -425,7 +439,10 @@ function generateChecklistPDF(
   doc.save(filename);
 }
 
-function generateMetadataPDF(metadata: Metadata) {
+function generateMetadataPDF(
+  metadata: Metadata,
+  techDescription?: MetadataTechDescription,
+) {
   const doc = new jsPDF();
   const { addText, addSpacer } = createPdfTextWriter(doc);
 
@@ -455,6 +472,15 @@ function generateMetadataPDF(metadata: Metadata) {
 
     addSpacer(5);
   }
+
+  addText("Teknisk beskrivning", 14, true);
+  addSpacer(3);
+  for (const key of metadataTechDescriptionKeys) {
+    const label = metadataTechDescriptionFieldLabels[key] ?? String(key);
+    const value = formatValue(techDescription?.[key], String(key));
+    addText(`${label}: ${value}`, 11);
+  }
+  addSpacer(5);
 
   const keySuffix =
     `${(metadata.schemaNamn ?? "").trim()}_${(metadata.namn ?? "").trim()}`.trim() ||
@@ -549,6 +575,9 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   const metadataListQuery = useMetadata();
   const metadataColumnDescriptionsQuery = useMetadataColumnDescription({
     enabled: columnDialogOpen && entity === "metadata",
+  });
+  const metadataTechDescriptionsQuery = useMetadataTechDescription({
+    enabled: entity === "metadata",
   });
   const managementPlanListQuery = useManagementPlan();
 
@@ -859,6 +888,31 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     );
   };
 
+  const renderMetadataTechDescriptionField = (
+    key: keyof MetadataTechDescription,
+    techDescription?: MetadataTechDescription,
+  ) => {
+    const label = metadataTechDescriptionFieldLabels[key] ?? String(key);
+    const value = techDescription?.[key];
+    const display = formatValue(value, String(key));
+
+    return (
+      <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+          sx={{ fontWeight: 900 }}
+        >
+          {label}
+        </Typography>
+        <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
+          {display}
+        </Typography>
+      </Grid>
+    );
+  };
+
   const columnDescriptionsForCurrentMetadata =
     entity === "metadata"
       ? (() => {
@@ -872,6 +926,19 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           );
         })()
       : [];
+
+  const techDescriptionForCurrentItem =
+    entity === "metadata"
+      ? (() => {
+          const schemaNamn = ((item as Metadata).schemaNamn ?? "").trim();
+          const namn = ((item as Metadata).namn ?? "").trim();
+          return (metadataTechDescriptionsQuery.data ?? []).find(
+            (x) =>
+              (x.schema ?? "").trim() === schemaNamn &&
+              (x.name ?? "").trim() === namn,
+          );
+        })()
+      : undefined;
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
@@ -981,7 +1048,10 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                       return;
                     }
                     if (entity === "metadata") {
-                      generateMetadataPDF(item as Metadata);
+                      generateMetadataPDF(
+                        item as Metadata,
+                        techDescriptionForCurrentItem,
+                      );
                       return;
                     }
                     generateManagementPlanPDF(item as ManagementPlan);
@@ -1093,6 +1163,23 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                       </Grid>
                     </Box>
                   ))}
+                  <Box sx={{ mt: 5 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
+                    >
+                      Teknisk beskrivning
+                    </Typography>
+                    <Divider sx={{ mb: 1.5 }} />
+                    <Grid container spacing={2}>
+                      {metadataTechDescriptionKeys.map((k) =>
+                        renderMetadataTechDescriptionField(
+                          k,
+                          techDescriptionForCurrentItem,
+                        ),
+                      )}
+                    </Grid>
+                  </Box>
                 </Box>
               ) : entity === "managementplan" ? (
                 <Box sx={{ mt: 1 }}>

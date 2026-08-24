@@ -33,4 +33,5 @@ export interface ManagementPlan {
   andradAv?: string;
 }
 
+export type CreateManagementPlanDto = Omit<ManagementPlan, "gid">;
 export type UpdateManagementPlanDto = Omit<ManagementPlan, "gid">;

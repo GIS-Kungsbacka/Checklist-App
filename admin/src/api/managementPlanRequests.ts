@@ -1,5 +1,6 @@
 import { api } from "./axiosConfig";
 import type {
+  CreateManagementPlanDto,
   ManagementPlan,
   UpdateManagementPlanDto,
 } from "../types/managementPlan";
@@ -14,6 +15,11 @@ export const managementPlanRequests = {
 
   getById: async (gid: number): Promise<ManagementPlan> => {
     const response = await api.get<ManagementPlan>(`${BASE}/${gid}`);
+    return response.data;
+  },
+
+  create: async (dto: CreateManagementPlanDto): Promise<ManagementPlan> => {
+    const response = await api.post<ManagementPlan>(BASE, dto);
     return response.data;
   },
 

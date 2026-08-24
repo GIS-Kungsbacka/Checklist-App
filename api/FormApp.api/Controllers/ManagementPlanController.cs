@@ -65,6 +65,62 @@ public class ManagementPlanController : ControllerBase
     }
 
     /// <summary>
+    /// Create a new record
+    /// </summary>
+    [HttpPost]
+    public async Task<ActionResult<ManagementPlan>> Create([FromBody] CreateManagementPlanDto dto)
+    {
+        try
+        {
+            var item = new ManagementPlan
+            {
+                ArendeNummberOpenE = dto.ArendeNummberOpenE,
+                BestallareNamn = dto.BestallareNamn,
+                BestallareEpost = dto.BestallareEpost,
+                Sakerhetsklass = dto.Sakerhetsklass,
+                DatakallaTyp = dto.DatakallaTyp,
+                SchemaNamn = dto.SchemaNamn,
+                Namn = dto.Namn,
+                Titel = dto.Titel,
+                DataAgare = dto.DataAgare,
+                DataForvaltare = dto.DataForvaltare,
+                DataAdministrator = dto.DataAdministrator,
+                DataKonsument = dto.DataKonsument,
+                RedigeringsKalla = dto.RedigeringsKalla,
+                OppnaData = dto.OppnaData,
+                DokumentSkUrl = dto.DokumentSkUrl,
+                DokuementInfoUrl = dto.DokuementInfoUrl,
+                OvrigInformation = dto.OvrigInformation,
+                KritiskDatamangd = dto.KritiskDatamangd,
+                Arkivering = dto.Arkivering,
+                ArkiveringTidpunkt = dto.ArkiveringTidpunkt,
+                Publicerad = dto.Publicerad,
+                PubliceradOppnaData = dto.PubliceradOppnaData,
+                Atkomst = dto.Atkomst,
+                Integration = dto.Integration,
+                Status = dto.Status,
+                Handlaggare = dto.Handlaggare,
+                ForvaltningsplanVersion = dto.ForvaltningsplanVersion,
+                SkapadTidPunkt = dto.SkapadTidPunkt,
+                SkapadAv = dto.SkapadAv,
+                AndradTidPunkt = dto.AndradTidPunkt,
+                AndradAv = dto.AndradAv,
+            };
+
+            var createdItem = await _repository.CreateAsync(item);
+
+            var username = User.Identity?.Name ?? "Unknown";
+            _logger.LogInformation("Managementplan record {Gid} created by {User}", createdItem.Gid, username);
+            return CreatedAtAction(nameof(GetById), new { gid = createdItem.Gid }, createdItem);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating Managementplan record");
+            return StatusCode(500, new { error = "An error occurred while creating the record", details = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Update an existing record
     /// </summary>
     [HttpPut("{gid}")]
@@ -153,7 +209,6 @@ public class ManagementPlanController : ControllerBase
 
 public class CreateManagementPlanDto
 {
-    public int Gid { get; set; }
     public string? ArendeNummberOpenE { get; set; }
     public string? BestallareNamn { get; set; }
     public string? BestallareEpost { get; set; }

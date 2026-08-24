@@ -84,7 +84,7 @@ const FILTER_COLUMNS = [
 ] as const;
 
 export const getPrioritetChipColor = (
-  p: string | undefined
+  p: string | undefined,
 ): "error" | "success" | "info" | "default" => {
   if (p === "Hög") return "error";
   if (p === "Medel") return "success";
@@ -158,12 +158,12 @@ function OrderSummaryToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
 
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -214,12 +214,12 @@ function OrderSummaryToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -368,7 +368,7 @@ export default function OrderSummaryDataGrid({
   const [searchQuery, setSearchQuery] = React.useState("");
   const [page, setPage] = React.useState(1);
   const [filterAnchor, setFilterAnchor] = React.useState<HTMLElement | null>(
-    null
+    null,
   );
   const [columnFilters, setColumnFilters] = React.useState<
     Record<string, string[]>
@@ -377,7 +377,7 @@ export default function OrderSummaryDataGrid({
     "asc" | "desc" | null
   >(null);
   const [cardPaginationEnabled, setCardPaginationEnabled] = React.useState(
-    getInitialCardPagination
+    getInitialCardPagination,
   );
 
   const {
@@ -403,7 +403,7 @@ export default function OrderSummaryDataGrid({
         arendenummerArtvise: true,
       } as unknown as Record<string, boolean>);
     },
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -418,7 +418,7 @@ export default function OrderSummaryDataGrid({
     try {
       localStorage.setItem(
         STORAGE_KEY_CARD_PAGINATION,
-        String(cardPaginationEnabled)
+        String(cardPaginationEnabled),
       );
     } catch {
       // ignore
@@ -450,7 +450,7 @@ export default function OrderSummaryDataGrid({
   const activeFilterCount =
     Object.values(columnFilters).reduce(
       (sum, arr) => sum + (arr?.length ?? 0),
-      0
+      0,
     ) + (datumSortOrder ? 1 : 0);
 
   const filteredItems = React.useMemo(() => {
@@ -511,8 +511,8 @@ export default function OrderSummaryDataGrid({
     } else {
       sorted.sort((a, b) =>
         (a.arendenummerArtvise as string).localeCompare(
-          b.arendenummerArtvise as string
-        )
+          b.arendenummerArtvise as string,
+        ),
       );
     }
     return sorted;
@@ -545,7 +545,7 @@ export default function OrderSummaryDataGrid({
 
   const handleViewModeChange = (
     _event: React.MouseEvent<HTMLElement>,
-    newMode: ViewMode | null
+    newMode: ViewMode | null,
   ) => {
     if (newMode !== null) setViewMode(newMode);
   };

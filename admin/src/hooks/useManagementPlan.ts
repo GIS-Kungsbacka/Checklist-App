@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { managementPlanRequests } from "../api/managementPlanRequests";
-import type { UpdateManagementPlanDto } from "../types/managementPlan";
+import type {
+  CreateManagementPlanDto,
+  UpdateManagementPlanDto,
+} from "../types/managementPlan";
 import { broadcastQueryInvalidation } from "../../lib/broadcastChannel";
 
 export const useManagementPlans = () =>
@@ -13,6 +16,18 @@ export const useManagementPlans = () =>
     refetchOnWindowFocus: true,
     staleTime: 0,
   });
+
+export const useCreateManagementPlan = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateManagementPlanDto) =>
+      managementPlanRequests.create(data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["management-plans"] });
+      broadcastQueryInvalidation(["management-plans"]);
+    },
+  });
+};
 
 export const useUpdateManagementPlan = () => {
   const queryClient = useQueryClient();
