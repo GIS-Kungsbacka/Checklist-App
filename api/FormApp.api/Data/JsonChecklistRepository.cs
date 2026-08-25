@@ -57,6 +57,7 @@ public class JsonChecklistRepository : IChecklistRepository
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Hog verksamhetsnytta och tydlig bestallning",
                 Handlaggare = "Test1",
+                SkapelseDatum = new DateOnly(2026, 8, 25),
             },
             new Checklist
             {
@@ -74,6 +75,7 @@ public class JsonChecklistRepository : IChecklistRepository
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Kopplad till strategiskt mal for vardtillganglighet",
                 Handlaggare = "Test2",
+                SkapelseDatum = new DateOnly(2026, 8, 24),
             },
             new Checklist
             {
@@ -91,6 +93,7 @@ public class JsonChecklistRepository : IChecklistRepository
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Begransat scope och snabb leveransmojlighet",
                 Handlaggare = "Test3",
+                SkapelseDatum = new DateOnly(2026, 8, 23),
             },
             new Checklist
             {
@@ -108,6 +111,7 @@ public class JsonChecklistRepository : IChecklistRepository
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Datatillgang och ansvarsfordelning ar tydlig",
                 Handlaggare = "Test4",
+                SkapelseDatum = new DateOnly(2026, 8, 22),
             },
             new Checklist
             {
@@ -125,6 +129,7 @@ public class JsonChecklistRepository : IChecklistRepository
                 AntagenJaNej = "Ja",
                 AntagenJaNejMotivering = "Bra forbattringspotential men ej akut",
                 Handlaggare = "Test5",
+                SkapelseDatum = new DateOnly(2026, 8, 21),
             }
         };
 
@@ -274,6 +279,7 @@ public class JsonChecklistRepository : IChecklistRepository
         existing.Kommentar = item.Kommentar;
         existing.VerksamhetsKritiskData = item.VerksamhetsKritiskData;
         existing.Levererad = item.Levererad;
+        existing.SkapelseDatum = item.SkapelseDatum;
         
         SaveData(data);
         return Task.FromResult<Checklist?>(existing);

@@ -44,9 +44,9 @@ using System.Text.Json;
                 DataKallaTyp = "Extern, organisation",
                 SchemaNamn = "sk0_schema_test",
                 Namn = "lekplatser_test_123",
-                Beskrivning = "Test beskrivning",
+                Beskrivning = "is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966, when designers at Letraset and James Mosley, the librarian at St Bride Printing Library in London, took a 1914 Cicero translation and scrambled it to make dummy text for Letraset's Body Type sheets.",
                 Ursprung = ["Extern", "Organisation"],
-                Syfte = "Att identifiera alla lekplatser och ta en kopp kaffe",
+                Syfte = "It has survived not only many decades, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised thanks to these sheets and more recently with desktop publishing software like Aldus PageMaker and Microsoft Word including versions of Lorem Ipsum.",
                 Metod = "Fjärranalys",
                 MetodUrl = "https://example.com/metod",
                 Projekt = "Testprojekt",
@@ -67,7 +67,10 @@ using System.Text.Json;
                 KolumnBeskrivningUrl = "https://example.com/kolumner",
                 Status = "granskas",
                 Handlaggare = "Jag",
-                MetaDataVersion = "1.0"
+                MetaDataVersion = "1.0",
+                SakerhetsklassRiktighet = "sk0",
+                SakerhetsklassTillganglighet = "sk1",
+                MetadataSpecifikationModelversion = "1.0",
             }
         };
 
@@ -186,6 +189,9 @@ using System.Text.Json;
             existing.Status = item.Status;
             existing.Handlaggare = item.Handlaggare;
             existing.MetaDataVersion = item.MetaDataVersion;
+            existing.SakerhetsklassRiktighet = item.SakerhetsklassRiktighet;
+            existing.SakerhetsklassTillganglighet = item.SakerhetsklassTillganglighet;
+            existing.MetadataSpecifikationModelversion = item.MetadataSpecifikationModelversion;
 
             SaveData(data);
             return Task.FromResult<Metadata?>(existing);

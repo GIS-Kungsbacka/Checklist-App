@@ -67,7 +67,8 @@ namespace FormApp.Api.Data
                     SkapadTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00"),
                     SkapadAv = "System",
                     AndradTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00"),
-                    AndradAv = "System"
+                    AndradAv = "System",
+                    ForvaltningsplanModelversion = "1.0",
                 }
             };
 

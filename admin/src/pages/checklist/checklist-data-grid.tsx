@@ -102,6 +102,7 @@ const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
     "Om leveransen är klar. Kryssrutan 'Levererad' skickar automatiskt objektet till Avslutad.",
   verksamhetskritiskData:
     "Om data bedöms vara verksamhetskritisk (beskrivning/klassning).",
+  skapelseDatum: "Datum då posten skapades (YYYY-MM-DD).",
 };
 
 function helpAdornment(
@@ -235,6 +236,7 @@ const defaultColumnVisibility = {
   kommentar: false,
   verksamhetskritiskData: true,
   levererad: true,
+  skapelseDatum: true,
 };
 const ColumnsToolbarButton = React.forwardRef(
   function ColumnsToolbarButton(props, _ref) {
@@ -535,6 +537,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       kommentar: "",
       verksamhetskritiskData: "",
       levererad: false,
+      skapelseDatum: "",
     },
   });
 
@@ -588,6 +591,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       kommentar: item.kommentar ?? "",
       verksamhetskritiskData: item.verksamhetskritiskData ?? "",
       levererad: item.levererad ?? false,
+      skapelseDatum: item.skapelseDatum ?? "",
     });
   };
 
@@ -881,6 +885,12 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
         params.value ? "Ja" : params.value === false ? "Nej" : "-",
     },
     {
+      field: "skapelseDatum",
+      headerName: "Skapelsedatum",
+      minWidth: 140,
+      flex: 0.8,
+    },
+    {
       field: "åtgärder",
       headerName: "Åtgärder",
       type: "actions",
@@ -918,7 +928,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       >
         <Box>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Klicka på ärendenummer för att öppna checklistan i client. Sök,
+            Klicka på ärendenummer för att öppna checklistan i en ny vy. Sök,
             filtrera, visa/dölj kolumner, exportera tabellen till CSV.
           </Typography>
         </Box>
@@ -930,7 +940,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           }}
           sx={{ height: 42 }}
         >
-          Skapa ny rad
+          Skapa ny checklista
         </Button>
       </Box>
 
@@ -1052,11 +1062,22 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       {/* Create Dialog */}
       <Dialog
         open={openCreate}
-        onClose={() => setOpenCreate(false)}
+        onClose={(_, reason) => {
+          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+          setOpenCreate(false);
+        }}
+        disableEscapeKeyDown
         maxWidth="md"
         fullWidth
+        slotProps={{
+          paper: {
+            component: "form",
+            onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
+              e.preventDefault();
+            },
+          },
+        }}
       >
-        <form onSubmit={handleCreateSubmit(handleCreate)}>
           <DialogTitle>Skapa ny post</DialogTitle>
           <DialogContent>
             <Typography variant="body2">
@@ -1097,6 +1118,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                   ["redigering", "Redigering"],
                   ["information", "Information"],
                   ["verksamhetskritiskData", "Verksamhetskritisk data"],
+                  ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
                   ["antagenJaNej", "Antagen"],
                   ["kommentar", "Kommentar"],
                   ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
@@ -1398,9 +1420,10 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               Avbryt
             </Button>
             <Button
-              type="submit"
+              type="button"
               variant="contained"
               disabled={createMutation.isPending || isCreating}
+              onClick={handleCreateSubmit(handleCreate)}
               sx={{ minWidth: 100 }}
             >
               {createMutation.isPending || isCreating ? (
@@ -1410,17 +1433,27 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               )}
             </Button>
           </DialogActions>
-        </form>
       </Dialog>
 
       {/* Edit Dialog */}
       <Dialog
         open={openEdit !== null}
-        onClose={() => setOpenEdit(null)}
+        onClose={(_, reason) => {
+          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+          setOpenEdit(null);
+        }}
+        disableEscapeKeyDown
         maxWidth="md"
         fullWidth
+        slotProps={{
+          paper: {
+            component: "form",
+            onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
+              e.preventDefault();
+            },
+          },
+        }}
       >
-        <form onSubmit={handleEditSubmit(handleUpdate)}>
           <DialogTitle>
             Redigera GID {openEdit?.gid} - ({openEdit?.arendenummerArtvise})
           </DialogTitle>
@@ -1456,6 +1489,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                   ["redigering", "Redigering"],
                   ["information", "Information"],
                   ["verksamhetskritiskData", "Verksamhetskritisk data"],
+                  ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
                   ["antagenJaNej", "Antagen"],
                   ["kommentar", "Kommentar"],
                   ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
@@ -1811,9 +1845,10 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               Avbryt
             </Button>
             <Button
-              type="submit"
+              type="button"
               variant="contained"
               disabled={updateMutation.isPending || isUpdating}
+              onClick={handleEditSubmit(handleUpdate)}
               sx={{ minWidth: 100 }}
             >
               {updateMutation.isPending || isUpdating ? (
@@ -1823,7 +1858,6 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               )}
             </Button>
           </DialogActions>
-        </form>
       </Dialog>
 
       {/* Delete Dialog */}

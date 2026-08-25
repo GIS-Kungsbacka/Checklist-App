@@ -70,6 +70,7 @@ public class DbContextManagementPlanRepository : IManagementPlanRepository
         existing.SkapadAv = item.SkapadAv;
         existing.AndradTidPunkt = item.AndradTidPunkt;
         existing.AndradAv = item.AndradAv;
+        existing.ForvaltningsplanModelversion = item.ForvaltningsplanModelversion;
 
         await _context.SaveChangesAsync();
         return existing;

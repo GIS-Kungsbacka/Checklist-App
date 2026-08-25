@@ -94,6 +94,7 @@ public class ChecklistController : ControllerBase
                 Kommentar = dto.Kommentar,
                 Levererad = dto.Levererad,
                 VerksamhetsKritiskData = dto.VerksamhetskritiskData,
+                SkapelseDatum = dto.SkapelseDatum
             };
 
             var createdItem = await _repository.CreateAsync(item);
@@ -148,6 +149,7 @@ public class ChecklistController : ControllerBase
                 Kommentar = dto.Kommentar,
                 Levererad = dto.Levererad,
                 VerksamhetsKritiskData = dto.VerksamhetskritiskData,
+                SkapelseDatum = dto.SkapelseDatum
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -217,6 +219,7 @@ public class CreateChecklistDto
     public string? Kommentar { get; set; }
     public bool? Levererad { get; set; }
     public string? VerksamhetskritiskData { get; set; }
+    public DateOnly? SkapelseDatum { get; set; }
 }
 
 public class UpdateChecklistDto
@@ -243,4 +246,5 @@ public class UpdateChecklistDto
     public string? Kommentar { get; set; }
     public bool? Levererad { get; set; }
     public string? VerksamhetskritiskData { get; set; }
+    public DateOnly? SkapelseDatum { get; set; }
 }

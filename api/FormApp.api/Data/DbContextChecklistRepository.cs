@@ -61,6 +61,7 @@ public class DbContextChecklistRepository : IChecklistRepository
         existing.Kommentar = item.Kommentar;
         existing.VerksamhetsKritiskData = item.VerksamhetsKritiskData;
         existing.Levererad = item.Levererad;
+        existing.SkapelseDatum = item.SkapelseDatum;
 
         await _context.SaveChangesAsync();
         return existing;

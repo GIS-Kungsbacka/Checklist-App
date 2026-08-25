@@ -34,5 +34,8 @@
         public string? Status { get; set; }
         public string? Handlaggare { get; set; }
         public string? MetaDataVersion { get; set; }
+        public string? SakerhetsklassRiktighet { get; set; }
+        public string? SakerhetsklassTillganglighet { get; set; }
+        public string? MetadataSpecifikationModelversion { get; set; }
     }
 }

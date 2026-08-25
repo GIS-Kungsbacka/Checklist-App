@@ -49,4 +49,6 @@ public class Checklist
     public string? VerksamhetsKritiskData { get; set; }
 
     public bool? Levererad { get; set; }
+    public DateOnly? SkapelseDatum { get; set; }
+
 }

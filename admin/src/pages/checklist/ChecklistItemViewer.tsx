@@ -140,6 +140,10 @@ export default function ChecklistItemViewer() {
                   label="Verksamhetskritisk data"
                   value={data?.verksamhetskritiskData}
                 />
+                <ChecklistDetailRow
+                  label="Skapelsedatum"
+                  value={data?.skapelseDatum}
+                />
               </TableBody>
             </Table>
           </TableContainer>

@@ -27,6 +27,7 @@ export interface ManagementPlan {
   status?: string;
   handlaggare?: string;
   forvaltningsplanVersion?: string;
+  forvaltningsplanModelversion?: string;
   skapadTidPunkt?: string;
   skapadAv?: string;
   andradTidPunkt?: string;

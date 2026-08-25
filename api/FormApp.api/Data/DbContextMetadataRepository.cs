@@ -70,6 +70,9 @@ public class DbContextMetadataRepository : IMetadataRepository
         existing.Status = item.Status;
         existing.Handlaggare = item.Handlaggare;
         existing.MetaDataVersion = item.MetaDataVersion;
+        existing.SakerhetsklassRiktighet = item.SakerhetsklassRiktighet;
+        existing.SakerhetsklassTillganglighet = item.SakerhetsklassTillganglighet;
+        existing.MetadataSpecifikationModelversion = item.MetadataSpecifikationModelversion;
 
         await _context.SaveChangesAsync();
         return existing;

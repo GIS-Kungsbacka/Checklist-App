@@ -34,6 +34,7 @@
         public string? SkapadAv { get; set; }
         public DateTimeOffset? AndradTidPunkt { get; set; }
         public string? AndradAv { get; set; }
+        public string? ForvaltningsplanModelversion { get; set; }
 
     }
 }

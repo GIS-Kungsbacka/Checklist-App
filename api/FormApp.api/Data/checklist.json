@@ -22,7 +22,8 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": false
+    "Levererad": false,
+    "SkapelseDatum": "2026-08-25"
   },
   {
     "Gid": 2,
@@ -47,7 +48,8 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": false
+    "Levererad": false,
+    "SkapelseDatum": null
   },
   {
     "Gid": 3,
@@ -72,7 +74,8 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": false
+    "Levererad": false,
+    "SkapelseDatum": null
   },
   {
     "Gid": 4,
@@ -97,7 +100,8 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": true
+    "Levererad": true,
+    "SkapelseDatum": null
   },
   {
     "Gid": 5,
@@ -122,6 +126,59 @@
     "Information": null,
     "Kommentar": null,
     "VerksamhetsKritiskData": null,
-    "Levererad": false
+    "Levererad": false,
+    "SkapelseDatum": null
+  },
+  {
+    "Gid": 6,
+    "ArendenummerArtvise": "2026XX9",
+    "Dataunderlag": null,
+    "Dataadministrator": null,
+    "Malgrupper": null,
+    "NyttjandeInterntExternt": null,
+    "Leverans": null,
+    "LeveransArbetstimmar": null,
+    "Kategori": null,
+    "KategoriTyp": null,
+    "Prioritet": null,
+    "AntagenJaNej": null,
+    "AntagenJaNejMotivering": null,
+    "Handlaggare": null,
+    "Tabell": null,
+    "Wms": null,
+    "Fme": null,
+    "Redigering": null,
+    "Kopiering": false,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": false,
+    "SkapelseDatum": null
+  },
+  {
+    "Gid": 7,
+    "ArendenummerArtvise": "2026XX8",
+    "Dataunderlag": "oppo\u00E5po\u00E5",
+    "Dataadministrator": null,
+    "Malgrupper": "Arbetsmarknadschef, Analysfunktion",
+    "NyttjandeInterntExternt": null,
+    "Leverans": "Kartlager i kartportalen",
+    "LeveransArbetstimmar": null,
+    "Kategori": "lager i kartportalen",
+    "KategoriTyp": null,
+    "Prioritet": "Medel",
+    "AntagenJaNej": "ja",
+    "AntagenJaNejMotivering": null,
+    "Handlaggare": "o\u00E5po\u00E5",
+    "Tabell": "op\u00E5op\u00E5",
+    "Wms": null,
+    "Fme": "FME-test2",
+    "Redigering": null,
+    "Kopiering": false,
+    "Information": null,
+    "Kommentar": null,
+    "VerksamhetsKritiskData": null,
+    "Levererad": false,
+    "SkapelseDatum": null
   }
 ]

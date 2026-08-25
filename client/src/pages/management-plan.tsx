@@ -281,6 +281,7 @@ export default function ManagementPlan({
       schemaNamn: true,
       datakallaTyp: true,
       forvaltningsplanVersion: true,
+      forvaltningsplanModelversion: true,
       dataAgare: true,
       dataForvaltare: true,
       dataAdministrator: true,
@@ -343,6 +344,12 @@ export default function ManagementPlan({
       headerName: "Version",
       minWidth: 120,
       flex: 0.7,
+    },
+    {
+      field: "forvaltningsplanModelversion",
+      headerName: "Modellversion",
+      minWidth: 150,
+      flex: 0.8,
     },
     {
       field: "dataAgare",

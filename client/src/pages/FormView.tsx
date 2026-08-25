@@ -50,6 +50,16 @@ import jsPDF from "jspdf";
 import { getPrioritetChipColor } from "./orderSummary/orderSummary-data-grid";
 import { useAuth } from "../hooks/useAuth";
 import { statusChipColor } from "../utils/status-chip";
+import { FieldHelpIcon } from "../components/FieldHelpIcon";
+import {
+  metadataFieldTooltips,
+  metadataSectionTooltips,
+  metadataTechDescriptionTooltips,
+} from "../utils/metadataTooltips";
+import {
+  managementPlanFieldTooltips,
+  managementPlanSectionTooltips,
+} from "../utils/managementPlanTooltips";
 
 const fieldLabels: Record<string, string> = {
   arendenummerArtvise: "Ärendenummer",
@@ -96,57 +106,71 @@ const metadataFieldLabels: Partial<Record<keyof Metadata, string>> = {
   kategori: "Kategori",
   status: "Status",
   handlaggare: "Handläggare",
-  arendeNummerOpenE: "Ärendenummer",
+  arendeNummerOpenE: "Ärendenummer (OpenE)",
   bestallareNamn: "Beställare",
-  bestallareEpost: "Beställare e-post",
-  sakerhetsKlass: "Säkerhetsklass",
-  dataKallaTyp: "Datakälla typ",
+  bestallareEpost: "Beställare E-post",
+  sakerhetsKlass: "Konfidentialitet",
+  sakerhetsklassRiktighet: "Riktighet",
+  sakerhetsklassTillganglighet: "Tillgänglighet",
+  dataKallaTyp: "Typ av datakälla",
   metod: "Metod",
-  metodUrl: "Metod URL",
+  metodUrl: "Metodbeskrivning (URL)",
   projekt: "Projekt",
   geografiskBegransning: "Geografisk begränsning",
   uppdateringsFrekvens: "Uppdateringsfrekvens",
   fullstandighet: "Fullständighet",
-  skalniva: "Skalnivå",
+  skalniva: "Skalbegränsning",
   nyckelOrd: "Nyckelord",
   tidsperiod: "Tidsperiod",
-  tidsperiodStartdatum: "Startdatum",
-  tidsperiodSlutdatum: "Slutdatum",
+  tidsperiodStartdatum: "Tidsperiod, startdatum",
+  tidsperiodSlutdatum: "Tidsperiod, slutdatum",
   tidsUpplosning: "Tidsupplösning",
   skapelseDatum: "Skapelsedatum",
   anvandarBegransningLicens: "Licensbegränsning",
-  anvandarBegransningLicensText: "Licenstext",
+  anvandarBegransningLicensText: "Licenstyp",
   relateradeResurser: "Relaterade resurser",
   kolumnBeskrivningUrl: "Kolumnbeskrivning URL",
   metaDataVersion: "Version",
 };
 
-const metadataSections: Array<{
-  title: string;
-  keys: (keyof Metadata)[];
-}> = [
+type MetadataSection =
+  | {
+      title: string;
+      keys: (keyof Metadata)[];
+      fullWidthKeys?: (keyof Metadata)[];
+      techDescription?: false;
+    }
+  | {
+      title: "Teknisk beskrivning";
+      techDescription: true;
+    };
+
+const metadataSections: MetadataSection[] = [
   {
     title: "Grundläggande identitet",
-    keys: ["schemaNamn", "namn", "metaDataVersion"],
+    keys: ["namn", "schemaNamn", "dataKallaTyp", "metaDataVersion"],
   },
   {
     title: "Beskrivning och syfte",
     keys: ["beskrivning", "syfte", "kategori", "nyckelOrd", "projekt"],
+    fullWidthKeys: ["beskrivning", "syfte"],
   },
   {
     title: "Ursprung och datakälla",
-    keys: ["dataKallaTyp", "ursprung", "metod", "metodUrl"],
+    keys: ["ursprung", "metod", "metodUrl"],
+    fullWidthKeys: ["ursprung"],
   },
   {
-    title: "Geografisk och detaljnivå",
+    title: "Geografisk detaljnivå",
     keys: ["geografiskBegransning", "skalniva"],
   },
   {
     title: "Tidsinformation",
     keys: [
-      "skapelseDatum",
+      "tidsperiod",
       "tidsperiodStartdatum",
       "tidsperiodSlutdatum",
+      "skapelseDatum",
       "tidsUpplosning",
     ],
   },
@@ -155,25 +179,33 @@ const metadataSections: Array<{
     keys: ["uppdateringsFrekvens", "fullstandighet"],
   },
   {
-    title: "Åtkomst, licens och säkerhet",
+    title: "Åtkomst och användarbegränsningar",
+    keys: ["anvandarBegransningLicens", "anvandarBegransningLicensText"],
+  },
+  {
+    title: "Säkerhetsklassning",
     keys: [
-      "anvandarBegransningLicens",
-      "anvandarBegransningLicensText",
       "sakerhetsKlass",
+      "sakerhetsklassRiktighet",
+      "sakerhetsklassTillganglighet",
     ],
   },
   {
-    title: "Struktur och relationer",
-    keys: ["kolumnBeskrivningUrl", "relateradeResurser"],
+    title: "Teknisk beskrivning",
+    techDescription: true,
   },
   {
-    title: "Status",
+    title: "Övrigt",
+    keys: ["relateradeResurser"],
+  },
+  {
+    title: "Ärendeuppgifter",
     keys: [
-      "arendeNummerOpenE",
       "bestallareNamn",
       "bestallareEpost",
       "handlaggare",
-      "status",
+      "arendeNummerOpenE",
+      "kolumnBeskrivningUrl",
     ],
   },
 ];
@@ -241,12 +273,7 @@ const managementPlanSections: Array<{
   },
   {
     title: "Ansvar och roller",
-    keys: [
-      "dataAgare",
-      "dataForvaltare",
-      "dataAdministrator",
-      "dataKonsument",
-    ],
+    keys: ["dataAgare", "dataForvaltare", "dataAdministrator", "dataKonsument"],
   },
   {
     title: "Publicering och åtkomst",
@@ -464,23 +491,22 @@ function generateMetadataPDF(
     addText(section.title, 14, true);
     addSpacer(3);
 
-    for (const key of section.keys) {
-      const label = metadataFieldLabels[key] ?? String(key);
-      const value = formatValue(metadata[key], String(key));
-      addText(`${label}: ${value}`, 11);
+    if (section.techDescription) {
+      for (const key of metadataTechDescriptionKeys) {
+        const label = metadataTechDescriptionFieldLabels[key] ?? String(key);
+        const value = formatValue(techDescription?.[key], String(key));
+        addText(`${label}: ${value}`, 11);
+      }
+    } else {
+      for (const key of section.keys) {
+        const label = metadataFieldLabels[key] ?? String(key);
+        const value = formatValue(metadata[key], String(key));
+        addText(`${label}: ${value}`, 11);
+      }
     }
 
     addSpacer(5);
   }
-
-  addText("Teknisk beskrivning", 14, true);
-  addSpacer(3);
-  for (const key of metadataTechDescriptionKeys) {
-    const label = metadataTechDescriptionFieldLabels[key] ?? String(key);
-    const value = formatValue(techDescription?.[key], String(key));
-    addText(`${label}: ${value}`, 11);
-  }
-  addSpacer(5);
 
   const keySuffix =
     `${(metadata.schemaNamn ?? "").trim()}_${(metadata.namn ?? "").trim()}`.trim() ||
@@ -790,7 +816,13 @@ export default function FormView({ entity }: { entity: FormEntity }) {
   }
 
   const isOrderSummary = entity === "checklist";
-  const entityHeading = entity === "metadata" ? "Metadata" : "Förvaltningsplan";
+
+  const modelVersionLabel =
+    entity === "metadata"
+      ? (item as Metadata).metadataSpecifikationModelversion
+      : entity === "managementplan"
+        ? (item as ManagementPlan).forvaltningsplanModelversion
+        : undefined;
 
   const displayKeys = isOrderSummary
     ? (Object.keys(fieldLabels) as (keyof OrderSummary)[])
@@ -844,13 +876,14 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     );
   };
 
-  const renderMetadataField = (key: keyof Metadata) => {
+  const renderMetadataField = (key: keyof Metadata, fullWidth = false) => {
     const label = metadataFieldLabels[key] ?? String(key);
     const value = (item as Metadata)?.[key];
     const display = formatValue(value, String(key));
+    const tooltip = metadataFieldTooltips[key];
 
     return (
-      <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
+      <Grid size={{ xs: 12, sm: fullWidth ? 12 : 4 }} key={String(key)}>
         <Typography
           variant="caption"
           color="text.secondary"
@@ -858,6 +891,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           sx={{ fontWeight: 900 }}
         >
           {label}
+          <FieldHelpIcon title={tooltip} />
         </Typography>
         <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
           {display}
@@ -870,6 +904,15 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     const label = managementPlanFieldLabels[key] ?? String(key);
     const value = (item as ManagementPlan)?.[key];
     const display = formatValue(value, String(key));
+    const tooltip = managementPlanFieldTooltips[key];
+    // Keep last word + icon together so the help icon doesn't wrap alone under the label.
+    const glueHelpIconToLastWord = key === "oppnaData";
+    const labelWords = glueHelpIconToLastWord ? label.split(" ") : null;
+    const labelBeforeLast =
+      labelWords && labelWords.length > 1
+        ? `${labelWords.slice(0, -1).join(" ")} `
+        : null;
+    const labelLastWord = labelWords?.at(-1) ?? label;
 
     return (
       <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
@@ -879,7 +922,20 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           display="block"
           sx={{ fontWeight: 900 }}
         >
-          {label}
+          {glueHelpIconToLastWord ? (
+            <>
+              {labelBeforeLast}
+              <Box component="span" sx={{ whiteSpace: "nowrap" }}>
+                {labelLastWord}
+                <FieldHelpIcon title={tooltip} />
+              </Box>
+            </>
+          ) : (
+            <>
+              {label}
+              <FieldHelpIcon title={tooltip} />
+            </>
+          )}
         </Typography>
         <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
           {display}
@@ -895,6 +951,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
     const label = metadataTechDescriptionFieldLabels[key] ?? String(key);
     const value = techDescription?.[key];
     const display = formatValue(value, String(key));
+    const tooltip = metadataTechDescriptionTooltips[key];
 
     return (
       <Grid size={{ xs: 12, sm: 4 }} key={String(key)}>
@@ -905,6 +962,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
           sx={{ fontWeight: 900 }}
         >
           {label}
+          <FieldHelpIcon title={tooltip} />
         </Typography>
         <Typography variant="body1" sx={{ wordBreak: "break-word" }}>
           {display}
@@ -1122,29 +1180,33 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                 sx={{ mt: 2 }}
                 flexWrap="wrap"
                 useFlexGap
+                alignItems="center"
               >
-                {"kategori" in item && (item as any).kategori ? (
-                  <Chip
-                    label={(item as any).kategori}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
-                ) : null}
-                {"status" in item && (item as any).status ? (
-                  <Chip
-                    label={(item as any).status}
-                    size="small"
-                    color={statusChipColor((item as any).status)}
-                    variant="outlined"
-                  />
-                ) : null}
-                <Chip
-                  label={entityHeading}
-                  size="small"
-                  variant="outlined"
-                  sx={{ ml: "auto" }}
-                />
+                <Box
+                  sx={{
+                    ml: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {"status" in item && (item as any).status ? (
+                    <Chip
+                      label={(item as any).status}
+                      size="small"
+                      color={statusChipColor((item as any).status)}
+                      variant="outlined"
+                    />
+                  ) : null}
+                  {modelVersionLabel ? (
+                    <Chip
+                      label={modelVersionLabel}
+                      size="small"
+                      variant="outlined"
+                    />
+                  ) : null}
+                </Box>
               </Stack>
               <Divider sx={{ my: 1.5 }} />
               {entity === "metadata" ? (
@@ -1156,30 +1218,28 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                         sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
                       >
                         {section.title}
+                        <FieldHelpIcon
+                          title={metadataSectionTooltips[section.title]}
+                        />
                       </Typography>
                       <Divider sx={{ mb: 1.5 }} />
                       <Grid container spacing={2}>
-                        {section.keys.map((k) => renderMetadataField(k))}
+                        {section.techDescription
+                          ? metadataTechDescriptionKeys.map((k) =>
+                              renderMetadataTechDescriptionField(
+                                k,
+                                techDescriptionForCurrentItem,
+                              ),
+                            )
+                          : section.keys.map((k) =>
+                              renderMetadataField(
+                                k,
+                                section.fullWidthKeys?.includes(k) ?? false,
+                              ),
+                            )}
                       </Grid>
                     </Box>
                   ))}
-                  <Box sx={{ mt: 5 }}>
-                    <Typography
-                      variant="body1"
-                      sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
-                    >
-                      Teknisk beskrivning
-                    </Typography>
-                    <Divider sx={{ mb: 1.5 }} />
-                    <Grid container spacing={2}>
-                      {metadataTechDescriptionKeys.map((k) =>
-                        renderMetadataTechDescriptionField(
-                          k,
-                          techDescriptionForCurrentItem,
-                        ),
-                      )}
-                    </Grid>
-                  </Box>
                 </Box>
               ) : entity === "managementplan" ? (
                 <Box sx={{ mt: 1 }}>
@@ -1190,6 +1250,9 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                         sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
                       >
                         {section.title}
+                        <FieldHelpIcon
+                          title={managementPlanSectionTooltips[section.title]}
+                        />
                       </Typography>
                       <Divider sx={{ mb: 1.5 }} />
                       <Grid container spacing={2}>

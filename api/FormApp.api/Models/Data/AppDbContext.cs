@@ -98,6 +98,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Checklist>()
             .Property(x => x.VerksamhetsKritiskData)
             .HasColumnName("verksamhetskritisk_data");
+        modelBuilder.Entity<Checklist>()
+            .Property(x => x.SkapelseDatum)
+            .HasColumnName("skapelsedatum");
 
         // Read-only view: orderSummary
         modelBuilder.Entity<OrderSummary>()
@@ -238,6 +241,12 @@ public class AppDbContext : DbContext
             .Property(x => x.Handlaggare).HasColumnName("handlaggare");
         modelBuilder.Entity<Metadata>()
             .Property(x => x.MetaDataVersion).HasColumnName("metadata_version");
+        modelBuilder.Entity<Metadata>()
+            .Property(x => x.SakerhetsklassRiktighet).HasColumnName("sakerhetsklass_riktighet");
+        modelBuilder.Entity<Metadata>()
+            .Property(x => x.SakerhetsklassTillganglighet).HasColumnName("sakerhetsklass_tillganglighet");
+        modelBuilder.Entity<Metadata>()
+            .Property(x => x.MetadataSpecifikationModelversion).HasColumnName("metadataspecifikation_modelversion");
 
         // Configure MetadataColumnDescription entity
         modelBuilder.Entity<MetadataColumnDescription>()
@@ -324,6 +333,8 @@ public class AppDbContext : DbContext
             .Property(x => x.AndradTidPunkt).HasColumnName("andrad_tidpunkt");
         modelBuilder.Entity<ManagementPlan>()
             .Property(x => x.AndradAv).HasColumnName("andrad_av");
+        modelBuilder.Entity<ManagementPlan>()
+            .Property(x => x.ForvaltningsplanModelversion).HasColumnName("forvaltningsplan_modelversion");
 
         // Configure MetadataTechDescription entity
         modelBuilder.Entity<MetadataTechDescription>()

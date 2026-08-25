@@ -67,6 +67,7 @@ const defaultColumnVisibility = {
   kommentar: false,
   verksamhetskritiskData: true,
   levererad: true,
+  skapelseDatum: true,
 };
 
 const ColumnsToolbarButton = React.forwardRef(
@@ -284,6 +285,7 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       kommentar: item.kommentar,
       levererad: false, // Changed back to false
       verksamhetskritiskData: item.verksamhetskritiskData,
+      skapelseDatum: item.skapelseDatum,
     };
 
     updateMutation.mutate(
@@ -410,6 +412,12 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
         params.value ? "Ja" : params.value === false ? "Nej" : "-",
     },
     {
+      field: "skapelseDatum",
+      headerName: "Skapelsedatum",
+      minWidth: 140,
+      flex: 0.8,
+    },
+    {
       field: "actions",
       headerName: "Åtgärder",
       type: "actions",
@@ -464,9 +472,9 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
     <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
       <Box mb={3}>
         <Typography variant="body2" fontWeight={600}>
-          Här listas objekt med levererad satt till "true". Klicka på ångra för
-          att flytta tillbaka till beställningslistan. <br /> Klicka på ett
-          ärendenummer för att öppna en detaljerad vy
+          Här listas objekt med levererad satt till "true". Klicka på ångra
+          knappen för att flytta tillbaka objektet till beställningslistan.{" "}
+          <br /> Klicka på ett ärendenummer för att öppna en detaljerad vy
         </Typography>
       </Box>
 

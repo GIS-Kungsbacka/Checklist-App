@@ -104,6 +104,9 @@ public class MetadataController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
+                SakerhetsklassRiktighet = dto.SakerhetsklassRiktighet,
+                SakerhetsklassTillganglighet = dto.SakerhetsklassTillganglighet,
+                MetadataSpecifikationModelversion = dto.MetadataSpecifikationModelversion
             };
 
             var createdItem = await _repository.CreateAsync(item);
@@ -161,6 +164,9 @@ public class MetadataController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
+                SakerhetsklassRiktighet = dto.SakerhetsklassRiktighet,
+                SakerhetsklassTillganglighet = dto.SakerhetsklassTillganglighet,
+                MetadataSpecifikationModelversion = dto.MetadataSpecifikationModelversion
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -239,6 +245,9 @@ public class CreateMetadataDto
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? MetaDataVersion { get; set; }
+    public string? SakerhetsklassRiktighet { get; set; }
+    public string? SakerhetsklassTillganglighet { get; set; }
+    public string? MetadataSpecifikationModelversion { get; set; }
 }
 
 public class UpdateMetadataDto
@@ -275,4 +284,7 @@ public class UpdateMetadataDto
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? MetaDataVersion { get; set; }
+    public string? SakerhetsklassRiktighet { get; set; }
+    public string? SakerhetsklassTillganglighet { get; set; }
+    public string? MetadataSpecifikationModelversion { get; set; }
 }

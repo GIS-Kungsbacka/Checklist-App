@@ -53,10 +53,7 @@ import {
   useUpdateMetadata,
 } from "../../hooks/useMetadata";
 import { useManagementPlans } from "../../hooks/useManagementPlan";
-import type {
-  CreateMetadataDto,
-  Metadata,
-} from "../../types/metadata";
+import type { CreateMetadataDto, Metadata } from "../../types/metadata";
 import { useGridPrefs } from "../../utils/gridPrefs";
 import {
   buildSchemaNamnUrl,
@@ -105,6 +102,8 @@ const defaultColumnVisibility = {
   bestallareEpost: false,
   titel: false,
   sakerhetsKlass: false,
+  sakerhetsklassRiktighet: false,
+  sakerhetsklassTillganglighet: false,
   dataKallaTyp: false,
   schemaNamn: false,
   beskrivning: false,
@@ -131,21 +130,21 @@ const defaultColumnVisibility = {
   status: true,
   handlaggare: true,
   metaDataVersion: false,
+  metadataSpecifikationModelversion: false,
   actions: true,
 };
 
-const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
-  props,
-  _ref
-) {
-  return (
-    <Tooltip title="Kolumner">
-      <ToolbarButton aria-label="Columns" {...props}>
-        <ViewColumnOutlinedIcon fontSize="small" />
-      </ToolbarButton>
-    </Tooltip>
-  );
-});
+const ColumnsToolbarButton = React.forwardRef(
+  function ColumnsToolbarButton(props, _ref) {
+    return (
+      <Tooltip title="Kolumner">
+        <ToolbarButton aria-label="Columns" {...props}>
+          <ViewColumnOutlinedIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+    );
+  },
+);
 
 function GridToolbar({
   density,
@@ -155,11 +154,11 @@ function GridToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -207,12 +206,12 @@ function GridToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -295,6 +294,8 @@ type MetadataFormState = {
   bestallareNamn: string;
   bestallareEpost: string;
   sakerhetsKlass: string;
+  sakerhetsklassRiktighet: string;
+  sakerhetsklassTillganglighet: string;
   dataKallaTyp: string;
   schemaNamn: string;
   namn: string;
@@ -322,6 +323,7 @@ type MetadataFormState = {
   status: string;
   handlaggare: string;
   metaDataVersion: string;
+  metadataSpecifikationModelversion: string;
 };
 
 const emptyForm: MetadataFormState = {
@@ -329,6 +331,8 @@ const emptyForm: MetadataFormState = {
   bestallareNamn: "",
   bestallareEpost: "",
   sakerhetsKlass: "",
+  sakerhetsklassRiktighet: "",
+  sakerhetsklassTillganglighet: "",
   dataKallaTyp: "",
   schemaNamn: "",
   namn: "",
@@ -356,6 +360,7 @@ const emptyForm: MetadataFormState = {
   status: "",
   handlaggare: "",
   metaDataVersion: "",
+  metadataSpecifikationModelversion: "",
 };
 
 const toFormState = (item: Metadata): MetadataFormState => ({
@@ -363,6 +368,8 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   bestallareNamn: item.bestallareNamn ?? "",
   bestallareEpost: item.bestallareEpost ?? "",
   sakerhetsKlass: item.sakerhetsKlass ?? "",
+  sakerhetsklassRiktighet: item.sakerhetsklassRiktighet ?? "",
+  sakerhetsklassTillganglighet: item.sakerhetsklassTillganglighet ?? "",
   dataKallaTyp: item.dataKallaTyp ?? "",
   schemaNamn: item.schemaNamn ?? "",
   namn: item.namn ?? "",
@@ -391,6 +398,8 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   status: item.status ?? "",
   handlaggare: item.handlaggare ?? "",
   metaDataVersion: item.metaDataVersion ?? "",
+  metadataSpecifikationModelversion:
+    item.metadataSpecifikationModelversion ?? "",
 });
 
 const toDto = (state: MetadataFormState): CreateMetadataDto => ({
@@ -398,6 +407,8 @@ const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
   sakerhetsKlass: state.sakerhetsKlass || undefined,
+  sakerhetsklassRiktighet: state.sakerhetsklassRiktighet || undefined,
+  sakerhetsklassTillganglighet: state.sakerhetsklassTillganglighet || undefined,
   dataKallaTyp: state.dataKallaTyp || undefined,
   schemaNamn: state.schemaNamn || undefined,
   namn: state.namn || undefined,
@@ -426,6 +437,8 @@ const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   status: state.status || undefined,
   handlaggare: state.handlaggare || undefined,
   metaDataVersion: state.metaDataVersion || undefined,
+  metadataSpecifikationModelversion:
+    state.metadataSpecifikationModelversion || undefined,
 });
 
 export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
@@ -464,7 +477,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       [...data]
         .sort((a, b) => a.gid - b.gid)
         .map((item) => ({ ...item, id: item.gid })),
-    [data]
+    [data],
   );
 
   const titelByArendeNummer = React.useMemo(() => {
@@ -504,7 +517,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         const href = buildSchemaNamnUrl(
           metadataCatalogBaseUrl,
           String(params.row?.schemaNamn ?? ""),
-          String(params.row?.namn ?? "")
+          String(params.row?.namn ?? ""),
         );
         if (!href) return value;
         return (
@@ -528,7 +541,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       flex: 1,
       valueGetter: (_value, row) => {
         const key = String(row.arendeNummerOpenE ?? "").trim();
-        return key ? titelByArendeNummer.get(key) ?? "-" : "-";
+        return key ? (titelByArendeNummer.get(key) ?? "-") : "-";
       },
     },
     {
@@ -545,7 +558,19 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
     },
     {
       field: "sakerhetsKlass",
-      headerName: "Säkerhetsklass",
+      headerName: "Konfidentialitet",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "sakerhetsklassRiktighet",
+      headerName: "Riktighet",
+      minWidth: 150,
+      flex: 0.8,
+    },
+    {
+      field: "sakerhetsklassTillganglighet",
+      headerName: "Tillgänglighet",
       minWidth: 150,
       flex: 0.8,
     },
@@ -685,6 +710,12 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
     {
       field: "metaDataVersion",
       headerName: "Metadata version",
+      minWidth: 150,
+      flex: 0.9,
+    },
+    {
+      field: "metadataSpecifikationModelversion",
+      headerName: "Modellversion",
       minWidth: 150,
       flex: 0.9,
     },
@@ -849,7 +880,12 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
 
       <Dialog
         open={openCreate || openEdit !== null}
-        onClose={() => (openEdit ? setOpenEdit(null) : setOpenCreate(false))}
+        onClose={(_, reason) => {
+          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+          if (openEdit) setOpenEdit(null);
+          else setOpenCreate(false);
+        }}
+        disableEscapeKeyDown
         maxWidth="md"
         fullWidth
       >
@@ -858,7 +894,14 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             ? "Skapa metadata"
             : `Redigera metadata ${openEdit?.arendeNummerOpenE} (${openEdit?.namn})`}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            const tag = (e.target as HTMLElement).tagName;
+            if (tag === "TEXTAREA") return;
+            e.preventDefault();
+          }}
+        >
           <Box
             sx={{
               display: "grid",
@@ -873,13 +916,16 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                 ["arendeNummerOpenE", "Ärendenummer"],
                 ["bestallareNamn", "Beställare namn"],
                 ["bestallareEpost", "Beställare e-post"],
-                ["sakerhetsKlass", "Säkerhetsklass"],
+                ["sakerhetsKlass", "Konfidentialitet"],
+                ["sakerhetsklassRiktighet", "Riktighet"],
+                ["sakerhetsklassTillganglighet", "Tillgänglighet"],
                 ["dataKallaTyp", "Datakälla typ"],
                 ["schemaNamn", "Schema"],
                 ["kategori", "Kategori"],
                 ["status", "Status"],
                 ["handlaggare", "Handläggare"],
                 ["metaDataVersion", "Metadata version"],
+                ["metadataSpecifikationModelversion", "Modellversion"],
                 ["ursprung", "Ursprung (kommaseparerat)"],
                 [
                   "geografiskBegransning",
@@ -984,7 +1030,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                       : undefined
                   }
                 />
-              )
+              ),
             )}
           </Box>
           <Divider sx={{ mt: 3 }} />
@@ -1021,6 +1067,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         </DialogContent>
         <DialogActions>
           <Button
+            type="button"
             onClick={() =>
               openEdit ? setOpenEdit(null) : setOpenCreate(false)
             }
@@ -1028,6 +1075,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
             Avbryt
           </Button>
           <Button
+            type="button"
             variant="contained"
             disabled={isSubmitting}
             onClick={() => {
@@ -1068,7 +1116,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
                         : "Kunde inte spara. Försök igen.";
                     toast.error(message);
                   },
-                }
+                },
               );
             }}
           >

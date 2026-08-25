@@ -105,6 +105,7 @@ public class ManagementPlanController : ControllerBase
                 SkapadAv = dto.SkapadAv,
                 AndradTidPunkt = dto.AndradTidPunkt,
                 AndradAv = dto.AndradAv,
+                ForvaltningsplanModelversion = dto.ForvaltningsplanModelversion
             };
 
             var createdItem = await _repository.CreateAsync(item);
@@ -162,6 +163,7 @@ public class ManagementPlanController : ControllerBase
                 SkapadAv = dto.SkapadAv,
                 AndradTidPunkt = dto.AndradTidPunkt,
                 AndradAv = dto.AndradAv,
+                ForvaltningsplanModelversion = dto.ForvaltningsplanModelversion
             };
 
             var updatedItem = await _repository.UpdateAsync(gid, item);
@@ -240,6 +242,7 @@ public class CreateManagementPlanDto
     public string? SkapadAv { get; set; }
     public DateTimeOffset? AndradTidPunkt { get; set; }
     public string? AndradAv { get; set; }
+    public string? ForvaltningsplanModelversion { get; set; }
 }
 
 public class UpdateManagementPlanDto
@@ -276,4 +279,5 @@ public class UpdateManagementPlanDto
     public string? SkapadAv { get; set; }
     public DateTimeOffset? AndradTidPunkt { get; set; }
     public string? AndradAv { get; set; }
+    public string? ForvaltningsplanModelversion { get; set; }
 }

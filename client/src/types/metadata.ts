@@ -4,6 +4,8 @@ export interface Metadata {
   bestallareNamn?: string;
   bestallareEpost?: string;
   sakerhetsKlass?: string;
+  sakerhetsklassRiktighet?: string;
+  sakerhetsklassTillganglighet?: string;
   dataKallaTyp?: string;
   schemaNamn?: string;
   namn?: string;
@@ -31,4 +33,5 @@ export interface Metadata {
   status?: string;
   handlaggare?: string;
   metaDataVersion?: string;
+  metadataSpecifikationModelversion?: string;
 }

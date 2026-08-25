@@ -104,6 +104,7 @@ const defaultColumnVisibility = {
   status: true,
   handlaggare: true,
   forvaltningsplanVersion: false,
+  forvaltningsplanModelversion: false,
   skapadTidPunkt: false,
   skapadAv: false,
   andradTidPunkt: false,
@@ -111,18 +112,17 @@ const defaultColumnVisibility = {
   actions: true,
 };
 
-const ColumnsToolbarButton = React.forwardRef(function ColumnsToolbarButton(
-  props,
-  _ref
-) {
-  return (
-    <Tooltip title="Kolumner">
-      <ToolbarButton aria-label="Columns" {...props}>
-        <ViewColumnOutlinedIcon fontSize="small" />
-      </ToolbarButton>
-    </Tooltip>
-  );
-});
+const ColumnsToolbarButton = React.forwardRef(
+  function ColumnsToolbarButton(props, _ref) {
+    return (
+      <Tooltip title="Kolumner">
+        <ToolbarButton aria-label="Columns" {...props}>
+          <ViewColumnOutlinedIcon fontSize="small" />
+        </ToolbarButton>
+      </Tooltip>
+    );
+  },
+);
 
 function GridToolbar({
   density,
@@ -132,11 +132,11 @@ function GridToolbar({
   onDensityChange: (d: GridDensity) => void;
 }) {
   const [exportAnchor, setExportAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const exportOpen = Boolean(exportAnchor);
   const [densityAnchor, setDensityAnchor] = React.useState<null | HTMLElement>(
-    null
+    null,
   );
   const densityOpen = Boolean(densityAnchor);
 
@@ -184,12 +184,12 @@ function GridToolbar({
                     d === "compact"
                       ? "Kompakt"
                       : d === "standard"
-                      ? "Standard"
-                      : "Komfortabelt"
+                        ? "Standard"
+                        : "Komfortabelt"
                   }
                 />
               </MenuItem>
-            )
+            ),
           )}
         </Menu>
 
@@ -295,6 +295,7 @@ type ManagementPlanFormState = {
   status: string;
   handlaggare: string;
   forvaltningsplanVersion: string;
+  forvaltningsplanModelversion: string;
   skapadTidPunkt: string;
   skapadAv: string;
   andradTidPunkt: string;
@@ -329,6 +330,7 @@ const emptyForm: ManagementPlanFormState = {
   status: "",
   handlaggare: "",
   forvaltningsplanVersion: "",
+  forvaltningsplanModelversion: "",
   skapadTidPunkt: "",
   skapadAv: "",
   andradTidPunkt: "",
@@ -363,6 +365,7 @@ const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
   status: item.status ?? "",
   handlaggare: item.handlaggare ?? "",
   forvaltningsplanVersion: item.forvaltningsplanVersion ?? "",
+  forvaltningsplanModelversion: item.forvaltningsplanModelversion ?? "",
   skapadTidPunkt: item.skapadTidPunkt ?? "",
   skapadAv: item.skapadAv ?? "",
   andradTidPunkt: item.andradTidPunkt ?? "",
@@ -397,6 +400,7 @@ const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
   status: state.status || undefined,
   handlaggare: state.handlaggare || undefined,
   forvaltningsplanVersion: state.forvaltningsplanVersion || undefined,
+  forvaltningsplanModelversion: state.forvaltningsplanModelversion || undefined,
   skapadTidPunkt: state.skapadTidPunkt || undefined,
   skapadAv: state.skapadAv || undefined,
   andradTidPunkt: state.andradTidPunkt || undefined,
@@ -418,7 +422,7 @@ export default function ManagementPlanPage({
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState<ManagementPlan | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<ManagementPlan | null>(
-    null
+    null,
   );
   const [form, setForm] = React.useState<ManagementPlanFormState>(emptyForm);
   const {
@@ -444,7 +448,7 @@ export default function ManagementPlanPage({
       [...data]
         .sort((a, b) => a.gid - b.gid)
         .map((item) => ({ ...item, id: item.gid })),
-    [data]
+    [data],
   );
 
   const columns: GridColDef<ManagementPlan>[] = [
@@ -471,7 +475,7 @@ export default function ManagementPlanPage({
         const href = buildSchemaNamnUrl(
           managementPlanCatalogBaseUrl,
           String((params.row as ManagementPlan | undefined)?.schemaNamn ?? ""),
-          String((params.row as ManagementPlan | undefined)?.namn ?? "")
+          String((params.row as ManagementPlan | undefined)?.namn ?? ""),
         );
         if (!href) return value;
         return (
@@ -639,6 +643,12 @@ export default function ManagementPlanPage({
       headerName: "Förvaltningsplan version",
       minWidth: 190,
       flex: 1,
+    },
+    {
+      field: "forvaltningsplanModelversion",
+      headerName: "Modellversion",
+      minWidth: 150,
+      flex: 0.9,
     },
     {
       field: "skapadTidPunkt",
@@ -832,7 +842,14 @@ export default function ManagementPlanPage({
                 openEdit?.titel ?? openEdit?.namn
               })`}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent
+          onKeyDown={(e) => {
+            if (e.key !== "Enter") return;
+            const tag = (e.target as HTMLElement).tagName;
+            if (tag === "TEXTAREA") return;
+            e.preventDefault();
+          }}
+        >
           <Box
             sx={{
               display: "grid",
@@ -866,6 +883,7 @@ export default function ManagementPlanPage({
                 ["status", "Status"],
                 ["handlaggare", "Handläggare"],
                 ["forvaltningsplanVersion", "Förvaltningsplan version"],
+                ["forvaltningsplanModelversion", "Modellversion"],
                 ["skapadTidPunkt", "Skapad tidpunkt (ISO datetime)"],
                 ["skapadAv", "Skapad av"],
                 ["andradTidPunkt", "Ändrad tidpunkt (ISO datetime)"],
@@ -910,7 +928,7 @@ export default function ManagementPlanPage({
                   multiline={key === "ovrigInformation"}
                   minRows={key === "ovrigInformation" ? 2 : undefined}
                 />
-              )
+              ),
             )}
           </Box>
           <Divider sx={{ mt: 3 }} />
@@ -961,6 +979,7 @@ export default function ManagementPlanPage({
         </DialogContent>
         <DialogActions>
           <Button
+            type="button"
             onClick={() =>
               openEdit ? setOpenEdit(null) : setOpenCreate(false)
             }
@@ -968,6 +987,7 @@ export default function ManagementPlanPage({
             Avbryt
           </Button>
           <Button
+            type="button"
             variant="contained"
             disabled={isSubmitting}
             onClick={() => {
@@ -1006,7 +1026,7 @@ export default function ManagementPlanPage({
                         : "Kunde inte spara. Försök igen.";
                     toast.error(message);
                   },
-                }
+                },
               );
             }}
           >
