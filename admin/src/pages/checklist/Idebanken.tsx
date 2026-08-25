@@ -286,7 +286,6 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
       kommentar: item.kommentar,
       levererad: item.levererad,
       verksamhetskritiskData: item.verksamhetskritiskData,
-      skapelseDatum: item.skapelseDatum,
     };
 
     updateMutation.mutate(

@@ -102,7 +102,6 @@ const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
     "Om leveransen är klar. Kryssrutan 'Levererad' skickar automatiskt objektet till Avslutad.",
   verksamhetskritiskData:
     "Om data bedöms vara verksamhetskritisk (beskrivning/klassning).",
-  skapelseDatum: "Datum då posten skapades (YYYY-MM-DD).",
 };
 
 function helpAdornment(
@@ -537,7 +536,6 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       kommentar: "",
       verksamhetskritiskData: "",
       levererad: false,
-      skapelseDatum: "",
     },
   });
 
@@ -591,7 +589,6 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       kommentar: item.kommentar ?? "",
       verksamhetskritiskData: item.verksamhetskritiskData ?? "",
       levererad: item.levererad ?? false,
-      skapelseDatum: item.skapelseDatum ?? "",
     });
   };
 
@@ -610,6 +607,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
         cleaned[key] = value;
       }
     }
+    delete cleaned.skapelseDatum;
     return cleaned as CreateChecklistDto;
   };
 
@@ -1118,7 +1116,6 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                 ["redigering", "Redigering"],
                 ["information", "Information"],
                 ["verksamhetskritiskData", "Verksamhetskritisk data"],
-                ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
                 ["antagenJaNej", "Antagen"],
                 ["kommentar", "Kommentar"],
                 ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
@@ -1489,7 +1486,6 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                 ["redigering", "Redigering"],
                 ["information", "Information"],
                 ["verksamhetskritiskData", "Verksamhetskritisk data"],
-                ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
                 ["antagenJaNej", "Antagen"],
                 ["kommentar", "Kommentar"],
                 ["antagenJaNejMotivering", "Antagen ja/nej motivering"],

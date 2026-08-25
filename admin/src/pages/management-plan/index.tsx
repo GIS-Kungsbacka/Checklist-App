@@ -837,7 +837,12 @@ export default function ManagementPlanPage({
 
       <Dialog
         open={openCreate || openEdit !== null}
-        onClose={() => (openEdit ? setOpenEdit(null) : setOpenCreate(false))}
+        onClose={(_, reason) => {
+          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+          if (openEdit) setOpenEdit(null);
+          else setOpenCreate(false);
+        }}
+        disableEscapeKeyDown
         maxWidth="md"
         fullWidth
       >

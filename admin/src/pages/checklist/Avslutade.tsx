@@ -285,7 +285,6 @@ export default function Avslutade({ mode }: { mode: "light" | "dark" }) {
       kommentar: item.kommentar,
       levererad: false, // Changed back to false
       verksamhetskritiskData: item.verksamhetskritiskData,
-      skapelseDatum: item.skapelseDatum,
     };
 
     updateMutation.mutate(

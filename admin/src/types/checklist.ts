@@ -48,7 +48,6 @@ export interface CreateChecklistDto {
   kommentar?: string;
   levererad?: boolean;
   verksamhetskritiskData?: string;
-  skapelseDatum?: string;
 }
 
 export interface UpdateChecklistDto {
@@ -74,5 +73,4 @@ export interface UpdateChecklistDto {
   kommentar?: string;
   levererad?: boolean;
   verksamhetskritiskData?: string;
-  skapelseDatum?: string;
 }
