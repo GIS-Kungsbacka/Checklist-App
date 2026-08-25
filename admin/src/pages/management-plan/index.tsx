@@ -83,8 +83,8 @@ const defaultColumnVisibility = {
   bestallareEpost: false,
   sakerhetsklass: false,
   datakallaTyp: false,
-  schemaNamn: false,
-  titel: false,
+  schemaNamn: true,
+  titel: true,
   dataAgare: false,
   dataForvaltare: false,
   dataAdministrator: false,
@@ -102,10 +102,10 @@ const defaultColumnVisibility = {
   atkomst: false,
   integration: false,
   status: true,
-  handlaggare: true,
+  handlaggare: false,
   forvaltningsplanVersion: false,
   forvaltningsplanModelversion: false,
-  skapadTidPunkt: false,
+  skapadTidPunkt: true,
   skapadAv: false,
   andradTidPunkt: false,
   andradAv: false,
@@ -466,6 +466,12 @@ export default function ManagementPlanPage({
       minWidth: 150,
       flex: 1,
       hideable: false,
+    },
+    {
+      field: "namn",
+      headerName: "Namn",
+      minWidth: 180,
+      flex: 1,
       renderCell: (params: GridRenderCellParams<ManagementPlan>) => {
         const value = String(params.value ?? "").trim();
         if (!value) {
@@ -474,8 +480,8 @@ export default function ManagementPlanPage({
 
         const href = buildSchemaNamnUrl(
           managementPlanCatalogBaseUrl,
-          String((params.row as ManagementPlan | undefined)?.schemaNamn ?? ""),
-          String((params.row as ManagementPlan | undefined)?.namn ?? ""),
+          String(params.row?.schemaNamn ?? ""),
+          value,
         );
         if (!href) return value;
         return (
@@ -491,7 +497,6 @@ export default function ManagementPlanPage({
         );
       },
     },
-    { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
     { field: "titel", headerName: "Titel", minWidth: 150, flex: 1 },
     {
       field: "bestallareNamn",
@@ -668,6 +673,7 @@ export default function ManagementPlanPage({
       field: "actions",
       headerName: "Åtgärder",
       type: "actions",
+      hideable: false,
       width: 100,
       getActions: (params) => [
         <GridActionsCellItem

@@ -1072,78 +1072,454 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
         slotProps={{
           paper: {
             component: "form",
-            onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
+            onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => {
               e.preventDefault();
             },
           },
         }}
       >
-          <DialogTitle>Skapa ny post</DialogTitle>
-          <DialogContent>
-            <Typography variant="body2">
-              Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
-              idébanken.
-            </Typography>
-            <Typography variant="body2">
-              Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt
-              objektet till Avslutad.
-            </Typography>
-          </DialogContent>
-          <Divider />
-          <DialogContent sx={{ pt: 3 }}>
-            {!!orderSummaryError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {"message" in orderSummaryError
-                  ? (orderSummaryError as Error).message
-                  : "Kunde inte ladda ärendenummer från beställningsunderlag."}
-              </Alert>
+        <DialogTitle>Skapa ny post</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
+            idébanken.
+          </Typography>
+          <Typography variant="body2">
+            Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt objektet
+            till Avslutad.
+          </Typography>
+        </DialogContent>
+        <Divider />
+        <DialogContent sx={{ pt: 3 }}>
+          {!!orderSummaryError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {"message" in orderSummaryError
+                ? (orderSummaryError as Error).message
+                : "Kunde inte ladda ärendenummer från beställningsunderlag."}
+            </Alert>
+          )}
+          <Grid container spacing={2}>
+            {(
+              [
+                ["arendenummerArtvise", "Ärendenummer"],
+                ["dataunderlag", "Dataunderlag"],
+                ["dataadministrator", "Dataadministratör"],
+                ["malgrupper", "Målgrupper"],
+                ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
+                ["leverans", "Leverans"],
+                ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
+                ["kategori", "Kategori"],
+                ["kategoriTyp", "Kategori typ"],
+                ["prioritet", "Prioritet"],
+                ["handlaggare", "Handläggare"],
+                ["tabell", "Tabell"],
+                ["wms", "WMS"],
+                ["fme", "FME"],
+                ["redigering", "Redigering"],
+                ["information", "Information"],
+                ["verksamhetskritiskData", "Verksamhetskritisk data"],
+                ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
+                ["antagenJaNej", "Antagen"],
+                ["kommentar", "Kommentar"],
+                ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+              ] as const
+            ).map(([key, label]) => (
+              <Grid
+                size={
+                  key === "antagenJaNejMotivering" || key === "kommentar"
+                    ? 12
+                    : 6
+                }
+                key={key}
+              >
+                {key === "prioritet" ? (
+                  <Controller
+                    name="prioritet"
+                    control={createControl}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel id="create-prioritet-label">
+                          Prioritet
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          labelId="create-prioritet-label"
+                          label="Prioritet"
+                          value={field.value ?? ""}
+                          input={
+                            <OutlinedInput
+                              label="Prioritet"
+                              endAdornment={helpAdornment("prioritet", {
+                                offsetForSelectIcon: true,
+                              })}
+                            />
+                          }
+                        >
+                          <MenuItem value="">
+                            <em>Välj prioritet</em>
+                          </MenuItem>
+                          {PRIORITET_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                ) : key === "kategori" ? (
+                  <Controller
+                    name="kategori"
+                    control={createControl}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel id="create-kategori-label">
+                          Kategori
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          labelId="create-kategori-label"
+                          label="Kategori"
+                          value={field.value ?? ""}
+                          input={
+                            <OutlinedInput
+                              label="Kategori"
+                              endAdornment={helpAdornment("kategori", {
+                                offsetForSelectIcon: true,
+                              })}
+                            />
+                          }
+                        >
+                          <MenuItem value="">
+                            <em>Välj kategori</em>
+                          </MenuItem>
+                          {KATEGORI_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                ) : key === "kategoriTyp" ? (
+                  <Controller
+                    name="kategoriTyp"
+                    control={createControl}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel id="create-kategoriTyp-label">
+                          Kategori typ
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          labelId="create-kategoriTyp-label"
+                          label="Kategori typ"
+                          value={field.value ?? ""}
+                          input={
+                            <OutlinedInput
+                              label="Kategori typ"
+                              endAdornment={helpAdornment("kategoriTyp", {
+                                offsetForSelectIcon: true,
+                              })}
+                            />
+                          }
+                        >
+                          <MenuItem value="">
+                            <em>Välj kategori typ</em>
+                          </MenuItem>
+                          {KATEGORI_TYP_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                ) : key === "antagenJaNej" ? (
+                  <Controller
+                    name="antagenJaNej"
+                    control={createControl}
+                    render={({ field }) => (
+                      <FormControl fullWidth>
+                        <InputLabel id="create-antagenJaNej-label">
+                          Antagen
+                        </InputLabel>
+                        <Select
+                          {...field}
+                          labelId="create-antagenJaNej-label"
+                          label="Antagen"
+                          value={field.value ?? ""}
+                          input={
+                            <OutlinedInput
+                              label="Antagen"
+                              endAdornment={helpAdornment("antagenJaNej", {
+                                offsetForSelectIcon: true,
+                              })}
+                            />
+                          }
+                        >
+                          <MenuItem value="">
+                            <em>Välj</em>
+                          </MenuItem>
+                          {ANTAGEN_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    )}
+                  />
+                ) : key === "arendenummerArtvise" ? (
+                  <Controller
+                    name="arendenummerArtvise"
+                    control={createControl}
+                    rules={{
+                      required: "Ärendenummer är obligatoriskt",
+                    }}
+                    render={({ field, fieldState }) => (
+                      <Autocomplete
+                        fullWidth
+                        options={availableOrderSummariesForCreate}
+                        getOptionLabel={(option) =>
+                          option.arendenummerArtvise ?? ""
+                        }
+                        loading={isLoadingOrderSummaries}
+                        value={
+                          availableOrderSummariesForCreate.find(
+                            (o) => o.arendenummerArtvise === field.value,
+                          ) ?? null
+                        }
+                        onChange={(_e, value) => {
+                          field.onChange(value?.arendenummerArtvise ?? "");
+                        }}
+                        isOptionEqualToValue={(option, value) =>
+                          option.arendenummerArtvise ===
+                          value.arendenummerArtvise
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label={label}
+                            required
+                            error={!!fieldState.error}
+                            helperText={fieldState.error?.message}
+                            slotProps={{
+                              input: {
+                                ...params.InputProps,
+                                endAdornment: mergeEndAdornment(
+                                  <>
+                                    {isLoadingOrderSummaries ? (
+                                      <CircularProgress
+                                        color="inherit"
+                                        size={20}
+                                      />
+                                    ) : null}
+                                    {params.InputProps.endAdornment}
+                                  </>,
+                                  helpAdornment("arendenummerArtvise"),
+                                ),
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    )}
+                  />
+                ) : (
+                  <Controller
+                    name={key as keyof CreateChecklistDto}
+                    control={createControl}
+                    render={({ field, fieldState }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label={label}
+                        multiline={
+                          key === "antagenJaNejMotivering" ||
+                          key === "kommentar"
+                        }
+                        rows={
+                          key === "antagenJaNejMotivering" ||
+                          key === "kommentar"
+                            ? 2
+                            : 1
+                        }
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                        slotProps={{
+                          input: {
+                            endAdornment: helpAdornment(
+                              key as keyof CreateChecklistDto,
+                            ),
+                          },
+                        }}
+                      />
+                    )}
+                  />
+                )}
+              </Grid>
+            ))}
+          </Grid>
+          <Divider sx={{ my: 3 }} />
+          <Box
+            sx={{
+              display: "flex",
+              gap: 4,
+              alignItems: "center",
+              px: 1,
+            }}
+          >
+            <Controller
+              name="kopiering"
+              control={createControl}
+              render={({ field }) => (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Kopiering"
+                  />
+                  {helpIconInline("kopiering")}
+                </Box>
+              )}
+            />
+            <Controller
+              name="levererad"
+              control={createControl}
+              render={({ field }) => (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Levererad"
+                  />
+                  {helpIconInline("levererad")}
+                </Box>
+              )}
+            />
+          </Box>
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button
+            type="button"
+            onClick={() => setOpenCreate(false)}
+            disabled={createMutation.isPending || isCreating}
+          >
+            Avbryt
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            disabled={createMutation.isPending || isCreating}
+            onClick={handleCreateSubmit(handleCreate)}
+            sx={{ minWidth: 100 }}
+          >
+            {createMutation.isPending || isCreating ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Skapa"
             )}
-            <Grid container spacing={2}>
-              {(
-                [
-                  ["arendenummerArtvise", "Ärendenummer"],
-                  ["dataunderlag", "Dataunderlag"],
-                  ["dataadministrator", "Dataadministratör"],
-                  ["malgrupper", "Målgrupper"],
-                  ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
-                  ["leverans", "Leverans"],
-                  ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
-                  ["kategori", "Kategori"],
-                  ["kategoriTyp", "Kategori typ"],
-                  ["prioritet", "Prioritet"],
-                  ["handlaggare", "Handläggare"],
-                  ["tabell", "Tabell"],
-                  ["wms", "WMS"],
-                  ["fme", "FME"],
-                  ["redigering", "Redigering"],
-                  ["information", "Information"],
-                  ["verksamhetskritiskData", "Verksamhetskritisk data"],
-                  ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
-                  ["antagenJaNej", "Antagen"],
-                  ["kommentar", "Kommentar"],
-                  ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
-                ] as const
-              ).map(([key, label]) => (
-                <Grid
-                  size={
-                    key === "antagenJaNejMotivering" || key === "kommentar"
-                      ? 12
-                      : 6
-                  }
-                  key={key}
-                >
-                  {key === "prioritet" ? (
-                    <Controller
-                      name="prioritet"
-                      control={createControl}
-                      render={({ field }) => (
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={openEdit !== null}
+        onClose={(_, reason) => {
+          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+          setOpenEdit(null);
+        }}
+        disableEscapeKeyDown
+        maxWidth="md"
+        fullWidth
+        slotProps={{
+          paper: {
+            component: "form",
+            onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => {
+              e.preventDefault();
+            },
+          },
+        }}
+      >
+        <DialogTitle>
+          Redigera GID {openEdit?.gid} - ({openEdit?.arendenummerArtvise})
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2">
+            Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
+            idébanken.
+          </Typography>
+          <Typography variant="body2">
+            Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt objektet
+            till Avslutad.
+          </Typography>
+        </DialogContent>
+        <Divider />
+        <DialogContent sx={{ pt: 3 }}>
+          <Grid container spacing={2}>
+            {(
+              [
+                ["arendenummerArtvise", "Ärendenummer"],
+                ["dataunderlag", "Dataunderlag"],
+                ["dataadministrator", "Dataadministratör"],
+                ["malgrupper", "Målgrupper"],
+                ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
+                ["leverans", "Leverans"],
+                ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
+                ["kategori", "Kategori"],
+                ["kategoriTyp", "Kategori typ"],
+                ["prioritet", "Prioritet"],
+                ["handlaggare", "Handläggare"],
+                ["tabell", "Tabell"],
+                ["wms", "WMS"],
+                ["fme", "FME"],
+                ["redigering", "Redigering"],
+                ["information", "Information"],
+                ["verksamhetskritiskData", "Verksamhetskritisk data"],
+                ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
+                ["antagenJaNej", "Antagen"],
+                ["kommentar", "Kommentar"],
+                ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
+              ] as const
+            ).map(([key, label]) => (
+              <Grid
+                size={
+                  key === "antagenJaNejMotivering" || key === "kommentar"
+                    ? 12
+                    : 6
+                }
+                key={key}
+              >
+                {key === "prioritet" ? (
+                  <Controller
+                    name="prioritet"
+                    control={editControl}
+                    render={({ field }) => {
+                      const options = addUnknownOption(
+                        PRIORITET_OPTIONS,
+                        field.value ?? openEdit?.prioritet,
+                      );
+                      return (
                         <FormControl fullWidth>
-                          <InputLabel id="create-prioritet-label">
+                          <InputLabel id="edit-prioritet-label">
                             Prioritet
                           </InputLabel>
                           <Select
                             {...field}
-                            labelId="create-prioritet-label"
+                            labelId="edit-prioritet-label"
                             label="Prioritet"
                             value={field.value ?? ""}
                             input={
@@ -1158,27 +1534,33 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                             <MenuItem value="">
                               <em>Välj prioritet</em>
                             </MenuItem>
-                            {PRIORITET_OPTIONS.map((opt) => (
+                            {options.map((opt) => (
                               <MenuItem key={opt} value={opt}>
                                 {opt}
                               </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
-                      )}
-                    />
-                  ) : key === "kategori" ? (
-                    <Controller
-                      name="kategori"
-                      control={createControl}
-                      render={({ field }) => (
+                      );
+                    }}
+                  />
+                ) : key === "kategori" ? (
+                  <Controller
+                    name="kategori"
+                    control={editControl}
+                    render={({ field }) => {
+                      const options = addUnknownOption(
+                        KATEGORI_OPTIONS,
+                        field.value ?? openEdit?.kategori,
+                      );
+                      return (
                         <FormControl fullWidth>
-                          <InputLabel id="create-kategori-label">
+                          <InputLabel id="edit-kategori-label">
                             Kategori
                           </InputLabel>
                           <Select
                             {...field}
-                            labelId="create-kategori-label"
+                            labelId="edit-kategori-label"
                             label="Kategori"
                             value={field.value ?? ""}
                             input={
@@ -1193,27 +1575,33 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                             <MenuItem value="">
                               <em>Välj kategori</em>
                             </MenuItem>
-                            {KATEGORI_OPTIONS.map((opt) => (
+                            {options.map((opt) => (
                               <MenuItem key={opt} value={opt}>
                                 {opt}
                               </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
-                      )}
-                    />
-                  ) : key === "kategoriTyp" ? (
-                    <Controller
-                      name="kategoriTyp"
-                      control={createControl}
-                      render={({ field }) => (
+                      );
+                    }}
+                  />
+                ) : key === "kategoriTyp" ? (
+                  <Controller
+                    name="kategoriTyp"
+                    control={editControl}
+                    render={({ field }) => {
+                      const options = addUnknownOption(
+                        KATEGORI_TYP_OPTIONS,
+                        field.value ?? openEdit?.kategoriTyp,
+                      );
+                      return (
                         <FormControl fullWidth>
-                          <InputLabel id="create-kategoriTyp-label">
+                          <InputLabel id="edit-kategoriTyp-label">
                             Kategori typ
                           </InputLabel>
                           <Select
                             {...field}
-                            labelId="create-kategoriTyp-label"
+                            labelId="edit-kategoriTyp-label"
                             label="Kategori typ"
                             value={field.value ?? ""}
                             input={
@@ -1228,29 +1616,43 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                             <MenuItem value="">
                               <em>Välj kategori typ</em>
                             </MenuItem>
-                            {KATEGORI_TYP_OPTIONS.map((opt) => (
+                            {options.map((opt) => (
                               <MenuItem key={opt} value={opt}>
                                 {opt}
                               </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
-                      )}
-                    />
-                  ) : key === "antagenJaNej" ? (
-                    <Controller
-                      name="antagenJaNej"
-                      control={createControl}
-                      render={({ field }) => (
+                      );
+                    }}
+                  />
+                ) : key === "antagenJaNej" ? (
+                  <Controller
+                    name="antagenJaNej"
+                    control={editControl}
+                    render={({ field }) => {
+                      const normalizedValue = normalizeAntagenJaNej(
+                        field.value ?? openEdit?.antagenJaNej,
+                      );
+                      const options = addUnknownOption(
+                        ANTAGEN_OPTIONS,
+                        normalizedValue,
+                      );
+                      return (
                         <FormControl fullWidth>
-                          <InputLabel id="create-antagenJaNej-label">
+                          <InputLabel id="edit-antagenJaNej-label">
                             Antagen
                           </InputLabel>
                           <Select
                             {...field}
-                            labelId="create-antagenJaNej-label"
+                            labelId="edit-antagenJaNej-label"
                             label="Antagen"
-                            value={field.value ?? ""}
+                            value={normalizedValue}
+                            onChange={(e) =>
+                              field.onChange(
+                                normalizeAntagenJaNej(String(e.target.value)),
+                              )
+                            }
                             input={
                               <OutlinedInput
                                 label="Antagen"
@@ -1263,35 +1665,59 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                             <MenuItem value="">
                               <em>Välj</em>
                             </MenuItem>
-                            {ANTAGEN_OPTIONS.map((opt) => (
+                            {options.map((opt) => (
                               <MenuItem key={opt} value={opt}>
                                 {opt}
                               </MenuItem>
                             ))}
                           </Select>
                         </FormControl>
-                      )}
-                    />
-                  ) : key === "arendenummerArtvise" ? (
-                    <Controller
-                      name="arendenummerArtvise"
-                      control={createControl}
-                      rules={{
-                        required: "Ärendenummer är obligatoriskt",
-                      }}
-                      render={({ field, fieldState }) => (
+                      );
+                    }}
+                  />
+                ) : key === "arendenummerArtvise" ? (
+                  <Controller
+                    name="arendenummerArtvise"
+                    control={editControl}
+                    rules={{
+                      required: "Ärendenummer är obligatoriskt",
+                    }}
+                    render={({ field, fieldState }) => {
+                      const usedByOthers = new Set(
+                        items
+                          .filter((c) => c.gid !== openEdit?.gid)
+                          .map((c) =>
+                            c.arendenummerArtvise?.toLowerCase().trim(),
+                          )
+                          .filter((v): v is string => !!v),
+                      );
+                      const options = orderSummaries.filter(
+                        (o) =>
+                          !usedByOthers.has(
+                            o.arendenummerArtvise.toLowerCase().trim(),
+                          ),
+                      );
+                      const currentValue =
+                        field.value ?? openEdit?.arendenummerArtvise ?? "";
+                      const currentOption =
+                        options.find(
+                          (o) => o.arendenummerArtvise === currentValue,
+                        ) ??
+                        (currentValue
+                          ? ({
+                              arendenummerArtvise: currentValue,
+                            } as OrderSummary)
+                          : null);
+
+                      return (
                         <Autocomplete
                           fullWidth
-                          options={availableOrderSummariesForCreate}
+                          options={options}
                           getOptionLabel={(option) =>
                             option.arendenummerArtvise ?? ""
                           }
                           loading={isLoadingOrderSummaries}
-                          value={
-                            availableOrderSummariesForCreate.find(
-                              (o) => o.arendenummerArtvise === field.value,
-                            ) ?? null
-                          }
+                          value={currentOption}
                           onChange={(_e, value) => {
                             field.onChange(value?.arendenummerArtvise ?? "");
                           }}
@@ -1326,538 +1752,112 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                             />
                           )}
                         />
-                      )}
-                    />
-                  ) : (
-                    <Controller
-                      name={key as keyof CreateChecklistDto}
-                      control={createControl}
-                      render={({ field, fieldState }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label={label}
-                          multiline={
-                            key === "antagenJaNejMotivering" ||
-                            key === "kommentar"
-                          }
-                          rows={
-                            key === "antagenJaNejMotivering" ||
-                            key === "kommentar"
-                              ? 2
-                              : 1
-                          }
-                          error={!!fieldState.error}
-                          helperText={fieldState.error?.message}
-                          slotProps={{
-                            input: {
-                              endAdornment: helpAdornment(
-                                key as keyof CreateChecklistDto,
-                              ),
-                            },
-                          }}
-                        />
-                      )}
-                    />
-                  )}
-                </Grid>
-              ))}
-            </Grid>
-            <Divider sx={{ my: 3 }} />
-            <Box
-              sx={{
-                display: "flex",
-                gap: 4,
-                alignItems: "center",
-                px: 1,
-              }}
-            >
-              <Controller
-                name="kopiering"
-                control={createControl}
-                render={({ field }) => (
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={Boolean(field.value)}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                        />
-                      }
-                      label="Kopiering"
-                    />
-                    {helpIconInline("kopiering")}
-                  </Box>
-                )}
-              />
-              <Controller
-                name="levererad"
-                control={createControl}
-                render={({ field }) => (
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={Boolean(field.value)}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                        />
-                      }
-                      label="Levererad"
-                    />
-                    {helpIconInline("levererad")}
-                  </Box>
-                )}
-              />
-            </Box>
-          </DialogContent>
-          <Divider />
-          <DialogActions sx={{ p: 2.5 }}>
-            <Button
-              type="button"
-              onClick={() => setOpenCreate(false)}
-              disabled={createMutation.isPending || isCreating}
-            >
-              Avbryt
-            </Button>
-            <Button
-              type="button"
-              variant="contained"
-              disabled={createMutation.isPending || isCreating}
-              onClick={handleCreateSubmit(handleCreate)}
-              sx={{ minWidth: 100 }}
-            >
-              {createMutation.isPending || isCreating ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Skapa"
-              )}
-            </Button>
-          </DialogActions>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog
-        open={openEdit !== null}
-        onClose={(_, reason) => {
-          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
-          setOpenEdit(null);
-        }}
-        disableEscapeKeyDown
-        maxWidth="md"
-        fullWidth
-        slotProps={{
-          paper: {
-            component: "form",
-            onSubmit: (e: React.FormEvent<HTMLFormElement>) => {
-              e.preventDefault();
-            },
-          },
-        }}
-      >
-          <DialogTitle>
-            Redigera GID {openEdit?.gid} - ({openEdit?.arendenummerArtvise})
-          </DialogTitle>
-          <DialogContent>
-            <Typography variant="body2">
-              Värdet 'Nej' i fältet 'Antagen' skickar automatiskt objektet till
-              idébanken.
-            </Typography>
-            <Typography variant="body2">
-              Värdet 'true' i kryssrutan 'Levererad' skickar automatiskt
-              objektet till Avslutad.
-            </Typography>
-          </DialogContent>
-          <Divider />
-          <DialogContent sx={{ pt: 3 }}>
-            <Grid container spacing={2}>
-              {(
-                [
-                  ["arendenummerArtvise", "Ärendenummer"],
-                  ["dataunderlag", "Dataunderlag"],
-                  ["dataadministrator", "Dataadministratör"],
-                  ["malgrupper", "Målgrupper"],
-                  ["nyttjandeInterntExternt", "Nyttjande internt/externt"],
-                  ["leverans", "Leverans"],
-                  ["leveransArbetstimmar", "Leverans (arbetstimmar)"],
-                  ["kategori", "Kategori"],
-                  ["kategoriTyp", "Kategori typ"],
-                  ["prioritet", "Prioritet"],
-                  ["handlaggare", "Handläggare"],
-                  ["tabell", "Tabell"],
-                  ["wms", "WMS"],
-                  ["fme", "FME"],
-                  ["redigering", "Redigering"],
-                  ["information", "Information"],
-                  ["verksamhetskritiskData", "Verksamhetskritisk data"],
-                  ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
-                  ["antagenJaNej", "Antagen"],
-                  ["kommentar", "Kommentar"],
-                  ["antagenJaNejMotivering", "Antagen ja/nej motivering"],
-                ] as const
-              ).map(([key, label]) => (
-                <Grid
-                  size={
-                    key === "antagenJaNejMotivering" || key === "kommentar"
-                      ? 12
-                      : 6
-                  }
-                  key={key}
-                >
-                  {key === "prioritet" ? (
-                    <Controller
-                      name="prioritet"
-                      control={editControl}
-                      render={({ field }) => {
-                        const options = addUnknownOption(
-                          PRIORITET_OPTIONS,
-                          field.value ?? openEdit?.prioritet,
-                        );
-                        return (
-                          <FormControl fullWidth>
-                            <InputLabel id="edit-prioritet-label">
-                              Prioritet
-                            </InputLabel>
-                            <Select
-                              {...field}
-                              labelId="edit-prioritet-label"
-                              label="Prioritet"
-                              value={field.value ?? ""}
-                              input={
-                                <OutlinedInput
-                                  label="Prioritet"
-                                  endAdornment={helpAdornment("prioritet", {
-                                    offsetForSelectIcon: true,
-                                  })}
-                                />
-                              }
-                            >
-                              <MenuItem value="">
-                                <em>Välj prioritet</em>
-                              </MenuItem>
-                              {options.map((opt) => (
-                                <MenuItem key={opt} value={opt}>
-                                  {opt}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        );
-                      }}
-                    />
-                  ) : key === "kategori" ? (
-                    <Controller
-                      name="kategori"
-                      control={editControl}
-                      render={({ field }) => {
-                        const options = addUnknownOption(
-                          KATEGORI_OPTIONS,
-                          field.value ?? openEdit?.kategori,
-                        );
-                        return (
-                          <FormControl fullWidth>
-                            <InputLabel id="edit-kategori-label">
-                              Kategori
-                            </InputLabel>
-                            <Select
-                              {...field}
-                              labelId="edit-kategori-label"
-                              label="Kategori"
-                              value={field.value ?? ""}
-                              input={
-                                <OutlinedInput
-                                  label="Kategori"
-                                  endAdornment={helpAdornment("kategori", {
-                                    offsetForSelectIcon: true,
-                                  })}
-                                />
-                              }
-                            >
-                              <MenuItem value="">
-                                <em>Välj kategori</em>
-                              </MenuItem>
-                              {options.map((opt) => (
-                                <MenuItem key={opt} value={opt}>
-                                  {opt}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        );
-                      }}
-                    />
-                  ) : key === "kategoriTyp" ? (
-                    <Controller
-                      name="kategoriTyp"
-                      control={editControl}
-                      render={({ field }) => {
-                        const options = addUnknownOption(
-                          KATEGORI_TYP_OPTIONS,
-                          field.value ?? openEdit?.kategoriTyp,
-                        );
-                        return (
-                          <FormControl fullWidth>
-                            <InputLabel id="edit-kategoriTyp-label">
-                              Kategori typ
-                            </InputLabel>
-                            <Select
-                              {...field}
-                              labelId="edit-kategoriTyp-label"
-                              label="Kategori typ"
-                              value={field.value ?? ""}
-                              input={
-                                <OutlinedInput
-                                  label="Kategori typ"
-                                  endAdornment={helpAdornment("kategoriTyp", {
-                                    offsetForSelectIcon: true,
-                                  })}
-                                />
-                              }
-                            >
-                              <MenuItem value="">
-                                <em>Välj kategori typ</em>
-                              </MenuItem>
-                              {options.map((opt) => (
-                                <MenuItem key={opt} value={opt}>
-                                  {opt}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        );
-                      }}
-                    />
-                  ) : key === "antagenJaNej" ? (
-                    <Controller
-                      name="antagenJaNej"
-                      control={editControl}
-                      render={({ field }) => {
-                        const normalizedValue = normalizeAntagenJaNej(
-                          field.value ?? openEdit?.antagenJaNej,
-                        );
-                        const options = addUnknownOption(
-                          ANTAGEN_OPTIONS,
-                          normalizedValue,
-                        );
-                        return (
-                          <FormControl fullWidth>
-                            <InputLabel id="edit-antagenJaNej-label">
-                              Antagen
-                            </InputLabel>
-                            <Select
-                              {...field}
-                              labelId="edit-antagenJaNej-label"
-                              label="Antagen"
-                              value={normalizedValue}
-                              onChange={(e) =>
-                                field.onChange(
-                                  normalizeAntagenJaNej(String(e.target.value)),
-                                )
-                              }
-                              input={
-                                <OutlinedInput
-                                  label="Antagen"
-                                  endAdornment={helpAdornment("antagenJaNej", {
-                                    offsetForSelectIcon: true,
-                                  })}
-                                />
-                              }
-                            >
-                              <MenuItem value="">
-                                <em>Välj</em>
-                              </MenuItem>
-                              {options.map((opt) => (
-                                <MenuItem key={opt} value={opt}>
-                                  {opt}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        );
-                      }}
-                    />
-                  ) : key === "arendenummerArtvise" ? (
-                    <Controller
-                      name="arendenummerArtvise"
-                      control={editControl}
-                      rules={{
-                        required: "Ärendenummer är obligatoriskt",
-                      }}
-                      render={({ field, fieldState }) => {
-                        const usedByOthers = new Set(
-                          items
-                            .filter((c) => c.gid !== openEdit?.gid)
-                            .map((c) =>
-                              c.arendenummerArtvise?.toLowerCase().trim(),
-                            )
-                            .filter((v): v is string => !!v),
-                        );
-                        const options = orderSummaries.filter(
-                          (o) =>
-                            !usedByOthers.has(
-                              o.arendenummerArtvise.toLowerCase().trim(),
+                      );
+                    }}
+                  />
+                ) : (
+                  <Controller
+                    name={key as keyof CreateChecklistDto}
+                    control={editControl}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        label={label}
+                        multiline={
+                          key === "antagenJaNejMotivering" ||
+                          key === "kommentar"
+                        }
+                        rows={
+                          key === "antagenJaNejMotivering" ||
+                          key === "kommentar"
+                            ? 2
+                            : 1
+                        }
+                        slotProps={{
+                          input: {
+                            endAdornment: helpAdornment(
+                              key as keyof CreateChecklistDto,
                             ),
-                        );
-                        const currentValue =
-                          field.value ?? openEdit?.arendenummerArtvise ?? "";
-                        const currentOption =
-                          options.find(
-                            (o) => o.arendenummerArtvise === currentValue,
-                          ) ??
-                          (currentValue
-                            ? ({
-                                arendenummerArtvise: currentValue,
-                              } as OrderSummary)
-                            : null);
-
-                        return (
-                          <Autocomplete
-                            fullWidth
-                            options={options}
-                            getOptionLabel={(option) =>
-                              option.arendenummerArtvise ?? ""
-                            }
-                            loading={isLoadingOrderSummaries}
-                            value={currentOption}
-                            onChange={(_e, value) => {
-                              field.onChange(value?.arendenummerArtvise ?? "");
-                            }}
-                            isOptionEqualToValue={(option, value) =>
-                              option.arendenummerArtvise ===
-                              value.arendenummerArtvise
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label={label}
-                                required
-                                error={!!fieldState.error}
-                                helperText={fieldState.error?.message}
-                                slotProps={{
-                                  input: {
-                                    ...params.InputProps,
-                                    endAdornment: mergeEndAdornment(
-                                      <>
-                                        {isLoadingOrderSummaries ? (
-                                          <CircularProgress
-                                            color="inherit"
-                                            size={20}
-                                          />
-                                        ) : null}
-                                        {params.InputProps.endAdornment}
-                                      </>,
-                                      helpAdornment("arendenummerArtvise"),
-                                    ),
-                                  },
-                                }}
-                              />
-                            )}
-                          />
-                        );
-                      }}
-                    />
-                  ) : (
-                    <Controller
-                      name={key as keyof CreateChecklistDto}
-                      control={editControl}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          fullWidth
-                          label={label}
-                          multiline={
-                            key === "antagenJaNejMotivering" ||
-                            key === "kommentar"
-                          }
-                          rows={
-                            key === "antagenJaNejMotivering" ||
-                            key === "kommentar"
-                              ? 2
-                              : 1
-                          }
-                          slotProps={{
-                            input: {
-                              endAdornment: helpAdornment(
-                                key as keyof CreateChecklistDto,
-                              ),
-                            },
-                          }}
-                        />
-                      )}
-                    />
-                  )}
-                </Grid>
-              ))}
-            </Grid>
-            <Divider sx={{ my: 3 }} />
-            <Box
-              sx={{
-                display: "flex",
-                gap: 4,
-                alignItems: "center",
-                px: 1,
-              }}
-            >
-              <Controller
-                name="kopiering"
-                control={editControl}
-                render={({ field }) => (
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={Boolean(field.value)}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                        />
-                      }
-                      label="Kopiering"
-                    />
-                    {helpIconInline("kopiering")}
-                  </Box>
+                          },
+                        }}
+                      />
+                    )}
+                  />
                 )}
-              />
-              <Controller
-                name="levererad"
-                control={editControl}
-                render={({ field }) => (
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={Boolean(field.value)}
-                          onChange={(e) => field.onChange(e.target.checked)}
-                        />
-                      }
-                      label="Levererad"
-                    />
-                    {helpIconInline("levererad")}
-                  </Box>
-                )}
-              />
-            </Box>
-          </DialogContent>
-          <Divider />
-          <DialogActions sx={{ p: 2.5 }}>
-            <Button
-              type="button"
-              onClick={() => setOpenEdit(null)}
-              disabled={updateMutation.isPending || isUpdating}
-            >
-              Avbryt
-            </Button>
-            <Button
-              type="button"
-              variant="contained"
-              disabled={updateMutation.isPending || isUpdating}
-              onClick={handleEditSubmit(handleUpdate)}
-              sx={{ minWidth: 100 }}
-            >
-              {updateMutation.isPending || isUpdating ? (
-                <CircularProgress size={20} color="inherit" />
-              ) : (
-                "Spara"
+              </Grid>
+            ))}
+          </Grid>
+          <Divider sx={{ my: 3 }} />
+          <Box
+            sx={{
+              display: "flex",
+              gap: 4,
+              alignItems: "center",
+              px: 1,
+            }}
+          >
+            <Controller
+              name="kopiering"
+              control={editControl}
+              render={({ field }) => (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Kopiering"
+                  />
+                  {helpIconInline("kopiering")}
+                </Box>
               )}
-            </Button>
-          </DialogActions>
+            />
+            <Controller
+              name="levererad"
+              control={editControl}
+              render={({ field }) => (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(field.value)}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                    }
+                    label="Levererad"
+                  />
+                  {helpIconInline("levererad")}
+                </Box>
+              )}
+            />
+          </Box>
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button
+            type="button"
+            onClick={() => setOpenEdit(null)}
+            disabled={updateMutation.isPending || isUpdating}
+          >
+            Avbryt
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            disabled={updateMutation.isPending || isUpdating}
+            onClick={handleEditSubmit(handleUpdate)}
+            sx={{ minWidth: 100 }}
+          >
+            {updateMutation.isPending || isUpdating ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Spara"
+            )}
+          </Button>
+        </DialogActions>
       </Dialog>
 
       {/* Delete Dialog */}

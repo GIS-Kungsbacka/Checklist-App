@@ -100,12 +100,12 @@ const defaultColumnVisibility = {
   arendeNummerOpenE: true,
   bestallareNamn: true,
   bestallareEpost: false,
-  titel: false,
+  titel: true,
   sakerhetsKlass: false,
   sakerhetsklassRiktighet: false,
   sakerhetsklassTillganglighet: false,
   dataKallaTyp: false,
-  schemaNamn: false,
+  schemaNamn: true,
   beskrivning: false,
   ursprung: false,
   syfte: false,
@@ -128,7 +128,7 @@ const defaultColumnVisibility = {
   relateradeResurser: false,
   kolumnBeskrivningUrl: false,
   status: true,
-  handlaggare: true,
+  handlaggare: false,
   metaDataVersion: false,
   metadataSpecifikationModelversion: false,
   actions: true,
@@ -508,6 +508,12 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       minWidth: 150,
       flex: 1,
       hideable: false,
+    },
+    {
+      field: "namn",
+      headerName: "Namn",
+      minWidth: 180,
+      flex: 1,
       renderCell: (params: GridRenderCellParams<Metadata>) => {
         const value = String(params.value ?? "").trim();
         if (!value) {
@@ -517,7 +523,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         const href = buildSchemaNamnUrl(
           metadataCatalogBaseUrl,
           String(params.row?.schemaNamn ?? ""),
-          String(params.row?.namn ?? ""),
+          value,
         );
         if (!href) return value;
         return (
@@ -533,7 +539,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         );
       },
     },
-    { field: "namn", headerName: "Namn", minWidth: 180, flex: 1 },
     {
       field: "titel",
       headerName: "Titel",
@@ -723,6 +728,7 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
       field: "actions",
       headerName: "Åtgärder",
       type: "actions",
+      hideable: false,
       width: 100,
       getActions: (params) => [
         <GridActionsCellItem

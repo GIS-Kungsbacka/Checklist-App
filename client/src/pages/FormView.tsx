@@ -824,6 +824,16 @@ export default function FormView({ entity }: { entity: FormEntity }) {
         ? (item as ManagementPlan).forvaltningsplanModelversion
         : undefined;
 
+  const schemaNameLabel = (() => {
+    if (entity !== "metadata" && entity !== "managementplan") return "";
+    const schemaNamn = String(
+      (item as Metadata | ManagementPlan).schemaNamn ?? "",
+    ).trim();
+    const namn = String((item as Metadata | ManagementPlan).namn ?? "").trim();
+    if (schemaNamn && namn) return `${schemaNamn}:${namn}`;
+    return schemaNamn || namn;
+  })();
+
   const displayKeys = isOrderSummary
     ? (Object.keys(fieldLabels) as (keyof OrderSummary)[])
     : (Object.keys(item) as (keyof typeof item)[]);
@@ -1053,7 +1063,9 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                 <Tooltip
                   title={
                     openInNewUrl
-                      ? "Öppna i metadataportalen"
+                      ? entity === "metadata"
+                        ? "Öppna förvaltningsplan"
+                        : "Öppna metadata"
                       : "Saknar konfiguration"
                   }
                 >
@@ -1061,11 +1073,7 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                     <IconButton
                       onClick={() => {
                         if (!openInNewUrl) return;
-                        window.open(
-                          openInNewUrl,
-                          "_blank",
-                          "noopener,noreferrer",
-                        );
+                        window.location.href = openInNewUrl;
                       }}
                       disabled={!openInNewUrl}
                       color="primary"
@@ -1182,6 +1190,11 @@ export default function FormView({ entity }: { entity: FormEntity }) {
                 useFlexGap
                 alignItems="center"
               >
+                {schemaNameLabel ? (
+                  <Typography variant="body2" sx={{ fontSize: 18 }}>
+                    {schemaNameLabel}
+                  </Typography>
+                ) : null}
                 <Box
                   sx={{
                     ml: "auto",
