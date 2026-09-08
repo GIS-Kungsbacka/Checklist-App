@@ -63,6 +63,16 @@ import {
 } from "../../utils/runtimeConfig";
 import { statusChipColor } from "../../utils/status-chip";
 import { toast } from "react-toastify";
+import { Controller, useForm } from "react-hook-form";
+import {
+  defaultColumnVisibility,
+  emptyForm,
+  GRID_PREFS_STORAGE_KEY,
+  MANAGEMENT_PLAN_FORM_FIELDS,
+  type ManagementPlanFormState,
+  REDIGERINGS_KALLA_OPTIONS,
+  STATUS_OPTIONS,
+} from "./constants";
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -73,44 +83,6 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
-const GRID_PREFS_STORAGE_KEY = "management-plan-default-prefs-dev-admin";
-const STATUS_OPTIONS = ["granskas", "godkänd"] as const;
-const defaultColumnVisibility = {
-  gid: true,
-  namn: true,
-  arendeNummberOpenE: true,
-  bestallareNamn: true,
-  bestallareEpost: false,
-  sakerhetsklass: false,
-  datakallaTyp: false,
-  schemaNamn: true,
-  titel: true,
-  dataAgare: false,
-  dataForvaltare: false,
-  dataAdministrator: false,
-  dataKonsument: false,
-  redigeringsKalla: false,
-  oppnaData: false,
-  dokumentSkUrl: false,
-  dokuementInfoUrl: false,
-  ovrigInformation: false,
-  kritiskDatamangd: false,
-  arkivering: false,
-  arkiveringTidpunkt: false,
-  publicerad: false,
-  publiceradOppnaData: false,
-  atkomst: false,
-  integration: false,
-  status: true,
-  handlaggare: false,
-  forvaltningsplanVersion: false,
-  forvaltningsplanModelversion: false,
-  skapadTidPunkt: true,
-  skapadAv: false,
-  andradTidPunkt: false,
-  andradAv: false,
-  actions: true,
-};
 
 const ColumnsToolbarButton = React.forwardRef(
   function ColumnsToolbarButton(props, _ref) {
@@ -267,78 +239,7 @@ function GridToolbar({
   );
 }
 
-type ManagementPlanFormState = {
-  arendeNummberOpenE: string;
-  bestallareNamn: string;
-  bestallareEpost: string;
-  sakerhetsklass: string;
-  datakallaTyp: string;
-  schemaNamn: string;
-  namn: string;
-  titel: string;
-  dataAgare: string;
-  dataForvaltare: string;
-  dataAdministrator: string;
-  dataKonsument: string;
-  redigeringsKalla: string;
-  oppnaData: boolean;
-  dokumentSkUrl: string;
-  dokuementInfoUrl: string;
-  ovrigInformation: string;
-  kritiskDatamangd: boolean;
-  arkivering: string;
-  arkiveringTidpunkt: string;
-  publicerad: string;
-  publiceradOppnaData: boolean;
-  atkomst: string;
-  integration: string;
-  status: string;
-  handlaggare: string;
-  forvaltningsplanVersion: string;
-  forvaltningsplanModelversion: string;
-  skapadTidPunkt: string;
-  skapadAv: string;
-  andradTidPunkt: string;
-  andradAv: string;
-};
-
-const emptyForm: ManagementPlanFormState = {
-  arendeNummberOpenE: "",
-  bestallareNamn: "",
-  bestallareEpost: "",
-  sakerhetsklass: "",
-  datakallaTyp: "",
-  schemaNamn: "",
-  namn: "",
-  titel: "",
-  dataAgare: "",
-  dataForvaltare: "",
-  dataAdministrator: "",
-  dataKonsument: "",
-  redigeringsKalla: "",
-  oppnaData: false,
-  dokumentSkUrl: "",
-  dokuementInfoUrl: "",
-  ovrigInformation: "",
-  kritiskDatamangd: false,
-  arkivering: "",
-  arkiveringTidpunkt: "",
-  publicerad: "",
-  publiceradOppnaData: false,
-  atkomst: "",
-  integration: "",
-  status: "",
-  handlaggare: "",
-  forvaltningsplanVersion: "",
-  forvaltningsplanModelversion: "",
-  skapadTidPunkt: "",
-  skapadAv: "",
-  andradTidPunkt: "",
-  andradAv: "",
-};
-
 const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
-  arendeNummberOpenE: item.arendeNummberOpenE ?? "",
   bestallareNamn: item.bestallareNamn ?? "",
   bestallareEpost: item.bestallareEpost ?? "",
   sakerhetsklass: item.sakerhetsklass ?? "",
@@ -350,10 +251,8 @@ const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
   dataForvaltare: item.dataForvaltare ?? "",
   dataAdministrator: fromArray(item.dataAdministrator),
   dataKonsument: fromArray(item.dataKonsument),
-  redigeringsKalla: fromArray(item.redigeringsKalla),
+  redigeringsKalla: String(item.redigeringsKalla?.[0] ?? "").trim(),
   oppnaData: item.oppnaData ?? false,
-  dokumentSkUrl: item.dokumentSkUrl ?? "",
-  dokuementInfoUrl: item.dokuementInfoUrl ?? "",
   ovrigInformation: item.ovrigInformation ?? "",
   kritiskDatamangd: item.kritiskDatamangd ?? false,
   arkivering: item.arkivering ?? "",
@@ -364,16 +263,9 @@ const toFormState = (item: ManagementPlan): ManagementPlanFormState => ({
   integration: fromArray(item.integration),
   status: item.status ?? "",
   handlaggare: item.handlaggare ?? "",
-  forvaltningsplanVersion: item.forvaltningsplanVersion ?? "",
-  forvaltningsplanModelversion: item.forvaltningsplanModelversion ?? "",
-  skapadTidPunkt: item.skapadTidPunkt ?? "",
-  skapadAv: item.skapadAv ?? "",
-  andradTidPunkt: item.andradTidPunkt ?? "",
-  andradAv: item.andradAv ?? "",
 });
 
 const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
-  arendeNummberOpenE: state.arendeNummberOpenE || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
   sakerhetsklass: state.sakerhetsklass || undefined,
@@ -385,10 +277,10 @@ const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
   dataForvaltare: state.dataForvaltare || undefined,
   dataAdministrator: toArray(state.dataAdministrator),
   dataKonsument: toArray(state.dataKonsument),
-  redigeringsKalla: toArray(state.redigeringsKalla),
+  redigeringsKalla: state.redigeringsKalla.trim()
+    ? [state.redigeringsKalla.trim()]
+    : undefined,
   oppnaData: state.oppnaData,
-  dokumentSkUrl: state.dokumentSkUrl || undefined,
-  dokuementInfoUrl: state.dokuementInfoUrl || undefined,
   ovrigInformation: state.ovrigInformation || undefined,
   kritiskDatamangd: state.kritiskDatamangd,
   arkivering: state.arkivering || undefined,
@@ -399,13 +291,242 @@ const toDto = (state: ManagementPlanFormState): CreateManagementPlanDto => ({
   integration: toArray(state.integration),
   status: state.status || undefined,
   handlaggare: state.handlaggare || undefined,
-  forvaltningsplanVersion: state.forvaltningsplanVersion || undefined,
-  forvaltningsplanModelversion: state.forvaltningsplanModelversion || undefined,
-  skapadTidPunkt: state.skapadTidPunkt || undefined,
-  skapadAv: state.skapadAv || undefined,
-  andradTidPunkt: state.andradTidPunkt || undefined,
-  andradAv: state.andradAv || undefined,
 });
+
+function ManagementPlanFormDialog({
+  open,
+  item,
+  isSubmitting,
+  onClose,
+  onCreate,
+  onUpdate,
+}: {
+  open: boolean;
+  item: ManagementPlan | null;
+  isSubmitting: boolean;
+  onClose: () => void;
+  onCreate: (dto: CreateManagementPlanDto) => void;
+  onUpdate: (gid: number, dto: CreateManagementPlanDto) => void;
+}) {
+  const isCreate = item === null;
+  const { control, handleSubmit, reset } = useForm<ManagementPlanFormState>({
+    defaultValues: emptyForm,
+  });
+
+  React.useEffect(() => {
+    if (!open) return;
+    reset(item ? toFormState(item) : emptyForm);
+  }, [open, item, reset]);
+
+  const onSubmit = (state: ManagementPlanFormState) => {
+    const dto = toDto(state);
+    if (isCreate) {
+      onCreate(dto);
+      return;
+    }
+    onUpdate(item.gid, {
+      ...dto,
+      // Keep values that are no longer editable in the form.
+      arendeNummberOpenE: item.arendeNummberOpenE,
+      dokumentSkUrl: item.dokumentSkUrl,
+      dokuementInfoUrl: item.dokuementInfoUrl,
+      forvaltningsplanVersion: item.forvaltningsplanVersion,
+      forvaltningsplanModelversion: item.forvaltningsplanModelversion,
+      skapadTidPunkt: item.skapadTidPunkt,
+      skapadAv: item.skapadAv,
+      andradTidPunkt: item.andradTidPunkt,
+      andradAv: item.andradAv,
+    });
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={(_, reason) => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+        onClose();
+      }}
+      disableEscapeKeyDown
+      maxWidth="md"
+      fullWidth
+    >
+      <DialogTitle>
+        {isCreate
+          ? "Skapa förvaltningsplan"
+          : `Redigera förvaltningsplan${
+              item.titel || item.namn ? ` (${item.titel ?? item.namn})` : ""
+            }`}
+      </DialogTitle>
+      <DialogContent
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          const tag = (e.target as HTMLElement).tagName;
+          if (tag === "TEXTAREA") return;
+          e.preventDefault();
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 2,
+            pt: 1,
+          }}
+        >
+          {MANAGEMENT_PLAN_FORM_FIELDS.map(([key, label]) =>
+            key === "status" ? (
+              <Controller
+                key={key}
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    label={label}
+                    value={field.value}
+                    slotProps={{
+                      inputLabel: { shrink: true },
+                      select: { displayEmpty: true },
+                    }}
+                    onChange={(e) =>
+                      field.onChange(String(e.target.value ?? ""))
+                    }
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    name={field.name}
+                  >
+                    <MenuItem value="">
+                      <em>Välj status</em>
+                    </MenuItem>
+                    {STATUS_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            ) : key === "redigeringsKalla" ? (
+              <Controller
+                key={key}
+                name="redigeringsKalla"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    label={label}
+                    value={field.value}
+                    slotProps={{
+                      inputLabel: { shrink: true },
+                      select: { displayEmpty: true },
+                    }}
+                    onChange={(e) =>
+                      field.onChange(String(e.target.value ?? "").trim())
+                    }
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    name={field.name}
+                  >
+                    <MenuItem value="">
+                      <em>Välj redigeringskälla</em>
+                    </MenuItem>
+                    {field.value &&
+                    !REDIGERINGS_KALLA_OPTIONS.includes(
+                      field.value as (typeof REDIGERINGS_KALLA_OPTIONS)[number],
+                    ) ? (
+                      <MenuItem value={field.value}>{field.value}</MenuItem>
+                    ) : null}
+                    {REDIGERINGS_KALLA_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            ) : (
+              <Controller
+                key={key}
+                name={key}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label={label}
+                    multiline={key === "ovrigInformation"}
+                    minRows={key === "ovrigInformation" ? 2 : undefined}
+                  />
+                )}
+              />
+            ),
+          )}
+        </Box>
+        <Divider sx={{ mt: 3 }} />
+        <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
+          <Controller
+            name="oppnaData"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={Boolean(field.value)}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                label="Önskemål om öppna data"
+              />
+            )}
+          />
+          <Controller
+            name="kritiskDatamangd"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={Boolean(field.value)}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                label="Kritisk datamängd"
+              />
+            )}
+          />
+          <Controller
+            name="publiceradOppnaData"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    disabled={!field.value}
+                    checked={Boolean(field.value)}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                label="Publicerad öppna data"
+              />
+            )}
+          />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button type="button" onClick={onClose}>
+          Avbryt
+        </Button>
+        <Button
+          type="button"
+          variant="contained"
+          disabled={isSubmitting}
+          onClick={handleSubmit(onSubmit)}
+        >
+          {isCreate ? "Skapa" : "Spara"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 export default function ManagementPlanPage({
   mode,
@@ -424,7 +545,6 @@ export default function ManagementPlanPage({
   const [deleteItem, setDeleteItem] = React.useState<ManagementPlan | null>(
     null,
   );
-  const [form, setForm] = React.useState<ManagementPlanFormState>(emptyForm);
   const {
     columnVisibilityModel,
     setColumnVisibilityModel,
@@ -681,9 +801,8 @@ export default function ManagementPlanPage({
           icon={<EditOutlinedIcon color="primary" />}
           label="Redigera"
           onClick={() => {
-            const row = params.row as ManagementPlan;
-            setOpenEdit(row);
-            setForm(toFormState(row));
+            setOpenCreate(false);
+            setOpenEdit(params.row as ManagementPlan);
           }}
         />,
         <GridActionsCellItem
@@ -739,7 +858,6 @@ export default function ManagementPlanPage({
         <Button
           variant="contained"
           onClick={() => {
-            setForm(emptyForm);
             setOpenEdit(null);
             setOpenCreate(true);
           }}
@@ -835,216 +953,48 @@ export default function ManagementPlanPage({
         />
       </Paper>
 
-      <Dialog
+      <ManagementPlanFormDialog
         open={openCreate || openEdit !== null}
-        onClose={(_, reason) => {
-          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
-          if (openEdit) setOpenEdit(null);
-          else setOpenCreate(false);
+        item={openCreate ? null : openEdit}
+        isSubmitting={isSubmitting}
+        onClose={() => {
+          setOpenEdit(null);
+          setOpenCreate(false);
         }}
-        disableEscapeKeyDown
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {openCreate
-            ? "Skapa förvaltningsplan"
-            : `Redigera förvaltningsplan ${openEdit?.arendeNummberOpenE} (${
-                openEdit?.titel ?? openEdit?.namn
-              })`}
-        </DialogTitle>
-        <DialogContent
-          onKeyDown={(e) => {
-            if (e.key !== "Enter") return;
-            const tag = (e.target as HTMLElement).tagName;
-            if (tag === "TEXTAREA") return;
-            e.preventDefault();
-          }}
-        >
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 2,
-              pt: 1,
-            }}
-          >
-            {(
-              [
-                ["namn", "Namn"],
-                ["titel", "Titel"],
-                ["arendeNummberOpenE", "Ärendenummer"],
-                ["bestallareNamn", "Beställare namn"],
-                ["bestallareEpost", "Beställare e-post"],
-                ["sakerhetsklass", "Säkerhetsklass"],
-                ["datakallaTyp", "Datakälla typ"],
-                ["schemaNamn", "Schema"],
-                ["dataAgare", "Dataägare"],
-                ["dataForvaltare", "Dataförvaltare"],
-                ["dataAdministrator", "Dataadministratör (kommaseparerat)"],
-                ["dataKonsument", "Datakonsument (kommaseparerat)"],
-                ["redigeringsKalla", "Redigeringskälla (kommaseparerat)"],
-                ["dokumentSkUrl", "Dokument SK URL"],
-                ["dokuementInfoUrl", "Dokument info URL"],
-                ["arkivering", "Arkivering"],
-                ["arkiveringTidpunkt", "Arkivering tidpunkt"],
-                ["publicerad", "Publicerad (kommaseparerat)"],
-                ["atkomst", "Åtkomst (kommaseparerat)"],
-                ["integration", "Integration (kommaseparerat)"],
-                ["status", "Status"],
-                ["handlaggare", "Handläggare"],
-                ["forvaltningsplanVersion", "Förvaltningsplan version"],
-                ["forvaltningsplanModelversion", "Modellversion"],
-                ["skapadTidPunkt", "Skapad tidpunkt (ISO datetime)"],
-                ["skapadAv", "Skapad av"],
-                ["andradTidPunkt", "Ändrad tidpunkt (ISO datetime)"],
-                ["andradAv", "Ändrad av"],
-                ["ovrigInformation", "Övrig information"],
-              ] as const
-            ).map(([key, label]) =>
-              key === "status" ? (
-                <TextField
-                  key={key}
-                  select
-                  label={label}
-                  value={form.status}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    select: { displayEmpty: true },
-                  }}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      status: String(e.target.value ?? ""),
-                    }))
-                  }
-                >
-                  <MenuItem value="">
-                    <em>Välj status</em>
-                  </MenuItem>
-                  {STATUS_OPTIONS.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              ) : (
-                <TextField
-                  key={key}
-                  label={label}
-                  value={form[key]}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, [key]: e.target.value }))
-                  }
-                  multiline={key === "ovrigInformation"}
-                  minRows={key === "ovrigInformation" ? 2 : undefined}
-                />
-              ),
-            )}
-          </Box>
-          <Divider sx={{ mt: 3 }} />
-          <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.oppnaData}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      oppnaData: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Öppna data"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.kritiskDatamangd}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      kritiskDatamangd: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Kritisk datamängd"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.publiceradOppnaData}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      publiceradOppnaData: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Publicerad öppna data"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            type="button"
-            onClick={() =>
-              openEdit ? setOpenEdit(null) : setOpenCreate(false)
-            }
-          >
-            Avbryt
-          </Button>
-          <Button
-            type="button"
-            variant="contained"
-            disabled={isSubmitting}
-            onClick={() => {
-              const dto = toDto(form);
-              if (openCreate) {
-                createMutation.mutate(dto, {
-                  onSuccess: () => {
-                    setOpenCreate(false);
-                    setForm(emptyForm);
-                    toast.success("Förvaltningsplan skapad.");
-                  },
-                  onError: (err) => {
-                    const message =
-                      err instanceof Error
-                        ? err.message
-                        : "Kunde inte skapa. Försök igen.";
-                    toast.error(message);
-                  },
-                });
-                return;
-              }
-              if (!openEdit) {
-                return;
-              }
-              updateMutation.mutate(
-                { gid: openEdit.gid, data: dto },
-                {
-                  onSuccess: () => {
-                    setOpenEdit(null);
-                    toast.success("Ändringar sparade.");
-                  },
-                  onError: (err) => {
-                    const message =
-                      err instanceof Error
-                        ? err.message
-                        : "Kunde inte spara. Försök igen.";
-                    toast.error(message);
-                  },
-                },
-              );
-            }}
-          >
-            {openCreate ? "Skapa" : "Spara"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onCreate={(dto) => {
+          createMutation.mutate(dto, {
+            onSuccess: () => {
+              setOpenCreate(false);
+              toast.success("Förvaltningsplan skapad.");
+            },
+            onError: (err) => {
+              const message =
+                err instanceof Error
+                  ? err.message
+                  : "Kunde inte skapa. Försök igen.";
+              toast.error(message);
+            },
+          });
+        }}
+        onUpdate={(gid, dto) => {
+          updateMutation.mutate(
+            { gid, data: dto },
+            {
+              onSuccess: () => {
+                setOpenEdit(null);
+                toast.success("Ändringar sparade.");
+              },
+              onError: (err) => {
+                const message =
+                  err instanceof Error
+                    ? err.message
+                    : "Kunde inte spara. Försök igen.";
+                toast.error(message);
+              },
+            },
+          );
+        }}
+      />
 
       <Dialog open={deleteItem !== null} onClose={() => setDeleteItem(null)}>
         <DialogTitle sx={{ color: "error" }}>Ta bort post</DialogTitle>

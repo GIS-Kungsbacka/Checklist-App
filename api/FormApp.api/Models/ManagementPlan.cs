@@ -30,9 +30,9 @@
         public string? Status { get; set; }
         public string? Handlaggare { get; set; }
         public string? ForvaltningsplanVersion { get; set; }
-        public DateTimeOffset? SkapadTidPunkt { get; set; }
+        public DateTime? SkapadTidPunkt { get; set; }
         public string? SkapadAv { get; set; }
-        public DateTimeOffset? AndradTidPunkt { get; set; }
+        public DateTime? AndradTidPunkt { get; set; }
         public string? AndradAv { get; set; }
         public string? ForvaltningsplanModelversion { get; set; }
 

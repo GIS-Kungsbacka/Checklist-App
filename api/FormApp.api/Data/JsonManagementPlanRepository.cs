@@ -64,9 +64,9 @@ namespace FormApp.Api.Data
                     Status = "granskas",
                     Handlaggare = "Jag",
                     ForvaltningsplanVersion = "1.0",
-                    SkapadTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00"),
+                    SkapadTidPunkt = new DateTime(2026, 4, 14, 0, 0, 0, DateTimeKind.Utc),
                     SkapadAv = "System",
-                    AndradTidPunkt = DateTimeOffset.Parse("2026-02-14T15:00:05.462671+01:00"),
+                    AndradTidPunkt = new DateTime(2026, 5, 14, 0, 0, 0, DateTimeKind.Utc),
                     AndradAv = "System",
                     ForvaltningsplanModelversion = "1.0",
                 }

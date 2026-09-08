@@ -43,6 +43,10 @@
     "Status": "granskas",
     "Handlaggare": "Jag",
     "MetaDataVersion": "1.0",
+    "SkapadTidPunkt": "2026-02-14T15:00:05",
+    "SkapadAv": "System",
+    "AndradTidPunkt": "2026-02-14T15:00:05",
+    "AndradAv": "System",
     "SakerhetsklassRiktighet": "sk0",
     "SakerhetsklassTillganglighet": "sk1",
     "MetadataSpecifikationModelversion": "1.0"

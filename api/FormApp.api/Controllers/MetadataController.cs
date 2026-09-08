@@ -104,6 +104,10 @@ public class MetadataController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
+                SkapadTidPunkt = dto.SkapadTidPunkt,
+                SkapadAv = dto.SkapadAv,
+                AndradTidPunkt = dto.AndradTidPunkt,
+                AndradAv = dto.AndradAv,
                 SakerhetsklassRiktighet = dto.SakerhetsklassRiktighet,
                 SakerhetsklassTillganglighet = dto.SakerhetsklassTillganglighet,
                 MetadataSpecifikationModelversion = dto.MetadataSpecifikationModelversion
@@ -164,6 +168,10 @@ public class MetadataController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
+                SkapadTidPunkt = dto.SkapadTidPunkt,
+                SkapadAv = dto.SkapadAv,
+                AndradTidPunkt = dto.AndradTidPunkt,
+                AndradAv = dto.AndradAv,
                 SakerhetsklassRiktighet = dto.SakerhetsklassRiktighet,
                 SakerhetsklassTillganglighet = dto.SakerhetsklassTillganglighet,
                 MetadataSpecifikationModelversion = dto.MetadataSpecifikationModelversion
@@ -245,6 +253,10 @@ public class CreateMetadataDto
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? MetaDataVersion { get; set; }
+    public DateTime? SkapadTidPunkt { get; set; }
+    public string? SkapadAv { get; set; }
+    public DateTime? AndradTidPunkt { get; set; }
+    public string? AndradAv { get; set; }
     public string? SakerhetsklassRiktighet { get; set; }
     public string? SakerhetsklassTillganglighet { get; set; }
     public string? MetadataSpecifikationModelversion { get; set; }
@@ -284,6 +296,10 @@ public class UpdateMetadataDto
     public string? Status { get; set; }
     public string? Handlaggare { get; set; }
     public string? MetaDataVersion { get; set; }
+    public DateTime? SkapadTidPunkt { get; set; }
+    public string? SkapadAv { get; set; }
+    public DateTime? AndradTidPunkt { get; set; }
+    public string? AndradAv { get; set; }
     public string? SakerhetsklassRiktighet { get; set; }
     public string? SakerhetsklassTillganglighet { get; set; }
     public string? MetadataSpecifikationModelversion { get; set; }

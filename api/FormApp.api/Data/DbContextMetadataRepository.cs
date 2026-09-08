@@ -70,6 +70,10 @@ public class DbContextMetadataRepository : IMetadataRepository
         existing.Status = item.Status;
         existing.Handlaggare = item.Handlaggare;
         existing.MetaDataVersion = item.MetaDataVersion;
+        existing.SkapadTidPunkt = item.SkapadTidPunkt;
+        existing.SkapadAv = item.SkapadAv;
+        existing.AndradTidPunkt = item.AndradTidPunkt;
+        existing.AndradAv = item.AndradAv;
         existing.SakerhetsklassRiktighet = item.SakerhetsklassRiktighet;
         existing.SakerhetsklassTillganglighet = item.SakerhetsklassTillganglighet;
         existing.MetadataSpecifikationModelversion = item.MetadataSpecifikationModelversion;

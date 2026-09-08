@@ -68,6 +68,10 @@ using System.Text.Json;
                 Status = "granskas",
                 Handlaggare = "Jag",
                 MetaDataVersion = "1.0",
+                SkapadTidPunkt = new DateTime(2026, 2, 14, 15, 0, 5, DateTimeKind.Utc),
+                SkapadAv = "System",
+                AndradTidPunkt = new DateTime(2026, 2, 14, 15, 0, 5, DateTimeKind.Utc),
+                AndradAv = "System",
                 SakerhetsklassRiktighet = "sk0",
                 SakerhetsklassTillganglighet = "sk1",
                 MetadataSpecifikationModelversion = "1.0",
@@ -189,6 +193,10 @@ using System.Text.Json;
             existing.Status = item.Status;
             existing.Handlaggare = item.Handlaggare;
             existing.MetaDataVersion = item.MetaDataVersion;
+            existing.SkapadTidPunkt = item.SkapadTidPunkt;
+            existing.SkapadAv = item.SkapadAv;
+            existing.AndradTidPunkt = item.AndradTidPunkt;
+            existing.AndradAv = item.AndradAv;
             existing.SakerhetsklassRiktighet = item.SakerhetsklassRiktighet;
             existing.SakerhetsklassTillganglighet = item.SakerhetsklassTillganglighet;
             existing.MetadataSpecifikationModelversion = item.MetadataSpecifikationModelversion;

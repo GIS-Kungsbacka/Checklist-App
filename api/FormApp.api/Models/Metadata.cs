@@ -34,6 +34,10 @@
         public string? Status { get; set; }
         public string? Handlaggare { get; set; }
         public string? MetaDataVersion { get; set; }
+        public DateTime? SkapadTidPunkt { get; set; }
+        public string? SkapadAv { get; set; }
+        public DateTime? AndradTidPunkt { get; set; }
+        public string? AndradAv { get; set; }
         public string? SakerhetsklassRiktighet { get; set; }
         public string? SakerhetsklassTillganglighet { get; set; }
         public string? MetadataSpecifikationModelversion { get; set; }

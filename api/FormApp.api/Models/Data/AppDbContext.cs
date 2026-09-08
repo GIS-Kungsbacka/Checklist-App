@@ -242,6 +242,14 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Metadata>()
             .Property(x => x.MetaDataVersion).HasColumnName("metadata_version");
         modelBuilder.Entity<Metadata>()
+              .Property(x => x.SkapadTidPunkt).HasColumnName("skapad_tidpunkt");
+        modelBuilder.Entity<Metadata>()
+            .Property(x => x.SkapadAv).HasColumnName("skapad_av");
+        modelBuilder.Entity<Metadata>()
+            .Property(x => x.AndradTidPunkt).HasColumnName("andrad_tidpunkt");
+        modelBuilder.Entity<Metadata>()
+            .Property(x => x.AndradAv).HasColumnName("andrad_av");
+        modelBuilder.Entity<Metadata>()
             .Property(x => x.SakerhetsklassRiktighet).HasColumnName("sakerhetsklass_riktighet");
         modelBuilder.Entity<Metadata>()
             .Property(x => x.SakerhetsklassTillganglighet).HasColumnName("sakerhetsklass_tillganglighet");

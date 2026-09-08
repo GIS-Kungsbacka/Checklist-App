@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Checkbox,
@@ -45,6 +46,12 @@ import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ViewColumnOutlinedIcon from "@mui/icons-material/ViewColumnOutlined";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { type Dayjs } from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import "dayjs/locale/sv";
 import { GRID_DEFAULT_LOCALE_TEXT } from "../../../constants/sv";
 import {
   useCreateMetadata,
@@ -61,6 +68,32 @@ import {
 } from "../../utils/runtimeConfig";
 import { statusChipColor } from "../../utils/status-chip";
 import { toast } from "react-toastify";
+import {
+  Controller,
+  useForm,
+  useWatch,
+  type Control,
+} from "react-hook-form";
+import { SelectWithOtherDialog } from "../../components/SelectWithOtherDialog";
+import {
+  defaultColumnVisibility,
+  emptyForm,
+  FULLSTANDIGHET_OPTIONS,
+  GEOGRAFISK_TYP_OPTIONS,
+  GRID_PREFS_STORAGE_KEY,
+  KATEGORI_OPTIONS,
+  METADATA_FORM_FIELDS,
+  type MetadataFormState,
+  STATUS_OPTIONS,
+  TATORT_OPTIONS,
+  TATORT_OPTION_SET,
+  TIDS_UPPLOSNING_OPTIONS,
+  TIDS_UPPLOSNING_OPTION_SET,
+  UPPDATERINGS_FREKVENS_OPTIONS,
+  UPPDATERINGS_FREKVENS_OPTION_SET,
+} from "./constants";
+
+dayjs.extend(customParseFormat);
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -71,68 +104,6 @@ const toArray = (value: string): string[] | undefined => {
 };
 
 const fromArray = (value?: string[]): string => (value ?? []).join(", ");
-const GRID_PREFS_STORAGE_KEY = "metadata-default-prefs-dev-admin";
-const STATUS_OPTIONS = ["granskas", "godkänd"] as const;
-const KATEGORI_OPTIONS = [
-  "Administrativa gränser",
-  "Arealtäckande bilder och bakgrundskartor",
-  "Areella näringar",
-  "Atmosfär, klimatologi och meteorologi",
-  "Biologi och ekologi",
-  "Byggnader och byggnadskonstruktioner",
-  "Ekonomi",
-  "Fastigheter och fysisk planering",
-  "Försvar",
-  "Geovetenskap",
-  "Hälsa",
-  "Höjddata",
-  "Kust och hav",
-  "Miljö",
-  "Positionering",
-  "Samhälle och kultur",
-  "Sjöar och vattendrag",
-  "Tekniska försörjningssystem",
-  "Transporter",
-] as const;
-const defaultColumnVisibility = {
-  gid: true,
-  namn: true,
-  arendeNummerOpenE: true,
-  bestallareNamn: true,
-  bestallareEpost: false,
-  titel: true,
-  sakerhetsKlass: false,
-  sakerhetsklassRiktighet: false,
-  sakerhetsklassTillganglighet: false,
-  dataKallaTyp: false,
-  schemaNamn: true,
-  beskrivning: false,
-  ursprung: false,
-  syfte: false,
-  metod: false,
-  metodUrl: false,
-  projekt: false,
-  geografiskBegransning: false,
-  uppdateringsFrekvens: false,
-  fullstandighet: false,
-  skalniva: false,
-  nyckelOrd: false,
-  kategori: true,
-  tidsperiod: false,
-  tidsperiodStartdatum: false,
-  tidsperiodSlutdatum: false,
-  tidsUpplosning: false,
-  skapelseDatum: false,
-  anvandarBegransningLicens: false,
-  anvandarBegransningLicensText: false,
-  relateradeResurser: false,
-  kolumnBeskrivningUrl: false,
-  status: true,
-  handlaggare: false,
-  metaDataVersion: false,
-  metadataSpecifikationModelversion: false,
-  actions: true,
-};
 
 const ColumnsToolbarButton = React.forwardRef(
   function ColumnsToolbarButton(props, _ref) {
@@ -289,82 +260,96 @@ function GridToolbar({
   );
 }
 
-type MetadataFormState = {
-  arendeNummerOpenE: string;
-  bestallareNamn: string;
-  bestallareEpost: string;
-  sakerhetsKlass: string;
-  sakerhetsklassRiktighet: string;
-  sakerhetsklassTillganglighet: string;
-  dataKallaTyp: string;
-  schemaNamn: string;
-  namn: string;
-  beskrivning: string;
-  ursprung: string;
-  syfte: string;
-  metod: string;
-  metodUrl: string;
-  projekt: string;
-  geografiskBegransning: string;
-  uppdateringsFrekvens: string;
-  fullstandighet: string;
-  skalniva: string;
-  nyckelOrd: string;
-  kategori: string;
-  tidsperiod: boolean;
-  tidsperiodStartdatum: string;
-  tidsperiodSlutdatum: string;
-  tidsUpplosning: string;
-  skapelseDatum: string;
-  anvandarBegransningLicens: boolean;
-  anvandarBegransningLicensText: string;
-  relateradeResurser: string;
-  kolumnBeskrivningUrl: string;
-  status: string;
-  handlaggare: string;
-  metaDataVersion: string;
-  metadataSpecifikationModelversion: string;
+const parseGeografiskBegransning = (
+  values?: string[],
+): Pick<
+  MetadataFormState,
+  | "geografiskBegransningTyp"
+  | "geografiskBegransningTatorter"
+  | "geografiskBegransningAnnat"
+> => {
+  const items = (values ?? [])
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+  if (items.length === 0) {
+    return {
+      geografiskBegransningTyp: "",
+      geografiskBegransningTatorter: [],
+      geografiskBegransningAnnat: "",
+    };
+  }
+
+  if (items.length === 1 && items[0] === "Kungsbacka kommun") {
+    return {
+      geografiskBegransningTyp: "Kungsbacka kommun",
+      geografiskBegransningTatorter: [],
+      geografiskBegransningAnnat: "",
+    };
+  }
+
+  if (items.length === 1 && items[0] === "Hela landet") {
+    return {
+      geografiskBegransningTyp: "Hela landet",
+      geografiskBegransningTatorter: [],
+      geografiskBegransningAnnat: "",
+    };
+  }
+
+  const withoutTatortTyp = items.filter(
+    (value) => value !== "Kungsbacka tätort",
+  );
+  const tatorter = withoutTatortTyp.filter((value) =>
+    TATORT_OPTION_SET.has(value),
+  );
+  const unknown = withoutTatortTyp.filter(
+    (value) => !TATORT_OPTION_SET.has(value),
+  );
+  if (
+    items.includes("Kungsbacka tätort") ||
+    (tatorter.length > 0 && unknown.length === 0)
+  ) {
+    return {
+      geografiskBegransningTyp: "Kungsbacka tätort",
+      geografiskBegransningTatorter: tatorter,
+      geografiskBegransningAnnat: "",
+    };
+  }
+
+  if (items[0] === "Annat") {
+    return {
+      geografiskBegransningTyp: "Annat",
+      geografiskBegransningTatorter: [],
+      geografiskBegransningAnnat: items.slice(1).join(", "),
+    };
+  }
+
+  return {
+    geografiskBegransningTyp: "Annat",
+    geografiskBegransningTatorter: [],
+    geografiskBegransningAnnat: items.join(", "),
+  };
 };
 
-const emptyForm: MetadataFormState = {
-  arendeNummerOpenE: "",
-  bestallareNamn: "",
-  bestallareEpost: "",
-  sakerhetsKlass: "",
-  sakerhetsklassRiktighet: "",
-  sakerhetsklassTillganglighet: "",
-  dataKallaTyp: "",
-  schemaNamn: "",
-  namn: "",
-  beskrivning: "",
-  ursprung: "",
-  syfte: "",
-  metod: "",
-  metodUrl: "",
-  projekt: "",
-  geografiskBegransning: "",
-  uppdateringsFrekvens: "",
-  fullstandighet: "",
-  skalniva: "",
-  nyckelOrd: "",
-  kategori: "",
-  tidsperiod: false,
-  tidsperiodStartdatum: "",
-  tidsperiodSlutdatum: "",
-  tidsUpplosning: "",
-  skapelseDatum: "",
-  anvandarBegransningLicens: false,
-  anvandarBegransningLicensText: "",
-  relateradeResurser: "",
-  kolumnBeskrivningUrl: "",
-  status: "",
-  handlaggare: "",
-  metaDataVersion: "",
-  metadataSpecifikationModelversion: "",
+const toGeografiskBegransning = (
+  state: MetadataFormState,
+): string[] | undefined => {
+  switch (state.geografiskBegransningTyp) {
+    case "Kungsbacka kommun":
+      return ["Kungsbacka kommun"];
+    case "Hela landet":
+      return ["Hela landet"];
+    case "Kungsbacka tätort":
+      return ["Kungsbacka tätort", ...state.geografiskBegransningTatorter];
+    case "Annat": {
+      const text = state.geografiskBegransningAnnat.trim();
+      return text ? ["Annat", text] : ["Annat"];
+    }
+    default:
+      return undefined;
+  }
 };
 
 const toFormState = (item: Metadata): MetadataFormState => ({
-  arendeNummerOpenE: item.arendeNummerOpenE ?? "",
   bestallareNamn: item.bestallareNamn ?? "",
   bestallareEpost: item.bestallareEpost ?? "",
   sakerhetsKlass: item.sakerhetsKlass ?? "",
@@ -379,9 +364,26 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   metod: item.metod ?? "",
   metodUrl: item.metodUrl ?? "",
   projekt: item.projekt ?? "",
-  geografiskBegransning: fromArray(item.geografiskBegransning),
-  uppdateringsFrekvens: item.uppdateringsFrekvens ?? "",
-  fullstandighet: item.fullstandighet ?? "",
+  ...parseGeografiskBegransning(item.geografiskBegransning),
+  uppdateringsFrekvens: (() => {
+    const raw = String(item.uppdateringsFrekvens ?? "").trim();
+    if (!raw) return "";
+    if (raw !== "Annat" && UPPDATERINGS_FREKVENS_OPTION_SET.has(raw)) {
+      return raw;
+    }
+    // Any custom value is treated as "Annat".
+    return "Annat";
+  })(),
+  uppdateringsFrekvensAnnat: (() => {
+    const raw = String(item.uppdateringsFrekvens ?? "").trim();
+    if (!raw) return "";
+    if (raw !== "Annat" && UPPDATERINGS_FREKVENS_OPTION_SET.has(raw)) {
+      return "";
+    }
+    // If the API value already equals "Annat", keep the free-text empty.
+    return raw === "Annat" ? "" : raw;
+  })(),
+  fullstandighet: String(item.fullstandighet ?? "").trim(),
   skalniva: item.skalniva ?? "",
   nyckelOrd: fromArray(item.nyckelOrd),
   // Normalize to match select options (avoids "blank" when value differs by whitespace/format).
@@ -389,21 +391,31 @@ const toFormState = (item: Metadata): MetadataFormState => ({
   tidsperiod: item.tidsperiod ?? false,
   tidsperiodStartdatum: item.tidsperiodStartdatum ?? "",
   tidsperiodSlutdatum: item.tidsperiodSlutdatum ?? "",
-  tidsUpplosning: item.tidsUpplosning ?? "",
+  tidsUpplosning: (() => {
+    const raw = String(item.tidsUpplosning ?? "").trim();
+    if (!raw) return "";
+    if (raw !== "Vet ej" && TIDS_UPPLOSNING_OPTION_SET.has(raw)) {
+      return raw;
+    }
+    return "Vet ej";
+  })(),
+  tidsUpplosningAnnat: (() => {
+    const raw = String(item.tidsUpplosning ?? "").trim();
+    if (!raw) return "";
+    if (raw !== "Vet ej" && TIDS_UPPLOSNING_OPTION_SET.has(raw)) {
+      return "";
+    }
+    return raw === "Vet ej" ? "" : raw;
+  })(),
   skapelseDatum: item.skapelseDatum ?? "",
   anvandarBegransningLicens: item.anvandarBegransningLicens ?? false,
   anvandarBegransningLicensText: item.anvandarBegransningLicensText ?? "",
   relateradeResurser: fromArray(item.relateradeResurser),
-  kolumnBeskrivningUrl: item.kolumnBeskrivningUrl ?? "",
   status: item.status ?? "",
   handlaggare: item.handlaggare ?? "",
-  metaDataVersion: item.metaDataVersion ?? "",
-  metadataSpecifikationModelversion:
-    item.metadataSpecifikationModelversion ?? "",
 });
 
 const toDto = (state: MetadataFormState): CreateMetadataDto => ({
-  arendeNummerOpenE: state.arendeNummerOpenE || undefined,
   bestallareNamn: state.bestallareNamn || undefined,
   bestallareEpost: state.bestallareEpost || undefined,
   sakerhetsKlass: state.sakerhetsKlass || undefined,
@@ -418,8 +430,11 @@ const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   metod: state.metod || undefined,
   metodUrl: state.metodUrl || undefined,
   projekt: state.projekt || undefined,
-  geografiskBegransning: toArray(state.geografiskBegransning),
-  uppdateringsFrekvens: state.uppdateringsFrekvens || undefined,
+  geografiskBegransning: toGeografiskBegransning(state),
+  uppdateringsFrekvens:
+    state.uppdateringsFrekvens === "Annat"
+      ? state.uppdateringsFrekvensAnnat.trim() || undefined
+      : state.uppdateringsFrekvens || undefined,
   fullstandighet: state.fullstandighet || undefined,
   skalniva: state.skalniva || undefined,
   nyckelOrd: toArray(state.nyckelOrd),
@@ -427,19 +442,489 @@ const toDto = (state: MetadataFormState): CreateMetadataDto => ({
   tidsperiod: state.tidsperiod,
   tidsperiodStartdatum: state.tidsperiodStartdatum || undefined,
   tidsperiodSlutdatum: state.tidsperiodSlutdatum || undefined,
-  tidsUpplosning: state.tidsUpplosning || undefined,
+  tidsUpplosning:
+    state.tidsUpplosning === "Vet ej"
+      ? state.tidsUpplosningAnnat.trim() || "Vet ej"
+      : state.tidsUpplosning || undefined,
   skapelseDatum: state.skapelseDatum || undefined,
   anvandarBegransningLicens: state.anvandarBegransningLicens,
   anvandarBegransningLicensText:
     state.anvandarBegransningLicensText || undefined,
   relateradeResurser: toArray(state.relateradeResurser),
-  kolumnBeskrivningUrl: state.kolumnBeskrivningUrl || undefined,
   status: state.status || undefined,
   handlaggare: state.handlaggare || undefined,
-  metaDataVersion: state.metaDataVersion || undefined,
-  metadataSpecifikationModelversion:
-    state.metadataSpecifikationModelversion || undefined,
 });
+
+const parseDateValue = (value: string): Dayjs | null => {
+  if (!value) return null;
+  const parsed = dayjs(value, "YYYY-MM-DD", true);
+  return parsed.isValid() ? parsed : null;
+};
+
+const formatDateValue = (value: Dayjs | null): string =>
+  value && value.isValid() ? value.format("YYYY-MM-DD") : "";
+
+function TidsperiodDatumFields({
+  control,
+}: {
+  control: Control<MetadataFormState>;
+}) {
+  const startValue = useWatch({ control, name: "tidsperiodStartdatum" }) ?? "";
+  const endValue = useWatch({ control, name: "tidsperiodSlutdatum" }) ?? "";
+  const startDate = parseDateValue(startValue);
+  const endDate = parseDateValue(endValue);
+
+  return (
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="sv">
+      <Box
+        sx={{
+          gridColumn: "1 / -1",
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+          gap: 2,
+          alignItems: "start",
+        }}
+      >
+        <Controller
+          name="tidsperiodStartdatum"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              label="Tidsperiod startdatum"
+              format="YYYY-MM-DD"
+              value={parseDateValue(field.value)}
+              onChange={(value) => field.onChange(formatDateValue(value))}
+              maxDate={endDate ?? undefined}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  onBlur: field.onBlur,
+                  inputRef: field.ref,
+                  name: field.name,
+                },
+                field: { clearable: true },
+              }}
+            />
+          )}
+        />
+        <Controller
+          name="tidsperiodSlutdatum"
+          control={control}
+          render={({ field }) => (
+            <DatePicker
+              label="Tidsperiod slutdatum"
+              format="YYYY-MM-DD"
+              value={parseDateValue(field.value)}
+              onChange={(value) => field.onChange(formatDateValue(value))}
+              minDate={startDate ?? undefined}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  onBlur: field.onBlur,
+                  inputRef: field.ref,
+                  name: field.name,
+                },
+                field: { clearable: true },
+              }}
+            />
+          )}
+        />
+      </Box>
+    </LocalizationProvider>
+  );
+}
+
+function MetadataFormDialog({
+  open,
+  item,
+  isSubmitting,
+  onClose,
+  onCreate,
+  onUpdate,
+}: {
+  open: boolean;
+  item: Metadata | null;
+  isSubmitting: boolean;
+  onClose: () => void;
+  onCreate: (dto: CreateMetadataDto) => void;
+  onUpdate: (gid: number, dto: CreateMetadataDto) => void;
+}) {
+  const isCreate = item === null;
+  const { control, handleSubmit, reset, setValue } = useForm<MetadataFormState>(
+    {
+      defaultValues: emptyForm,
+    },
+  );
+
+  React.useEffect(() => {
+    if (!open) return;
+    reset(item ? toFormState(item) : emptyForm);
+  }, [open, item, reset]);
+
+  const onSubmit = (state: MetadataFormState) => {
+    const dto = toDto(state);
+    if (isCreate) {
+      onCreate(dto);
+      return;
+    }
+    onUpdate(item.gid, {
+      ...dto,
+      // Keep values that are no longer editable in the form.
+      arendeNummerOpenE: item.arendeNummerOpenE,
+      kolumnBeskrivningUrl: item.kolumnBeskrivningUrl,
+      metaDataVersion: item.metaDataVersion,
+      metadataSpecifikationModelversion:
+        item.metadataSpecifikationModelversion,
+    });
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={(_, reason) => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") return;
+        onClose();
+      }}
+      disableEscapeKeyDown
+      maxWidth="md"
+      fullWidth
+    >
+      <DialogTitle>
+        {isCreate
+          ? "Skapa metadata"
+          : `Redigera metadata${item.namn ? ` (${item.namn})` : ""}`}
+      </DialogTitle>
+      <DialogContent
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+          const tag = (e.target as HTMLElement).tagName;
+          if (tag === "TEXTAREA") return;
+          e.preventDefault();
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 2,
+            pt: 1,
+          }}
+        >
+          {METADATA_FORM_FIELDS.map(([key, label]) =>
+            key === "kategori" ? (
+              <Controller
+                key={key}
+                name="kategori"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    label={label}
+                    value={field.value}
+                    slotProps={{
+                      inputLabel: { shrink: true },
+                      select: { displayEmpty: true },
+                    }}
+                    onChange={(e) =>
+                      field.onChange(String(e.target.value ?? "").trim())
+                    }
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    name={field.name}
+                  >
+                    <MenuItem value="">
+                      <em>Välj kategori</em>
+                    </MenuItem>
+                    {field.value &&
+                    !KATEGORI_OPTIONS.includes(
+                      field.value as (typeof KATEGORI_OPTIONS)[number],
+                    ) ? (
+                      <MenuItem value={field.value}>{field.value}</MenuItem>
+                    ) : null}
+                    {KATEGORI_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            ) : key === "status" ? (
+              <Controller
+                key={key}
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    label={label}
+                    value={field.value}
+                    slotProps={{
+                      inputLabel: { shrink: true },
+                      select: { displayEmpty: true },
+                    }}
+                    onChange={(e) =>
+                      field.onChange(String(e.target.value ?? ""))
+                    }
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    name={field.name}
+                  >
+                    <MenuItem value="">
+                      <em>Välj status</em>
+                    </MenuItem>
+                    {STATUS_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            ) : key === "fullstandighet" ? (
+              <Controller
+                key={key}
+                name="fullstandighet"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    select
+                    label={label}
+                    value={field.value}
+                    slotProps={{
+                      inputLabel: { shrink: true },
+                      select: { displayEmpty: true },
+                    }}
+                    onChange={(e) =>
+                      field.onChange(String(e.target.value ?? "").trim())
+                    }
+                    onBlur={field.onBlur}
+                    inputRef={field.ref}
+                    name={field.name}
+                  >
+                    <MenuItem value="">
+                      <em>Välj fullständighet</em>
+                    </MenuItem>
+                    {field.value &&
+                    !FULLSTANDIGHET_OPTIONS.includes(
+                      field.value as (typeof FULLSTANDIGHET_OPTIONS)[number],
+                    ) ? (
+                      <MenuItem value={field.value}>{field.value}</MenuItem>
+                    ) : null}
+                    {FULLSTANDIGHET_OPTIONS.map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            ) : key === "geografiskBegransning" ? (
+              <SelectWithOtherDialog
+                key={key}
+                control={control}
+                setValue={setValue}
+                label={label}
+                name="geografiskBegransningTyp"
+                options={GEOGRAFISK_TYP_OPTIONS}
+                emptyOptionLabel="Välj geografisk begränsning"
+                optionDialogs={[
+                  {
+                    option: "Kungsbacka tätort",
+                    fieldName: "geografiskBegransningTatorter",
+                    dialogTitle: "Välj tätorter",
+                    emptySummaryText: "Inga tätorter valda",
+                    formatSummary: (value) =>
+                      Array.isArray(value) ? value.join(", ") : "",
+                    renderEditor: ({ value, onChange }) => (
+                      <Autocomplete
+                        multiple
+                        disableCloseOnSelect
+                        options={[...TATORT_OPTIONS]}
+                        value={Array.isArray(value) ? (value as string[]) : []}
+                        onChange={(_event, next) => onChange(next)}
+                        slotProps={{
+                          popper: {
+                            placement: "top-start",
+                            modifiers: [{ name: "flip", enabled: false }],
+                          },
+                        }}
+                        renderOption={(props, option, { selected }) => {
+                          const { key: optionKey, ...optionProps } =
+                            props as typeof props & { key?: React.Key };
+                          return (
+                            <li key={optionKey ?? option} {...optionProps}>
+                              <Checkbox checked={selected} sx={{ mr: 1 }} />
+                              {option}
+                            </li>
+                          );
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            sx={{ mt: 1 }}
+                            label="Tätorter"
+                            placeholder="Välj tätorter"
+                          />
+                        )}
+                      />
+                    ),
+                  },
+                  {
+                    option: "Annat",
+                    fieldName: "geografiskBegransningAnnat",
+                    dialogTitle: "Ange geografisk begränsning",
+                    dialogFieldLabel: "Geografisk begränsning",
+                  },
+                ]}
+              />
+            ) : key === "uppdateringsFrekvens" ? (
+              <SelectWithOtherDialog
+                key={key}
+                control={control}
+                setValue={setValue}
+                label={label}
+                name="uppdateringsFrekvens"
+                options={UPPDATERINGS_FREKVENS_OPTIONS}
+                emptyOptionLabel="Välj uppdateringsfrekvens"
+                optionDialogs={[
+                  {
+                    option: "Annat",
+                    fieldName: "uppdateringsFrekvensAnnat",
+                    dialogTitle: "Ange uppdateringsfrekvens",
+                    dialogFieldLabel: "Uppdateringsfrekvens (Annat)",
+                  },
+                ]}
+              />
+            ) : key === "tidsUpplosning" ? (
+              <SelectWithOtherDialog
+                key={key}
+                control={control}
+                setValue={setValue}
+                label={label}
+                name="tidsUpplosning"
+                options={TIDS_UPPLOSNING_OPTIONS}
+                emptyOptionLabel="Välj tidsupplösning"
+                optionDialogs={[
+                  {
+                    option: "Vet ej",
+                    fieldName: "tidsUpplosningAnnat",
+                    dialogTitle: "Ange tidsupplösning",
+                    dialogFieldLabel: "Tidsupplösning (Vet ej)",
+                  },
+                ]}
+              />
+            ) : key === "tidsperiodDatum" ? (
+              <TidsperiodDatumFields key={key} control={control} />
+            ) : key === "skapelseDatum" ? (
+              <LocalizationProvider
+                key={key}
+                dateAdapter={AdapterDayjs}
+                adapterLocale="sv"
+              >
+                <Controller
+                  name="skapelseDatum"
+                  control={control}
+                  render={({ field }) => (
+                    <DatePicker
+                      label={label}
+                      format="YYYY-MM-DD"
+                      value={parseDateValue(field.value)}
+                      onChange={(value) =>
+                        field.onChange(formatDateValue(value))
+                      }
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          onBlur: field.onBlur,
+                          inputRef: field.ref,
+                          name: field.name,
+                        },
+                        field: { clearable: true },
+                      }}
+                    />
+                  )}
+                />
+              </LocalizationProvider>
+            ) : (
+              <Controller
+                key={key}
+                name={key}
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label={label}
+                    multiline={
+                      key === "syfte" ||
+                      key === "beskrivning" ||
+                      key === "metod" ||
+                      key === "anvandarBegransningLicensText"
+                    }
+                    minRows={
+                      key === "syfte" ||
+                      key === "beskrivning" ||
+                      key === "metod" ||
+                      key === "anvandarBegransningLicensText"
+                        ? 2
+                        : undefined
+                    }
+                  />
+                )}
+              />
+            ),
+          )}
+        </Box>
+        <Divider sx={{ mt: 3 }} />
+        <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
+          <Controller
+            name="tidsperiod"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={Boolean(field.value)}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                label="Tidsperiod"
+              />
+            )}
+          />
+          <Controller
+            name="anvandarBegransningLicens"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={Boolean(field.value)}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                  />
+                }
+                label="Användarbegränsning licens"
+              />
+            )}
+          />
+        </Box>
+      </DialogContent>
+      <DialogActions>
+        <Button type="button" onClick={onClose}>
+          Avbryt
+        </Button>
+        <Button
+          type="button"
+          variant="contained"
+          disabled={isSubmitting}
+          onClick={handleSubmit(onSubmit)}
+        >
+          {isCreate ? "Skapa" : "Spara"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
 export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
   const { config } = useRuntimeConfig();
@@ -453,7 +938,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
   const [openCreate, setOpenCreate] = React.useState(false);
   const [openEdit, setOpenEdit] = React.useState<Metadata | null>(null);
   const [deleteItem, setDeleteItem] = React.useState<Metadata | null>(null);
-  const [form, setForm] = React.useState<MetadataFormState>(emptyForm);
   const {
     columnVisibilityModel,
     setColumnVisibilityModel,
@@ -736,9 +1220,8 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
           icon={<EditOutlinedIcon color="primary" />}
           label="Redigera"
           onClick={() => {
-            const row = params.row as Metadata;
-            setOpenEdit(row);
-            setForm(toFormState(row));
+            setOpenCreate(false);
+            setOpenEdit(params.row as Metadata);
           }}
         />,
         <GridActionsCellItem
@@ -794,7 +1277,6 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         <Button
           variant="contained"
           onClick={() => {
-            setForm(emptyForm);
             setOpenEdit(null);
             setOpenCreate(true);
           }}
@@ -884,252 +1366,48 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
         />
       </Paper>
 
-      <Dialog
+      <MetadataFormDialog
         open={openCreate || openEdit !== null}
-        onClose={(_, reason) => {
-          if (reason === "backdropClick" || reason === "escapeKeyDown") return;
-          if (openEdit) setOpenEdit(null);
-          else setOpenCreate(false);
+        item={openCreate ? null : openEdit}
+        isSubmitting={isSubmitting}
+        onClose={() => {
+          setOpenEdit(null);
+          setOpenCreate(false);
         }}
-        disableEscapeKeyDown
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {openCreate
-            ? "Skapa metadata"
-            : `Redigera metadata ${openEdit?.arendeNummerOpenE} (${openEdit?.namn})`}
-        </DialogTitle>
-        <DialogContent
-          onKeyDown={(e) => {
-            if (e.key !== "Enter") return;
-            const tag = (e.target as HTMLElement).tagName;
-            if (tag === "TEXTAREA") return;
-            e.preventDefault();
-          }}
-        >
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 2,
-              pt: 1,
-            }}
-          >
-            {(
-              [
-                ["namn", "Namn"],
-                ["arendeNummerOpenE", "Ärendenummer"],
-                ["bestallareNamn", "Beställare namn"],
-                ["bestallareEpost", "Beställare e-post"],
-                ["sakerhetsKlass", "Konfidentialitet"],
-                ["sakerhetsklassRiktighet", "Riktighet"],
-                ["sakerhetsklassTillganglighet", "Tillgänglighet"],
-                ["dataKallaTyp", "Datakälla typ"],
-                ["schemaNamn", "Schema"],
-                ["kategori", "Kategori"],
-                ["status", "Status"],
-                ["handlaggare", "Handläggare"],
-                ["metaDataVersion", "Metadata version"],
-                ["metadataSpecifikationModelversion", "Modellversion"],
-                ["ursprung", "Ursprung (kommaseparerat)"],
-                [
-                  "geografiskBegransning",
-                  "Geografisk begränsning (kommaseparerat)",
-                ],
-                ["nyckelOrd", "Nyckelord (kommaseparerat)"],
-                ["relateradeResurser", "Relaterade resurser (kommaseparerat)"],
-                ["uppdateringsFrekvens", "Uppdateringsfrekvens"],
-                ["fullstandighet", "Fullständighet"],
-                ["skalniva", "Skalniva"],
-                ["tidsUpplosning", "Tidsupplösning"],
-                ["tidsperiodStartdatum", "Tidsperiod startdatum (YYYY-MM-DD)"],
-                ["tidsperiodSlutdatum", "Tidsperiod slutdatum (YYYY-MM-DD)"],
-                ["skapelseDatum", "Skapelsedatum (YYYY-MM-DD)"],
-                ["metod", "Metod"],
-                ["metodUrl", "Metod URL"],
-                ["projekt", "Projekt"],
-                ["kolumnBeskrivningUrl", "Kolumnbeskrivning URL"],
-                [
-                  "anvandarBegransningLicensText",
-                  "Användarbegränsning licens text",
-                ],
-                ["syfte", "Syfte"],
-                ["beskrivning", "Beskrivning"],
-              ] as const
-            ).map(([key, label]) =>
-              key === "kategori" ? (
-                <TextField
-                  key={key}
-                  select
-                  label={label}
-                  value={form.kategori}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    select: { displayEmpty: true },
-                  }}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      kategori: String(e.target.value ?? "").trim(),
-                    }))
-                  }
-                >
-                  <MenuItem value="">
-                    <em>Välj kategori</em>
-                  </MenuItem>
-                  {form.kategori &&
-                  !KATEGORI_OPTIONS.includes(form.kategori as any) ? (
-                    <MenuItem value={form.kategori}>{form.kategori}</MenuItem>
-                  ) : null}
-                  {KATEGORI_OPTIONS.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              ) : key === "status" ? (
-                <TextField
-                  key={key}
-                  select
-                  label={label}
-                  value={form.status}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    select: { displayEmpty: true },
-                  }}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      status: String(e.target.value ?? ""),
-                    }))
-                  }
-                >
-                  <MenuItem value="">
-                    <em>Välj status</em>
-                  </MenuItem>
-                  {STATUS_OPTIONS.map((opt) => (
-                    <MenuItem key={opt} value={opt}>
-                      {opt}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              ) : (
-                <TextField
-                  key={key}
-                  label={label}
-                  value={form[key]}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, [key]: e.target.value }))
-                  }
-                  multiline={
-                    key === "syfte" ||
-                    key === "beskrivning" ||
-                    key === "metod" ||
-                    key === "anvandarBegransningLicensText"
-                  }
-                  minRows={
-                    key === "syfte" ||
-                    key === "beskrivning" ||
-                    key === "anvandarBegransningLicensText"
-                      ? 2
-                      : undefined
-                  }
-                />
-              ),
-            )}
-          </Box>
-          <Divider sx={{ mt: 3 }} />
-          <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.tidsperiod}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      tidsperiod: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Tidsperiod"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={form.anvandarBegransningLicens}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      anvandarBegransningLicens: e.target.checked,
-                    }))
-                  }
-                />
-              }
-              label="Användarbegränsning licens"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            type="button"
-            onClick={() =>
-              openEdit ? setOpenEdit(null) : setOpenCreate(false)
-            }
-          >
-            Avbryt
-          </Button>
-          <Button
-            type="button"
-            variant="contained"
-            disabled={isSubmitting}
-            onClick={() => {
-              const dto = toDto(form);
-              if (openCreate) {
-                createMutation.mutate(dto, {
-                  onSuccess: () => {
-                    setOpenCreate(false);
-                    setForm(emptyForm);
-                    toast.success("Metadata skapad.");
-                  },
-                  onError: (err) => {
-                    const message =
-                      err instanceof Error
-                        ? err.message
-                        : "Kunde inte skapa. Försök igen.";
-                    toast.error(message);
-                  },
-                });
-                return;
-              }
-
-              if (!openEdit) {
-                return;
-              }
-
-              updateMutation.mutate(
-                { gid: openEdit.gid, data: dto },
-                {
-                  onSuccess: () => {
-                    setOpenEdit(null);
-                    toast.success("Ändringar sparade.");
-                  },
-                  onError: (err) => {
-                    const message =
-                      err instanceof Error
-                        ? err.message
-                        : "Kunde inte spara. Försök igen.";
-                    toast.error(message);
-                  },
-                },
-              );
-            }}
-          >
-            {openCreate ? "Skapa" : "Spara"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onCreate={(dto) => {
+          createMutation.mutate(dto, {
+            onSuccess: () => {
+              setOpenCreate(false);
+              toast.success("Metadata skapad.");
+            },
+            onError: (err) => {
+              const message =
+                err instanceof Error
+                  ? err.message
+                  : "Kunde inte skapa. Försök igen.";
+              toast.error(message);
+            },
+          });
+        }}
+        onUpdate={(gid, dto) => {
+          updateMutation.mutate(
+            { gid, data: dto },
+            {
+              onSuccess: () => {
+                setOpenEdit(null);
+                toast.success("Ändringar sparade.");
+              },
+              onError: (err) => {
+                const message =
+                  err instanceof Error
+                    ? err.message
+                    : "Kunde inte spara. Försök igen.";
+                toast.error(message);
+              },
+            },
+          );
+        }}
+      />
 
       <Dialog open={deleteItem !== null} onClose={() => setDeleteItem(null)}>
         <DialogTitle sx={{ color: "error" }}>Ta bort post</DialogTitle>
@@ -1140,9 +1418,8 @@ export default function MetadataPage({ mode }: { mode: "light" | "dark" }) {
           </Alert>
           <Typography>
             Vill du ta bort posten med GID <strong>{deleteItem?.gid}</strong>
-            {deleteItem?.arendeNummerOpenE ? (
-              <> (ärendenummer: {deleteItem.arendeNummerOpenE})</>
-            ) : null}
+            {deleteItem?.namn ? <> ({deleteItem.namn})</> : null}
+            ?
           </Typography>
         </DialogContent>
         <Divider />
