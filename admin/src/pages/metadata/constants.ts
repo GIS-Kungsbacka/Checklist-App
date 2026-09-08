@@ -203,32 +203,82 @@ export const emptyForm: MetadataFormState = {
   handlaggare: "",
 };
 
-export const METADATA_FORM_FIELDS = [
-  ["namn", "Namn"],
-  ["bestallareNamn", "Beställare namn"],
-  ["bestallareEpost", "Beställare e-post"],
-  ["sakerhetsKlass", "Konfidentialitet"],
-  ["sakerhetsklassRiktighet", "Riktighet"],
-  ["sakerhetsklassTillganglighet", "Tillgänglighet"],
-  ["dataKallaTyp", "Datakälla typ"],
-  ["schemaNamn", "Schema"],
-  ["kategori", "Kategori"],
-  ["status", "Status"],
-  ["handlaggare", "Handläggare"],
-  ["ursprung", "Ursprung"],
-  ["geografiskBegransning", "Geografisk begränsning"],
-  ["nyckelOrd", "Nyckelord"],
-  ["relateradeResurser", "Relaterade resurser"],
-  ["uppdateringsFrekvens", "Uppdateringsfrekvens"],
-  ["fullstandighet", "Fullständighet"],
-  ["skalniva", "Skalniva"],
-  ["tidsUpplosning", "Tidsupplösning"],
-  ["projekt", "Projekt"],
-  ["tidsperiodDatum", "Tidsperiod"],
-  ["skapelseDatum", "Skapelsedatum"],
-  ["metodUrl", "Metod URL"],
-  ["metod", "Metod"],
-  ["anvandarBegransningLicensText", "Användarbegränsning licens text"],
-  ["syfte", "Syfte"],
-  ["beskrivning", "Beskrivning"],
+export const METADATA_FORM_SECTIONS = [
+  {
+    title: "Grundläggande identitet",
+    fields: [
+      ["namn", "Namn"],
+      ["schemaNamn", "Schema"],
+      ["dataKallaTyp", "Datakälla typ"],
+    ],
+  },
+  {
+    title: "Beskrivning och syfte",
+    fields: [
+      ["kategori", "Kategori"],
+      ["nyckelOrd", "Nyckelord"],
+      ["projekt", "Projekt"],
+      ["beskrivning", "Beskrivning"],
+      ["syfte", "Syfte"],
+    ],
+  },
+  {
+    title: "Ursprung och datakälla",
+    fields: [
+      ["ursprung", "Ursprung"],
+      ["metodUrl", "Metod URL"],
+      ["metod", "Metod"],
+    ],
+  },
+  {
+    title: "Geografisk detaljnivå",
+    fields: [
+      ["geografiskBegransning", "Geografisk begränsning"],
+      ["skalniva", "Skalniva"],
+    ],
+  },
+  {
+    title: "Tidsinformation",
+    fields: [
+      ["tidsperiodDatum", "Tidsperiod"],
+      ["skapelseDatum", "Skapelsedatum"],
+      ["tidsUpplosning", "Tidsupplösning"],
+      ["tidsperiod", "Tidsperiod"],
+    ],
+  },
+  {
+    title: "Kvalitet och uppdatering",
+    fields: [
+      ["uppdateringsFrekvens", "Uppdateringsfrekvens"],
+      ["fullstandighet", "Fullständighet"],
+    ],
+  },
+  {
+    title: "Åtkomst och användarbegränsningar",
+    fields: [
+      ["anvandarBegransningLicens", "Användarbegränsning licens"],
+      ["anvandarBegransningLicensText", "Användarbegränsning licens text"],
+    ],
+  },
+  {
+    title: "Säkerhetsklassning",
+    fields: [
+      ["sakerhetsKlass", "Konfidentialitet"],
+      ["sakerhetsklassRiktighet", "Riktighet"],
+      ["sakerhetsklassTillganglighet", "Tillgänglighet"],
+    ],
+  },
+  {
+    title: "Övrigt",
+    fields: [["relateradeResurser", "Relaterade resurser"]],
+  },
+  {
+    title: "Ärendeuppgifter",
+    fields: [
+      ["bestallareNamn", "Beställare namn"],
+      ["bestallareEpost", "Beställare e-post"],
+      ["handlaggare", "Handläggare"],
+      ["status", "Status"],
+    ],
+  },
 ] as const;

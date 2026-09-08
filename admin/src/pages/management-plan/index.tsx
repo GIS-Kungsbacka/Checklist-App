@@ -64,15 +64,37 @@ import {
 import { statusChipColor } from "../../utils/status-chip";
 import { toast } from "react-toastify";
 import { Controller, useForm } from "react-hook-form";
+import { FieldHelpIcon } from "../../components/FieldHelpIcon";
+import { FormLabelWithHelp } from "../../components/FormLabelWithHelp";
+import {
+  managementPlanFieldTooltips,
+  managementPlanSectionTooltips,
+} from "../../utils/managementPlanTooltips";
 import {
   defaultColumnVisibility,
   emptyForm,
   GRID_PREFS_STORAGE_KEY,
-  MANAGEMENT_PLAN_FORM_FIELDS,
+  MANAGEMENT_PLAN_FORM_SECTIONS,
   type ManagementPlanFormState,
   REDIGERINGS_KALLA_OPTIONS,
   STATUS_OPTIONS,
 } from "./constants";
+
+const managementPlanFieldLabel = (
+  fieldKey: string,
+  text: string,
+  glueIconToLastWord = false,
+) => (
+  <FormLabelWithHelp
+    label={text}
+    title={
+      managementPlanFieldTooltips[
+        fieldKey as keyof typeof managementPlanFieldTooltips
+      ]
+    }
+    glueIconToLastWord={glueIconToLastWord}
+  />
+);
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -364,151 +386,156 @@ function ManagementPlanFormDialog({
           if (tag === "TEXTAREA") return;
           e.preventDefault();
         }}
+        sx={{
+          // Default shrunk label is ~12px (16px * 0.75); bump to ~13px.
+          "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+            transform: "translate(14px, -9px) scale(0.8125)",
+          },
+        }}
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 2,
-            pt: 1,
-          }}
-        >
-          {MANAGEMENT_PLAN_FORM_FIELDS.map(([key, label]) =>
-            key === "status" ? (
-              <Controller
-                key={key}
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    select
-                    label={label}
-                    value={field.value}
-                    slotProps={{
-                      inputLabel: { shrink: true },
-                      select: { displayEmpty: true },
-                    }}
-                    onChange={(e) =>
-                      field.onChange(String(e.target.value ?? ""))
-                    }
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                    name={field.name}
-                  >
-                    <MenuItem value="">
-                      <em>Välj status</em>
-                    </MenuItem>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+        <Box sx={{ mt: 1 }}>
+          {MANAGEMENT_PLAN_FORM_SECTIONS.map((section) => (
+            <Box key={section.title} sx={{ mt: 5 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
+              >
+                {section.title}
+                <FieldHelpIcon
+                  title={managementPlanSectionTooltips[section.title]}
+                />
+              </Typography>
+              <Divider sx={{ mb: 1.5 }} />
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                }}
+              >
+                {section.fields.map(([key, label]) =>
+                  key === "oppnaData" ||
+                  key === "kritiskDatamangd" ||
+                  key === "publiceradOppnaData" ? (
+                    <Controller
+                      key={key}
+                      name={key}
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={Boolean(field.value)}
+                              onChange={(e) =>
+                                field.onChange(e.target.checked)
+                              }
+                            />
+                          }
+                          label={managementPlanFieldLabel(
+                            key,
+                            label,
+                            key === "oppnaData",
+                          )}
+                        />
+                      )}
+                    />
+                  ) : key === "status" ? (
+                    <Controller
+                      key={key}
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          select
+                          label={managementPlanFieldLabel(key, label)}
+                          value={field.value}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? ""))
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                        >
+                          <MenuItem value="">
+                            <em>Välj status</em>
+                          </MenuItem>
+                          {STATUS_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      )}
+                    />
+                  ) : key === "redigeringsKalla" ? (
+                    <Controller
+                      key={key}
+                      name="redigeringsKalla"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          select
+                          label={managementPlanFieldLabel(key, label)}
+                          value={field.value}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? "").trim())
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                        >
+                          <MenuItem value="">
+                            <em>Välj redigeringskälla</em>
+                          </MenuItem>
+                          {field.value &&
+                          !REDIGERINGS_KALLA_OPTIONS.includes(
+                            field.value as (typeof REDIGERINGS_KALLA_OPTIONS)[number],
+                          ) ? (
+                            <MenuItem value={field.value}>
+                              {field.value}
+                            </MenuItem>
+                          ) : null}
+                          {REDIGERINGS_KALLA_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      )}
+                    />
+                  ) : (
+                    <Controller
+                      key={key}
+                      name={key}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          value={
+                            typeof field.value === "boolean"
+                              ? ""
+                              : (field.value ?? "")
+                          }
+                          label={managementPlanFieldLabel(key, label)}
+                          multiline={key === "ovrigInformation"}
+                          minRows={key === "ovrigInformation" ? 2 : undefined}
+                          slotProps={{ inputLabel: { shrink: true } }}
+                        />
+                      )}
+                    />
+                  ),
                 )}
-              />
-            ) : key === "redigeringsKalla" ? (
-              <Controller
-                key={key}
-                name="redigeringsKalla"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    select
-                    label={label}
-                    value={field.value}
-                    slotProps={{
-                      inputLabel: { shrink: true },
-                      select: { displayEmpty: true },
-                    }}
-                    onChange={(e) =>
-                      field.onChange(String(e.target.value ?? "").trim())
-                    }
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                    name={field.name}
-                  >
-                    <MenuItem value="">
-                      <em>Välj redigeringskälla</em>
-                    </MenuItem>
-                    {field.value &&
-                    !REDIGERINGS_KALLA_OPTIONS.includes(
-                      field.value as (typeof REDIGERINGS_KALLA_OPTIONS)[number],
-                    ) ? (
-                      <MenuItem value={field.value}>{field.value}</MenuItem>
-                    ) : null}
-                    {REDIGERINGS_KALLA_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            ) : (
-              <Controller
-                key={key}
-                name={key}
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={label}
-                    multiline={key === "ovrigInformation"}
-                    minRows={key === "ovrigInformation" ? 2 : undefined}
-                  />
-                )}
-              />
-            ),
-          )}
-        </Box>
-        <Divider sx={{ mt: 3 }} />
-        <Box sx={{ mt: 2, display: "flex", gap: 3, flexWrap: "wrap" }}>
-          <Controller
-            name="oppnaData"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={Boolean(field.value)}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Önskemål om öppna data"
-              />
-            )}
-          />
-          <Controller
-            name="kritiskDatamangd"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={Boolean(field.value)}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Kritisk datamängd"
-              />
-            )}
-          />
-          <Controller
-            name="publiceradOppnaData"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={!field.value}
-                    checked={Boolean(field.value)}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Publicerad öppna data"
-              />
-            )}
-          />
+              </Box>
+            </Box>
+          ))}
         </Box>
       </DialogContent>
       <DialogActions>

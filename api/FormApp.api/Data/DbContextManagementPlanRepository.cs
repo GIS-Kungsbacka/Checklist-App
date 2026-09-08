@@ -66,10 +66,9 @@ public class DbContextManagementPlanRepository : IManagementPlanRepository
         existing.Status = item.Status;
         existing.Handlaggare = item.Handlaggare;
         existing.ForvaltningsplanVersion = item.ForvaltningsplanVersion;
-        existing.SkapadTidPunkt = item.SkapadTidPunkt;
-        existing.SkapadAv = item.SkapadAv;
-        existing.AndradTidPunkt = item.AndradTidPunkt;
-        existing.AndradAv = item.AndradAv;
+        // Keep original create-audit values; only update change-audit.
+        existing.AndradTidPunkt = item.AndradTidPunkt ?? DateTime.UtcNow;
+        existing.AndradAv = item.AndradAv ?? existing.AndradAv;
         existing.ForvaltningsplanModelversion = item.ForvaltningsplanModelversion;
 
         await _context.SaveChangesAsync();

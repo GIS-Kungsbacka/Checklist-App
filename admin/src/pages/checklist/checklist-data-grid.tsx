@@ -20,15 +20,9 @@ import {
   TextField,
   Divider,
   Grid,
-  FormControl,
-  InputLabel,
-  Select,
   Autocomplete,
   Checkbox,
   FormControlLabel,
-  IconButton,
-  InputAdornment,
-  OutlinedInput,
   keyframes,
 } from "@mui/material";
 
@@ -58,11 +52,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 
+import { FormLabelWithHelp } from "../../components/FormLabelWithHelp";
 import {
   useChecklists,
   useCreateChecklist,
@@ -73,102 +67,19 @@ import { useOrderSummaries } from "../../hooks/useOrderSummary";
 import type { Checklist, CreateChecklistDto } from "../../types/checklist";
 import type { OrderSummary } from "../../types/orderSummary";
 import { useGridPrefs } from "../../utils/gridPrefs";
+import { checklistFieldTooltips } from "../../utils/checklistTooltips";
 
-const FIELD_TOOLTIPS: Partial<Record<keyof CreateChecklistDto, string>> = {
-  arendenummerArtvise:
-    "Ärendenummer (Artvise). Välj från beställningsunderlag. Används som unik identifierare i listan.",
-  dataunderlag:
-    "Vilket underlag som används (t.ex. beställningsunderlag, datakälla).",
-  dataadministrator: "Vem som ansvarar för dataadministration/hantering.",
-  malgrupper: "Vilka målgrupper som nyttjar resultatet.",
-  nyttjandeInterntExternt: "Om nyttjandet är internt och/eller externt.",
-  leverans: "Vad som ska levereras (t.ex. tjänst, lager, fil, rapport).",
-  leveransArbetstimmar: "Uppskattad arbetsinsats i timmar för leveransen.",
-  kategori: "Kategori för ärendet.",
-  kategoriTyp: "Typ av kategori: ny eller förändring.",
-  prioritet: "Prioritet: Hög/Medel/Låg.",
-  antagenJaNej:
-    "Om posten är antagen. Värdet 'nej' skickar automatiskt objektet till idébanken.",
-  antagenJaNejMotivering: "Motivering till 'Antagen' (särskilt vid 'nej').",
-  handlaggare: "Ansvarig handläggare.",
-  tabell: "Information om tabell(er) som berörs.",
-  wms: "Information om WMS-publicering/åtkomst.",
-  fme: "Information om FME-script/app eller koppling till FME.",
-  redigering: "Hur redigering ska ske (process/verktyg/åtkomst).",
-  kopiering: "Om kopiering är tillåten/aktuell för data.",
-  information: "Övrig viktig information som behövs för hantering/leverans.",
-  kommentar: "Interna kommentarer/anteckningar.",
-  levererad:
-    "Om leveransen är klar. Kryssrutan 'Levererad' skickar automatiskt objektet till Avslutad.",
-  verksamhetskritiskData:
-    "Om data bedöms vara verksamhetskritisk (beskrivning/klassning).",
-};
+const checklistFieldLabel = (key: keyof CreateChecklistDto, text: string) => (
+  <FormLabelWithHelp label={text} title={checklistFieldTooltips[key]} />
+);
 
-function helpAdornment(
-  key: keyof CreateChecklistDto,
-  opts?: { offsetForSelectIcon?: boolean },
-) {
-  const title = FIELD_TOOLTIPS[key];
-  if (!title) return null;
-  return (
-    <InputAdornment position="end">
-      <Tooltip title={title} arrow placement="top" enterDelay={250}>
-        <IconButton
-          size="small"
-          tabIndex={-1}
-          edge="end"
-          aria-label="Hjälp"
-          sx={
-            opts?.offsetForSelectIcon
-              ? {
-                  // MUI Select renders its dropdown arrow on the far right;
-                  // nudge the help icon left so they don't overlap.
-                  mr: 2.5,
-                }
-              : undefined
-          }
-          onMouseDown={(e) => {
-            // Keep focus on the input
-            e.preventDefault();
-          }}
-        >
-          <HelpOutlineIcon fontSize="inherit" />
-        </IconButton>
-      </Tooltip>
-    </InputAdornment>
-  );
-}
-
-function mergeEndAdornment(
-  existing: React.ReactNode,
-  help: React.ReactNode,
-): React.ReactNode {
-  if (!help) return existing ?? null;
-  if (!existing) return help;
-  return (
-    <>
-      {existing}
-      {help}
-    </>
-  );
-}
-
-function helpIconInline(key: keyof CreateChecklistDto) {
-  const title = FIELD_TOOLTIPS[key];
-  if (!title) return null;
-  return (
-    <Tooltip title={title} arrow placement="top" enterDelay={250}>
-      <IconButton
-        size="small"
-        tabIndex={-1}
-        aria-label="Hjälp"
-        onMouseDown={(e) => e.preventDefault()}
-      >
-        <HelpOutlineIcon fontSize="inherit" />
-      </IconButton>
-    </Tooltip>
-  );
-}
+const FORM_DIALOG_CONTENT_SX = {
+  pt: 3,
+  // Default shrunk label is ~12px (16px * 0.75); bump to ~13px.
+  "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+    transform: "translate(14px, -9px) scale(0.8125)",
+  },
+} as const;
 
 export const getPrioritetChipColor = (
   p: string | undefined,
@@ -214,7 +125,7 @@ function addUnknownOption<T extends readonly string[]>(
 const defaultColumnVisibility = {
   gid: true,
   arendenummerArtvise: true,
-  dataunderlag: true,
+  dataunderlag: false,
   dataadministrator: true,
   nyttjandeInterntExternt: true,
   leveransArbetstimmar: true,
@@ -1088,7 +999,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           </Typography>
         </DialogContent>
         <Divider />
-        <DialogContent sx={{ pt: 3 }}>
+        <DialogContent sx={FORM_DIALOG_CONTENT_SX}>
           {!!orderSummaryError && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {"message" in orderSummaryError
@@ -1134,34 +1045,31 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                     name="prioritet"
                     control={createControl}
                     render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel id="create-prioritet-label">
-                          Prioritet
-                        </InputLabel>
-                        <Select
-                          {...field}
-                          labelId="create-prioritet-label"
-                          label="Prioritet"
-                          value={field.value ?? ""}
-                          input={
-                            <OutlinedInput
-                              label="Prioritet"
-                              endAdornment={helpAdornment("prioritet", {
-                                offsetForSelectIcon: true,
-                              })}
-                            />
-                          }
-                        >
-                          <MenuItem value="">
-                            <em>Välj prioritet</em>
+                      <TextField
+                        select
+                        fullWidth
+                        label={checklistFieldLabel("prioritet", "Prioritet")}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(String(e.target.value ?? ""))
+                        }
+                        onBlur={field.onBlur}
+                        inputRef={field.ref}
+                        name={field.name}
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                          select: { displayEmpty: true },
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Välj prioritet</em>
+                        </MenuItem>
+                        {PRIORITET_OPTIONS.map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            {opt}
                           </MenuItem>
-                          {PRIORITET_OPTIONS.map((opt) => (
-                            <MenuItem key={opt} value={opt}>
-                              {opt}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                        ))}
+                      </TextField>
                     )}
                   />
                 ) : key === "kategori" ? (
@@ -1169,34 +1077,31 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                     name="kategori"
                     control={createControl}
                     render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel id="create-kategori-label">
-                          Kategori
-                        </InputLabel>
-                        <Select
-                          {...field}
-                          labelId="create-kategori-label"
-                          label="Kategori"
-                          value={field.value ?? ""}
-                          input={
-                            <OutlinedInput
-                              label="Kategori"
-                              endAdornment={helpAdornment("kategori", {
-                                offsetForSelectIcon: true,
-                              })}
-                            />
-                          }
-                        >
-                          <MenuItem value="">
-                            <em>Välj kategori</em>
+                      <TextField
+                        select
+                        fullWidth
+                        label={checklistFieldLabel("kategori", "Kategori")}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(String(e.target.value ?? ""))
+                        }
+                        onBlur={field.onBlur}
+                        inputRef={field.ref}
+                        name={field.name}
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                          select: { displayEmpty: true },
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Välj kategori</em>
+                        </MenuItem>
+                        {KATEGORI_OPTIONS.map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            {opt}
                           </MenuItem>
-                          {KATEGORI_OPTIONS.map((opt) => (
-                            <MenuItem key={opt} value={opt}>
-                              {opt}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                        ))}
+                      </TextField>
                     )}
                   />
                 ) : key === "kategoriTyp" ? (
@@ -1204,34 +1109,34 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                     name="kategoriTyp"
                     control={createControl}
                     render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel id="create-kategoriTyp-label">
-                          Kategori typ
-                        </InputLabel>
-                        <Select
-                          {...field}
-                          labelId="create-kategoriTyp-label"
-                          label="Kategori typ"
-                          value={field.value ?? ""}
-                          input={
-                            <OutlinedInput
-                              label="Kategori typ"
-                              endAdornment={helpAdornment("kategoriTyp", {
-                                offsetForSelectIcon: true,
-                              })}
-                            />
-                          }
-                        >
-                          <MenuItem value="">
-                            <em>Välj kategori typ</em>
+                      <TextField
+                        select
+                        fullWidth
+                        label={checklistFieldLabel(
+                          "kategoriTyp",
+                          "Kategori typ",
+                        )}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(String(e.target.value ?? ""))
+                        }
+                        onBlur={field.onBlur}
+                        inputRef={field.ref}
+                        name={field.name}
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                          select: { displayEmpty: true },
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Välj kategori typ</em>
+                        </MenuItem>
+                        {KATEGORI_TYP_OPTIONS.map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            {opt}
                           </MenuItem>
-                          {KATEGORI_TYP_OPTIONS.map((opt) => (
-                            <MenuItem key={opt} value={opt}>
-                              {opt}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                        ))}
+                      </TextField>
                     )}
                   />
                 ) : key === "antagenJaNej" ? (
@@ -1239,34 +1144,31 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                     name="antagenJaNej"
                     control={createControl}
                     render={({ field }) => (
-                      <FormControl fullWidth>
-                        <InputLabel id="create-antagenJaNej-label">
-                          Antagen
-                        </InputLabel>
-                        <Select
-                          {...field}
-                          labelId="create-antagenJaNej-label"
-                          label="Antagen"
-                          value={field.value ?? ""}
-                          input={
-                            <OutlinedInput
-                              label="Antagen"
-                              endAdornment={helpAdornment("antagenJaNej", {
-                                offsetForSelectIcon: true,
-                              })}
-                            />
-                          }
-                        >
-                          <MenuItem value="">
-                            <em>Välj</em>
+                      <TextField
+                        select
+                        fullWidth
+                        label={checklistFieldLabel("antagenJaNej", "Antagen")}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(String(e.target.value ?? ""))
+                        }
+                        onBlur={field.onBlur}
+                        inputRef={field.ref}
+                        name={field.name}
+                        slotProps={{
+                          inputLabel: { shrink: true },
+                          select: { displayEmpty: true },
+                        }}
+                      >
+                        <MenuItem value="">
+                          <em>Välj</em>
+                        </MenuItem>
+                        {ANTAGEN_OPTIONS.map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            {opt}
                           </MenuItem>
-                          {ANTAGEN_OPTIONS.map((opt) => (
-                            <MenuItem key={opt} value={opt}>
-                              {opt}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                        ))}
+                      </TextField>
                     )}
                   />
                 ) : key === "arendenummerArtvise" ? (
@@ -1299,14 +1201,18 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label={label}
+                            label={checklistFieldLabel(
+                              "arendenummerArtvise",
+                              label,
+                            )}
                             required
                             error={!!fieldState.error}
                             helperText={fieldState.error?.message}
                             slotProps={{
+                              inputLabel: { shrink: true },
                               input: {
                                 ...params.InputProps,
-                                endAdornment: mergeEndAdornment(
+                                endAdornment: (
                                   <>
                                     {isLoadingOrderSummaries ? (
                                       <CircularProgress
@@ -1315,8 +1221,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                                       />
                                     ) : null}
                                     {params.InputProps.endAdornment}
-                                  </>,
-                                  helpAdornment("arendenummerArtvise"),
+                                  </>
                                 ),
                               },
                             }}
@@ -1333,7 +1238,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                       <TextField
                         {...field}
                         fullWidth
-                        label={label}
+                        label={checklistFieldLabel(key, label)}
                         multiline={
                           key === "antagenJaNejMotivering" ||
                           key === "kommentar"
@@ -1346,13 +1251,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                         }
                         error={!!fieldState.error}
                         helperText={fieldState.error?.message}
-                        slotProps={{
-                          input: {
-                            endAdornment: helpAdornment(
-                              key as keyof CreateChecklistDto,
-                            ),
-                          },
-                        }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                       />
                     )}
                   />
@@ -1373,36 +1272,30 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               name="kopiering"
               control={createControl}
               render={({ field }) => (
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Kopiering"
-                  />
-                  {helpIconInline("kopiering")}
-                </Box>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={Boolean(field.value)}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label={checklistFieldLabel("kopiering", "Kopiering")}
+                />
               )}
             />
             <Controller
               name="levererad"
               control={createControl}
               render={({ field }) => (
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Levererad"
-                  />
-                  {helpIconInline("levererad")}
-                </Box>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={Boolean(field.value)}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label={checklistFieldLabel("levererad", "Levererad")}
+                />
               )}
             />
           </Box>
@@ -1465,7 +1358,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           </Typography>
         </DialogContent>
         <Divider />
-        <DialogContent sx={{ pt: 3 }}>
+        <DialogContent sx={FORM_DIALOG_CONTENT_SX}>
           <Grid container spacing={2}>
             {(
               [
@@ -1509,34 +1402,31 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                         field.value ?? openEdit?.prioritet,
                       );
                       return (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-prioritet-label">
-                            Prioritet
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-prioritet-label"
-                            label="Prioritet"
-                            value={field.value ?? ""}
-                            input={
-                              <OutlinedInput
-                                label="Prioritet"
-                                endAdornment={helpAdornment("prioritet", {
-                                  offsetForSelectIcon: true,
-                                })}
-                              />
-                            }
-                          >
-                            <MenuItem value="">
-                              <em>Välj prioritet</em>
+                        <TextField
+                          select
+                          fullWidth
+                          label={checklistFieldLabel("prioritet", "Prioritet")}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? ""))
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Välj prioritet</em>
+                          </MenuItem>
+                          {options.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
                             </MenuItem>
-                            {options.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                          ))}
+                        </TextField>
                       );
                     }}
                   />
@@ -1550,34 +1440,31 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                         field.value ?? openEdit?.kategori,
                       );
                       return (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-kategori-label">
-                            Kategori
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-kategori-label"
-                            label="Kategori"
-                            value={field.value ?? ""}
-                            input={
-                              <OutlinedInput
-                                label="Kategori"
-                                endAdornment={helpAdornment("kategori", {
-                                  offsetForSelectIcon: true,
-                                })}
-                              />
-                            }
-                          >
-                            <MenuItem value="">
-                              <em>Välj kategori</em>
+                        <TextField
+                          select
+                          fullWidth
+                          label={checklistFieldLabel("kategori", "Kategori")}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? ""))
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Välj kategori</em>
+                          </MenuItem>
+                          {options.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
                             </MenuItem>
-                            {options.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                          ))}
+                        </TextField>
                       );
                     }}
                   />
@@ -1591,34 +1478,34 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                         field.value ?? openEdit?.kategoriTyp,
                       );
                       return (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-kategoriTyp-label">
-                            Kategori typ
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-kategoriTyp-label"
-                            label="Kategori typ"
-                            value={field.value ?? ""}
-                            input={
-                              <OutlinedInput
-                                label="Kategori typ"
-                                endAdornment={helpAdornment("kategoriTyp", {
-                                  offsetForSelectIcon: true,
-                                })}
-                              />
-                            }
-                          >
-                            <MenuItem value="">
-                              <em>Välj kategori typ</em>
+                        <TextField
+                          select
+                          fullWidth
+                          label={checklistFieldLabel(
+                            "kategoriTyp",
+                            "Kategori typ",
+                          )}
+                          value={field.value ?? ""}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? ""))
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Välj kategori typ</em>
+                          </MenuItem>
+                          {options.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
                             </MenuItem>
-                            {options.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                          ))}
+                        </TextField>
                       );
                     }}
                   />
@@ -1635,39 +1522,33 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                         normalizedValue,
                       );
                       return (
-                        <FormControl fullWidth>
-                          <InputLabel id="edit-antagenJaNej-label">
-                            Antagen
-                          </InputLabel>
-                          <Select
-                            {...field}
-                            labelId="edit-antagenJaNej-label"
-                            label="Antagen"
-                            value={normalizedValue}
-                            onChange={(e) =>
-                              field.onChange(
-                                normalizeAntagenJaNej(String(e.target.value)),
-                              )
-                            }
-                            input={
-                              <OutlinedInput
-                                label="Antagen"
-                                endAdornment={helpAdornment("antagenJaNej", {
-                                  offsetForSelectIcon: true,
-                                })}
-                              />
-                            }
-                          >
-                            <MenuItem value="">
-                              <em>Välj</em>
+                        <TextField
+                          select
+                          fullWidth
+                          label={checklistFieldLabel("antagenJaNej", "Antagen")}
+                          value={normalizedValue}
+                          onChange={(e) =>
+                            field.onChange(
+                              normalizeAntagenJaNej(String(e.target.value)),
+                            )
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                        >
+                          <MenuItem value="">
+                            <em>Välj</em>
+                          </MenuItem>
+                          {options.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
                             </MenuItem>
-                            {options.map((opt) => (
-                              <MenuItem key={opt} value={opt}>
-                                {opt}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                          ))}
+                        </TextField>
                       );
                     }}
                   />
@@ -1724,14 +1605,18 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              label={label}
+                              label={checklistFieldLabel(
+                                "arendenummerArtvise",
+                                label,
+                              )}
                               required
                               error={!!fieldState.error}
                               helperText={fieldState.error?.message}
                               slotProps={{
+                                inputLabel: { shrink: true },
                                 input: {
                                   ...params.InputProps,
-                                  endAdornment: mergeEndAdornment(
+                                  endAdornment: (
                                     <>
                                       {isLoadingOrderSummaries ? (
                                         <CircularProgress
@@ -1740,8 +1625,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                                         />
                                       ) : null}
                                       {params.InputProps.endAdornment}
-                                    </>,
-                                    helpAdornment("arendenummerArtvise"),
+                                    </>
                                   ),
                                 },
                               }}
@@ -1759,7 +1643,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                       <TextField
                         {...field}
                         fullWidth
-                        label={label}
+                        label={checklistFieldLabel(key, label)}
                         multiline={
                           key === "antagenJaNejMotivering" ||
                           key === "kommentar"
@@ -1770,13 +1654,7 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
                             ? 2
                             : 1
                         }
-                        slotProps={{
-                          input: {
-                            endAdornment: helpAdornment(
-                              key as keyof CreateChecklistDto,
-                            ),
-                          },
-                        }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                       />
                     )}
                   />
@@ -1797,36 +1675,30 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
               name="kopiering"
               control={editControl}
               render={({ field }) => (
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Kopiering"
-                  />
-                  {helpIconInline("kopiering")}
-                </Box>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={Boolean(field.value)}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label={checklistFieldLabel("kopiering", "Kopiering")}
+                />
               )}
             />
             <Controller
               name="levererad"
               control={editControl}
               render={({ field }) => (
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={Boolean(field.value)}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                    label="Levererad"
-                  />
-                  {helpIconInline("levererad")}
-                </Box>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={Boolean(field.value)}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                    />
+                  }
+                  label={checklistFieldLabel("levererad", "Levererad")}
+                />
               )}
             />
           </Box>

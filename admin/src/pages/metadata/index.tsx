@@ -75,6 +75,12 @@ import {
   type Control,
 } from "react-hook-form";
 import { SelectWithOtherDialog } from "../../components/SelectWithOtherDialog";
+import { FieldHelpIcon } from "../../components/FieldHelpIcon";
+import { FormLabelWithHelp } from "../../components/FormLabelWithHelp";
+import {
+  metadataFieldTooltips,
+  metadataSectionTooltips,
+} from "../../utils/metadataTooltips";
 import {
   defaultColumnVisibility,
   emptyForm,
@@ -82,7 +88,7 @@ import {
   GEOGRAFISK_TYP_OPTIONS,
   GRID_PREFS_STORAGE_KEY,
   KATEGORI_OPTIONS,
-  METADATA_FORM_FIELDS,
+  METADATA_FORM_SECTIONS,
   type MetadataFormState,
   STATUS_OPTIONS,
   TATORT_OPTIONS,
@@ -94,6 +100,10 @@ import {
 } from "./constants";
 
 dayjs.extend(customParseFormat);
+
+const metadataFieldLabel = (fieldKey: string, text: string) => (
+  <FormLabelWithHelp label={text} title={metadataFieldTooltips[fieldKey]} />
+);
 
 const toArray = (value: string): string[] | undefined => {
   const values = value
@@ -490,7 +500,12 @@ function TidsperiodDatumFields({
           control={control}
           render={({ field }) => (
             <DatePicker
-              label="Tidsperiod startdatum"
+              label={
+                <FormLabelWithHelp
+                  label="Tidsperiod startdatum"
+                  title={metadataFieldTooltips.tidsperiodStartdatum}
+                />
+              }
               format="YYYY-MM-DD"
               value={parseDateValue(field.value)}
               onChange={(value) => field.onChange(formatDateValue(value))}
@@ -501,6 +516,7 @@ function TidsperiodDatumFields({
                   onBlur: field.onBlur,
                   inputRef: field.ref,
                   name: field.name,
+                  slotProps: { inputLabel: { shrink: true } },
                 },
                 field: { clearable: true },
               }}
@@ -512,7 +528,12 @@ function TidsperiodDatumFields({
           control={control}
           render={({ field }) => (
             <DatePicker
-              label="Tidsperiod slutdatum"
+              label={
+                <FormLabelWithHelp
+                  label="Tidsperiod slutdatum"
+                  title={metadataFieldTooltips.tidsperiodSlutdatum}
+                />
+              }
               format="YYYY-MM-DD"
               value={parseDateValue(field.value)}
               onChange={(value) => field.onChange(formatDateValue(value))}
@@ -523,6 +544,7 @@ function TidsperiodDatumFields({
                   onBlur: field.onBlur,
                   inputRef: field.ref,
                   name: field.name,
+                  slotProps: { inputLabel: { shrink: true } },
                 },
                 field: { clearable: true },
               }}
@@ -601,312 +623,410 @@ function MetadataFormDialog({
           if (tag === "TEXTAREA") return;
           e.preventDefault();
         }}
+        sx={{
+          // Default shrunk label is ~12px (16px * 0.75); bump to ~13px.
+          "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+            transform: "translate(14px, -9px) scale(0.8125)",
+          },
+        }}
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 2,
-            pt: 1,
-          }}
-        >
-          {METADATA_FORM_FIELDS.map(([key, label]) =>
-            key === "kategori" ? (
-              <Controller
-                key={key}
-                name="kategori"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    select
-                    label={label}
-                    value={field.value}
-                    slotProps={{
-                      inputLabel: { shrink: true },
-                      select: { displayEmpty: true },
-                    }}
-                    onChange={(e) =>
-                      field.onChange(String(e.target.value ?? "").trim())
-                    }
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                    name={field.name}
-                  >
-                    <MenuItem value="">
-                      <em>Välj kategori</em>
-                    </MenuItem>
-                    {field.value &&
-                    !KATEGORI_OPTIONS.includes(
-                      field.value as (typeof KATEGORI_OPTIONS)[number],
-                    ) ? (
-                      <MenuItem value={field.value}>{field.value}</MenuItem>
-                    ) : null}
-                    {KATEGORI_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            ) : key === "status" ? (
-              <Controller
-                key={key}
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    select
-                    label={label}
-                    value={field.value}
-                    slotProps={{
-                      inputLabel: { shrink: true },
-                      select: { displayEmpty: true },
-                    }}
-                    onChange={(e) =>
-                      field.onChange(String(e.target.value ?? ""))
-                    }
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                    name={field.name}
-                  >
-                    <MenuItem value="">
-                      <em>Välj status</em>
-                    </MenuItem>
-                    {STATUS_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            ) : key === "fullstandighet" ? (
-              <Controller
-                key={key}
-                name="fullstandighet"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    select
-                    label={label}
-                    value={field.value}
-                    slotProps={{
-                      inputLabel: { shrink: true },
-                      select: { displayEmpty: true },
-                    }}
-                    onChange={(e) =>
-                      field.onChange(String(e.target.value ?? "").trim())
-                    }
-                    onBlur={field.onBlur}
-                    inputRef={field.ref}
-                    name={field.name}
-                  >
-                    <MenuItem value="">
-                      <em>Välj fullständighet</em>
-                    </MenuItem>
-                    {field.value &&
-                    !FULLSTANDIGHET_OPTIONS.includes(
-                      field.value as (typeof FULLSTANDIGHET_OPTIONS)[number],
-                    ) ? (
-                      <MenuItem value={field.value}>{field.value}</MenuItem>
-                    ) : null}
-                    {FULLSTANDIGHET_OPTIONS.map((opt) => (
-                      <MenuItem key={opt} value={opt}>
-                        {opt}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            ) : key === "geografiskBegransning" ? (
-              <SelectWithOtherDialog
-                key={key}
-                control={control}
-                setValue={setValue}
-                label={label}
-                name="geografiskBegransningTyp"
-                options={GEOGRAFISK_TYP_OPTIONS}
-                emptyOptionLabel="Välj geografisk begränsning"
-                optionDialogs={[
-                  {
-                    option: "Kungsbacka tätort",
-                    fieldName: "geografiskBegransningTatorter",
-                    dialogTitle: "Välj tätorter",
-                    emptySummaryText: "Inga tätorter valda",
-                    formatSummary: (value) =>
-                      Array.isArray(value) ? value.join(", ") : "",
-                    renderEditor: ({ value, onChange }) => (
-                      <Autocomplete
-                        multiple
-                        disableCloseOnSelect
-                        options={[...TATORT_OPTIONS]}
-                        value={Array.isArray(value) ? (value as string[]) : []}
-                        onChange={(_event, next) => onChange(next)}
-                        slotProps={{
-                          popper: {
-                            placement: "top-start",
-                            modifiers: [{ name: "flip", enabled: false }],
-                          },
-                        }}
-                        renderOption={(props, option, { selected }) => {
-                          const { key: optionKey, ...optionProps } =
-                            props as typeof props & { key?: React.Key };
-                          return (
-                            <li key={optionKey ?? option} {...optionProps}>
-                              <Checkbox checked={selected} sx={{ mr: 1 }} />
-                              {option}
-                            </li>
-                          );
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            sx={{ mt: 1 }}
-                            label="Tätorter"
-                            placeholder="Välj tätorter"
+        <Box sx={{ mt: 1 }}>
+          {METADATA_FORM_SECTIONS.map((section) => (
+            <Box key={section.title} sx={{ mt: 5 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontSize: 15, fontWeight: 800, mb: 1 }}
+              >
+                {section.title}
+                <FieldHelpIcon
+                  title={metadataSectionTooltips[section.title]}
+                />
+              </Typography>
+              <Divider sx={{ mb: 1.5 }} />
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 2,
+                }}
+              >
+                {section.fields.map(([key, label]) =>
+                  key === "tidsperiod" ? (
+                    <Controller
+                      key={key}
+                      name="tidsperiod"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={Boolean(field.value)}
+                              onChange={(e) =>
+                                field.onChange(e.target.checked)
+                              }
+                            />
+                          }
+                          label={metadataFieldLabel(key, label)}
+                        />
+                      )}
+                    />
+                  ) : key === "anvandarBegransningLicensText" ? null : key ===
+                    "anvandarBegransningLicens" ? (
+                    <Box
+                      key="anvandarBegransningLicens-group"
+                      sx={{
+                        gridColumn: "1 / -1",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 2,
+                      }}
+                    >
+                      <Controller
+                        name="anvandarBegransningLicens"
+                        control={control}
+                        render={({ field }) => (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={Boolean(field.value)}
+                                onChange={(e) =>
+                                  field.onChange(e.target.checked)
+                                }
+                              />
+                            }
+                            label={metadataFieldLabel(key, label)}
                           />
                         )}
                       />
-                    ),
-                  },
-                  {
-                    option: "Annat",
-                    fieldName: "geografiskBegransningAnnat",
-                    dialogTitle: "Ange geografisk begränsning",
-                    dialogFieldLabel: "Geografisk begränsning",
-                  },
-                ]}
-              />
-            ) : key === "uppdateringsFrekvens" ? (
-              <SelectWithOtherDialog
-                key={key}
-                control={control}
-                setValue={setValue}
-                label={label}
-                name="uppdateringsFrekvens"
-                options={UPPDATERINGS_FREKVENS_OPTIONS}
-                emptyOptionLabel="Välj uppdateringsfrekvens"
-                optionDialogs={[
-                  {
-                    option: "Annat",
-                    fieldName: "uppdateringsFrekvensAnnat",
-                    dialogTitle: "Ange uppdateringsfrekvens",
-                    dialogFieldLabel: "Uppdateringsfrekvens (Annat)",
-                  },
-                ]}
-              />
-            ) : key === "tidsUpplosning" ? (
-              <SelectWithOtherDialog
-                key={key}
-                control={control}
-                setValue={setValue}
-                label={label}
-                name="tidsUpplosning"
-                options={TIDS_UPPLOSNING_OPTIONS}
-                emptyOptionLabel="Välj tidsupplösning"
-                optionDialogs={[
-                  {
-                    option: "Vet ej",
-                    fieldName: "tidsUpplosningAnnat",
-                    dialogTitle: "Ange tidsupplösning",
-                    dialogFieldLabel: "Tidsupplösning (Vet ej)",
-                  },
-                ]}
-              />
-            ) : key === "tidsperiodDatum" ? (
-              <TidsperiodDatumFields key={key} control={control} />
-            ) : key === "skapelseDatum" ? (
-              <LocalizationProvider
-                key={key}
-                dateAdapter={AdapterDayjs}
-                adapterLocale="sv"
-              >
-                <Controller
-                  name="skapelseDatum"
-                  control={control}
-                  render={({ field }) => (
-                    <DatePicker
-                      label={label}
-                      format="YYYY-MM-DD"
-                      value={parseDateValue(field.value)}
-                      onChange={(value) =>
-                        field.onChange(formatDateValue(value))
-                      }
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          onBlur: field.onBlur,
-                          inputRef: field.ref,
-                          name: field.name,
-                        },
-                        field: { clearable: true },
-                      }}
+                      <Controller
+                        name="anvandarBegransningLicensText"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label={metadataFieldLabel(
+                              "anvandarBegransningLicensText",
+                              "Användarbegränsning licens text",
+                            )}
+                            multiline
+                            minRows={2}
+                            slotProps={{ inputLabel: { shrink: true } }}
+                          />
+                        )}
+                      />
+                    </Box>
+                  ) : key === "kategori" ? (
+                    <Controller
+                      key={key}
+                      name="kategori"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          select
+                          label={metadataFieldLabel(key, label)}
+                          value={field.value}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? "").trim())
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                        >
+                          <MenuItem value="">
+                            <em>Välj kategori</em>
+                          </MenuItem>
+                          {field.value &&
+                          !KATEGORI_OPTIONS.includes(
+                            field.value as (typeof KATEGORI_OPTIONS)[number],
+                          ) ? (
+                            <MenuItem value={field.value}>
+                              {field.value}
+                            </MenuItem>
+                          ) : null}
+                          {KATEGORI_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      )}
                     />
-                  )}
-                />
-              </LocalizationProvider>
-            ) : (
-              <Controller
-                key={key}
-                name={key}
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={label}
-                    multiline={
-                      key === "syfte" ||
-                      key === "beskrivning" ||
-                      key === "metod" ||
-                      key === "anvandarBegransningLicensText"
-                    }
-                    minRows={
-                      key === "syfte" ||
-                      key === "beskrivning" ||
-                      key === "metod" ||
-                      key === "anvandarBegransningLicensText"
-                        ? 2
-                        : undefined
-                    }
-                  />
+                  ) : key === "status" ? (
+                    <Controller
+                      key={key}
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          select
+                          label={metadataFieldLabel(key, label)}
+                          value={field.value}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? ""))
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                        >
+                          <MenuItem value="">
+                            <em>Välj status</em>
+                          </MenuItem>
+                          {STATUS_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      )}
+                    />
+                  ) : key === "fullstandighet" ? (
+                    <Controller
+                      key={key}
+                      name="fullstandighet"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          select
+                          label={metadataFieldLabel(key, label)}
+                          value={field.value}
+                          slotProps={{
+                            inputLabel: { shrink: true },
+                            select: { displayEmpty: true },
+                          }}
+                          onChange={(e) =>
+                            field.onChange(String(e.target.value ?? "").trim())
+                          }
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                          name={field.name}
+                        >
+                          <MenuItem value="">
+                            <em>Välj fullständighet</em>
+                          </MenuItem>
+                          {field.value &&
+                          !FULLSTANDIGHET_OPTIONS.includes(
+                            field.value as (typeof FULLSTANDIGHET_OPTIONS)[number],
+                          ) ? (
+                            <MenuItem value={field.value}>
+                              {field.value}
+                            </MenuItem>
+                          ) : null}
+                          {FULLSTANDIGHET_OPTIONS.map((opt) => (
+                            <MenuItem key={opt} value={opt}>
+                              {opt}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      )}
+                    />
+                  ) : key === "geografiskBegransning" ? (
+                    <SelectWithOtherDialog
+                      key={key}
+                      control={control}
+                      setValue={setValue}
+                      label={metadataFieldLabel(key, label)}
+                      name="geografiskBegransningTyp"
+                      options={GEOGRAFISK_TYP_OPTIONS}
+                      emptyOptionLabel="Välj geografisk begränsning"
+                      optionDialogs={[
+                        {
+                          option: "Kungsbacka tätort",
+                          fieldName: "geografiskBegransningTatorter",
+                          dialogTitle: "Välj tätorter",
+                          emptySummaryText: "Inga tätorter valda",
+                          formatSummary: (value) =>
+                            Array.isArray(value) ? value.join(", ") : "",
+                          renderEditor: ({ value, onChange }) => (
+                            <Autocomplete
+                              multiple
+                              disableCloseOnSelect
+                              options={[...TATORT_OPTIONS]}
+                              value={
+                                Array.isArray(value) ? (value as string[]) : []
+                              }
+                              onChange={(_event, next) => onChange(next)}
+                              slotProps={{
+                                popper: {
+                                  placement: "top-start",
+                                  modifiers: [
+                                    { name: "flip", enabled: false },
+                                  ],
+                                },
+                              }}
+                              renderOption={(props, option, { selected }) => {
+                                const { key: optionKey, ...optionProps } =
+                                  props as typeof props & { key?: React.Key };
+                                return (
+                                  <li
+                                    key={optionKey ?? option}
+                                    {...optionProps}
+                                  >
+                                    <Checkbox
+                                      checked={selected}
+                                      sx={{ mr: 1 }}
+                                    />
+                                    {option}
+                                  </li>
+                                );
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  sx={{ mt: 1 }}
+                                  label="Tätorter"
+                                  placeholder="Välj tätorter"
+                                />
+                              )}
+                            />
+                          ),
+                        },
+                        {
+                          option: "Annat",
+                          fieldName: "geografiskBegransningAnnat",
+                          dialogTitle: "Ange geografisk begränsning",
+                          dialogFieldLabel: "Geografisk begränsning",
+                        },
+                      ]}
+                    />
+                  ) : key === "uppdateringsFrekvens" ? (
+                    <SelectWithOtherDialog
+                      key={key}
+                      control={control}
+                      setValue={setValue}
+                      label={metadataFieldLabel(key, label)}
+                      name="uppdateringsFrekvens"
+                      options={UPPDATERINGS_FREKVENS_OPTIONS}
+                      emptyOptionLabel="Välj uppdateringsfrekvens"
+                      optionDialogs={[
+                        {
+                          option: "Annat",
+                          fieldName: "uppdateringsFrekvensAnnat",
+                          dialogTitle: "Ange uppdateringsfrekvens",
+                          dialogFieldLabel: "Uppdateringsfrekvens (Annat)",
+                        },
+                      ]}
+                    />
+                  ) : key === "tidsUpplosning" ? (
+                    <SelectWithOtherDialog
+                      key={key}
+                      control={control}
+                      setValue={setValue}
+                      label={metadataFieldLabel(key, label)}
+                      name="tidsUpplosning"
+                      options={TIDS_UPPLOSNING_OPTIONS}
+                      emptyOptionLabel="Välj tidsupplösning"
+                      optionDialogs={[
+                        {
+                          option: "Vet ej",
+                          fieldName: "tidsUpplosningAnnat",
+                          dialogTitle: "Ange tidsupplösning",
+                          dialogFieldLabel: "Tidsupplösning (Vet ej)",
+                        },
+                      ]}
+                    />
+                  ) : key === "tidsperiodDatum" ? (
+                    <TidsperiodDatumFields key={key} control={control} />
+                  ) : key === "skapelseDatum" ? (
+                    <LocalizationProvider
+                      key={key}
+                      dateAdapter={AdapterDayjs}
+                      adapterLocale="sv"
+                    >
+                      <Controller
+                        name="skapelseDatum"
+                        control={control}
+                        render={({ field }) => (
+                          <DatePicker
+                            label={metadataFieldLabel(key, label)}
+                            format="YYYY-MM-DD"
+                            value={parseDateValue(field.value)}
+                            onChange={(value) =>
+                              field.onChange(formatDateValue(value))
+                            }
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                onBlur: field.onBlur,
+                                inputRef: field.ref,
+                                name: field.name,
+                                slotProps: { inputLabel: { shrink: true } },
+                              },
+                              field: { clearable: true },
+                            }}
+                          />
+                        )}
+                      />
+                    </LocalizationProvider>
+                  ) : key === "syfte" ? null : key === "beskrivning" ? (
+                    <Box
+                      key="beskrivning-syfte"
+                      sx={{
+                        gridColumn: "1 / -1",
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 2,
+                      }}
+                    >
+                      <Controller
+                        name="beskrivning"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label={metadataFieldLabel(key, label)}
+                            multiline
+                            minRows={2}
+                            slotProps={{ inputLabel: { shrink: true } }}
+                          />
+                        )}
+                      />
+                      <Controller
+                        name="syfte"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            label={metadataFieldLabel("syfte", "Syfte")}
+                            multiline
+                            minRows={2}
+                            slotProps={{ inputLabel: { shrink: true } }}
+                          />
+                        )}
+                      />
+                    </Box>
+                  ) : (
+                    <Controller
+                      key={key}
+                      name={key as keyof MetadataFormState}
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          value={
+                            typeof field.value === "boolean"
+                              ? ""
+                              : (field.value ?? "")
+                          }
+                          label={metadataFieldLabel(key, label)}
+                          multiline={key === "metod"}
+                          minRows={key === "metod" ? 2 : undefined}
+                          slotProps={{ inputLabel: { shrink: true } }}
+                        />
+                      )}
+                    />
+                  ),
                 )}
-              />
-            ),
-          )}
-        </Box>
-        <Divider sx={{ mt: 3 }} />
-        <Box sx={{ mt: 2, display: "flex", gap: 3 }}>
-          <Controller
-            name="tidsperiod"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={Boolean(field.value)}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Tidsperiod"
-              />
-            )}
-          />
-          <Controller
-            name="anvandarBegransningLicens"
-            control={control}
-            render={({ field }) => (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={Boolean(field.value)}
-                    onChange={(e) => field.onChange(e.target.checked)}
-                  />
-                }
-                label="Användarbegränsning licens"
-              />
-            )}
-          />
+              </Box>
+            </Box>
+          ))}
         </Box>
       </DialogContent>
       <DialogActions>

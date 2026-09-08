@@ -38,7 +38,7 @@ export type SelectOptionDialogConfig<TFieldValues extends FieldValues> = {
 type SelectWithOtherDialogProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
   setValue: UseFormSetValue<TFieldValues>;
-  label: string;
+  label: React.ReactNode;
   name: FieldPath<TFieldValues>;
   options: readonly string[];
   emptyOptionLabel: string;

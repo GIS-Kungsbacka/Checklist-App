@@ -46,7 +46,7 @@ const GRID_PREFS_STORAGE_KEY = "idebanken-default-prefs-dev-admin";
 const defaultColumnVisibility = {
   gid: true,
   arendenummerArtvise: true,
-  dataunderlag: true,
+  dataunderlag: false,
   dataadministrator: true,
   nyttjandeInterntExternt: true,
   leveransArbetstimmar: true,

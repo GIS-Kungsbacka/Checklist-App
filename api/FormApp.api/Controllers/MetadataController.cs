@@ -29,7 +29,12 @@ public class MetadataController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving metadata records");
-            return StatusCode(500, new { error = "An error occurred while retrieving records", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while retrieving records",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -53,7 +58,12 @@ public class MetadataController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving metadata record {Gid}", gid);
-            return StatusCode(500, new { error = "An error occurred while retrieving the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while retrieving the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -71,6 +81,9 @@ public class MetadataController : ControllerBase
     {
         try
         {
+            var username = User.Identity?.Name?.Split('\\').Last() ?? "Unknown";
+            var now = DateTime.UtcNow;
+
             var item = new Metadata
             {
                 ArendeNummerOpenE = dto.ArendeNummerOpenE,
@@ -104,10 +117,10 @@ public class MetadataController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
-                SkapadTidPunkt = dto.SkapadTidPunkt,
-                SkapadAv = dto.SkapadAv,
-                AndradTidPunkt = dto.AndradTidPunkt,
-                AndradAv = dto.AndradAv,
+                SkapadTidPunkt = dto.SkapadTidPunkt ?? now,
+                SkapadAv = dto.SkapadAv ?? username,
+                AndradTidPunkt = dto.AndradTidPunkt ?? now,
+                AndradAv = dto.AndradAv ?? username,
                 SakerhetsklassRiktighet = dto.SakerhetsklassRiktighet,
                 SakerhetsklassTillganglighet = dto.SakerhetsklassTillganglighet,
                 MetadataSpecifikationModelversion = dto.MetadataSpecifikationModelversion
@@ -115,14 +128,18 @@ public class MetadataController : ControllerBase
 
             var createdItem = await _repository.CreateAsync(item);
 
-            var username = User.Identity?.Name ?? "Unknown";
             _logger.LogInformation("Metadata record {Gid} created by {User}", createdItem.Gid, username);
             return CreatedAtAction(nameof(GetById), new { gid = createdItem.Gid }, createdItem);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating metadata record");
-            return StatusCode(500, new { error = "An error occurred while creating the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while creating the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -134,6 +151,9 @@ public class MetadataController : ControllerBase
     {
         try
         {
+            var username = User.Identity?.Name?.Split('\\').Last() ?? "Unknown";
+            var now = DateTime.UtcNow;
+
             var item = new Metadata
             {
                 Gid = gid,
@@ -168,10 +188,9 @@ public class MetadataController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 MetaDataVersion = dto.MetaDataVersion,
-                SkapadTidPunkt = dto.SkapadTidPunkt,
-                SkapadAv = dto.SkapadAv,
-                AndradTidPunkt = dto.AndradTidPunkt,
-                AndradAv = dto.AndradAv,
+                // Create-audit fields are preserved in the repository; only change-audit is set here.
+                AndradTidPunkt = dto.AndradTidPunkt ?? now,
+                AndradAv = dto.AndradAv ?? username,
                 SakerhetsklassRiktighet = dto.SakerhetsklassRiktighet,
                 SakerhetsklassTillganglighet = dto.SakerhetsklassTillganglighet,
                 MetadataSpecifikationModelversion = dto.MetadataSpecifikationModelversion
@@ -183,14 +202,18 @@ public class MetadataController : ControllerBase
                 return NotFound();
             }
 
-            var username = User.Identity?.Name ?? "Unknown";
             _logger.LogInformation("Metadata record {Gid} updated by {User}", gid, username);
             return NoContent();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating metadata record {Gid}", gid);
-            return StatusCode(500, new { error = "An error occurred while updating the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while updating the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -208,15 +231,29 @@ public class MetadataController : ControllerBase
                 return NotFound();
             }
 
-            var username = User.Identity?.Name ?? "Unknown";
+            var username = User.Identity?.Name?.Split('\\').Last() ?? "Unknown";
             _logger.LogInformation("Metadata record {Gid} deleted by {User}", gid, username);
             return NoContent();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting metadata record {Gid}", gid);
-            return StatusCode(500, new { error = "An error occurred while deleting the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while deleting the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
+    }
+
+    private static string GetInnermostMessage(Exception ex)
+    {
+        while (ex.InnerException != null)
+        {
+            ex = ex.InnerException;
+        }
+        return ex.Message;
     }
 }
 

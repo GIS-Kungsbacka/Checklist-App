@@ -101,25 +101,56 @@ export const emptyForm: ManagementPlanFormState = {
   handlaggare: "",
 };
 
-export const MANAGEMENT_PLAN_FORM_FIELDS = [
-  ["namn", "Namn"],
-  ["titel", "Titel"],
-  ["bestallareNamn", "Beställare namn"],
-  ["bestallareEpost", "Beställare e-post"],
-  ["sakerhetsklass", "Säkerhetsklass"],
-  ["datakallaTyp", "Datakälla typ"],
-  ["schemaNamn", "Schema"],
-  ["dataAgare", "Dataägare"],
-  ["dataForvaltare", "Dataförvaltare"],
-  ["dataAdministrator", "Dataadministratör"],
-  ["dataKonsument", "Datakonsument"],
-  ["redigeringsKalla", "Redigeringskälla"],
-  ["arkivering", "Arkivering"],
-  ["arkiveringTidpunkt", "Arkivering tidpunkt"],
-  ["publicerad", "Publicerad"],
-  ["atkomst", "Åtkomst"],
-  ["integration", "Integration"],
-  ["status", "Status"],
-  ["handlaggare", "Handläggare"],
-  ["ovrigInformation", "Övrig information"],
+export const MANAGEMENT_PLAN_FORM_SECTIONS = [
+  {
+    title: "Grundläggande identitet",
+    fields: [
+      ["titel", "Titel"],
+      ["namn", "Namn"],
+      ["schemaNamn", "Schema"],
+      ["datakallaTyp", "Datakälla typ"],
+      ["sakerhetsklass", "Säkerhetsklass"],
+    ],
+  },
+  {
+    title: "Ansvar och roller",
+    fields: [
+      ["dataAgare", "Dataägare"],
+      ["dataForvaltare", "Dataförvaltare"],
+      ["dataAdministrator", "Dataadministratör"],
+      ["dataKonsument", "Datakonsument"],
+    ],
+  },
+  {
+    title: "Publicering och åtkomst",
+    fields: [
+      ["redigeringsKalla", "Redigeringskälla"],
+      ["publicerad", "Publicerad"],
+      ["atkomst", "Åtkomst"],
+      ["integration", "Integration"],
+      ["oppnaData", "Önskemål om öppna data"],
+      ["publiceradOppnaData", "Publicerad öppna data"],
+      ["kritiskDatamangd", "Kritisk datamängd"],
+    ],
+  },
+  {
+    title: "Livscykel och arkivering",
+    fields: [
+      ["arkivering", "Arkivering"],
+      ["arkiveringTidpunkt", "Arkivering tidpunkt"],
+    ],
+  },
+  {
+    title: "Övrig information",
+    fields: [["ovrigInformation", "Övrig information"]],
+  },
+  {
+    title: "Ärendeuppgifter",
+    fields: [
+      ["bestallareNamn", "Beställare namn"],
+      ["bestallareEpost", "Beställare e-post"],
+      ["handlaggare", "Handläggare"],
+      ["status", "Status"],
+    ],
+  },
 ] as const;

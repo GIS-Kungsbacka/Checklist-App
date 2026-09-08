@@ -30,7 +30,12 @@ public class ManagementPlanController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving management plan records");
-            return StatusCode(500, new { error = "An error occurred while retrieving records", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while retrieving records",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -54,7 +59,12 @@ public class ManagementPlanController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving management plan record {Gid}", gid);
-            return StatusCode(500, new { error = "An error occurred while retrieving the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while retrieving the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -72,6 +82,9 @@ public class ManagementPlanController : ControllerBase
     {
         try
         {
+            var username = User.Identity?.Name?.Split('\\').Last() ?? "Unknown";
+            var now = DateTime.UtcNow;
+
             var item = new ManagementPlan
             {
                 ArendeNummberOpenE = dto.ArendeNummberOpenE,
@@ -101,23 +114,27 @@ public class ManagementPlanController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 ForvaltningsplanVersion = dto.ForvaltningsplanVersion,
-                SkapadTidPunkt = dto.SkapadTidPunkt,
-                SkapadAv = dto.SkapadAv,
-                AndradTidPunkt = dto.AndradTidPunkt,
-                AndradAv = dto.AndradAv,
+                SkapadTidPunkt = dto.SkapadTidPunkt ?? now,
+                SkapadAv = dto.SkapadAv ?? username,
+                AndradTidPunkt = dto.AndradTidPunkt ?? now,
+                AndradAv = dto.AndradAv ?? username,
                 ForvaltningsplanModelversion = dto.ForvaltningsplanModelversion
             };
 
             var createdItem = await _repository.CreateAsync(item);
 
-            var username = User.Identity?.Name ?? "Unknown";
             _logger.LogInformation("Managementplan record {Gid} created by {User}", createdItem.Gid, username);
             return CreatedAtAction(nameof(GetById), new { gid = createdItem.Gid }, createdItem);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating Managementplan record");
-            return StatusCode(500, new { error = "An error occurred while creating the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while creating the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -129,6 +146,9 @@ public class ManagementPlanController : ControllerBase
     {
         try
         {
+            var username = User.Identity?.Name?.Split('\\').Last() ?? "Unknown";
+            var now = DateTime.UtcNow;
+
             var item = new ManagementPlan
             {
                 Gid = gid,
@@ -159,10 +179,9 @@ public class ManagementPlanController : ControllerBase
                 Status = dto.Status,
                 Handlaggare = dto.Handlaggare,
                 ForvaltningsplanVersion = dto.ForvaltningsplanVersion,
-                SkapadTidPunkt = dto.SkapadTidPunkt,
-                SkapadAv = dto.SkapadAv,
-                AndradTidPunkt = dto.AndradTidPunkt,
-                AndradAv = dto.AndradAv,
+                // Create-audit fields are preserved in the repository; only change-audit is set here.
+                AndradTidPunkt = dto.AndradTidPunkt ?? now,
+                AndradAv = dto.AndradAv ?? username,
                 ForvaltningsplanModelversion = dto.ForvaltningsplanModelversion
             };
 
@@ -172,14 +191,18 @@ public class ManagementPlanController : ControllerBase
                 return NotFound();
             }
 
-            var username = User.Identity?.Name ?? "Unknown";
             _logger.LogInformation("Managementplan record {Gid} updated by {User}", gid, username);
             return NoContent();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating Managementplan record {Gid}", gid);
-            return StatusCode(500, new { error = "An error occurred while updating the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while updating the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
     }
 
@@ -197,15 +220,29 @@ public class ManagementPlanController : ControllerBase
                 return NotFound();
             }
 
-            var username = User.Identity?.Name ?? "Unknown";
+            var username = User.Identity?.Name?.Split('\\').Last() ?? "Unknown";
             _logger.LogInformation("Managementplan record {Gid} deleted by {User}", gid, username);
             return NoContent();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting Managementplan record {Gid}", gid);
-            return StatusCode(500, new { error = "An error occurred while deleting the record", details = ex.Message });
+            return StatusCode(500, new
+            {
+                error = "An error occurred while deleting the record",
+                details = ex.Message,
+                inner = GetInnermostMessage(ex),
+            });
         }
+    }
+
+    private static string GetInnermostMessage(Exception ex)
+    {
+        while (ex.InnerException != null)
+        {
+            ex = ex.InnerException;
+        }
+        return ex.Message;
     }
 }
 
