@@ -267,7 +267,7 @@ public class CreateManagementPlanDto
     public string? OvrigInformation { get; set; }
     public bool? KritiskDatamangd { get; set; }
     public string? Arkivering { get; set; }
-    public string? ArkiveringTidpunkt { get; set; }
+    public DateOnly? ArkiveringTidpunkt { get; set; }
     public string[]? Publicerad { get; set; }
     public bool? PubliceradOppnaData { get; set; }
     public string[]? Atkomst { get; set; }
@@ -304,7 +304,7 @@ public class UpdateManagementPlanDto
     public string? OvrigInformation { get; set; }
     public bool? KritiskDatamangd { get; set; }
     public string? Arkivering { get; set; }
-    public string? ArkiveringTidpunkt { get; set; }
+    public DateOnly? ArkiveringTidpunkt { get; set; }
     public string[]? Publicerad { get; set; }
     public bool? PubliceradOppnaData { get; set; }
     public string[]? Atkomst { get; set; }

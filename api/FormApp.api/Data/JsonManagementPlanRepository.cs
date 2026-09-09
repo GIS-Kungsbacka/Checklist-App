@@ -56,7 +56,7 @@ namespace FormApp.Api.Data
                     OvrigInformation = "Testinformation",
                     KritiskDatamangd = false,
                     Arkivering = "Nej",
-                    ArkiveringTidpunkt = "Ej planerad",
+                    ArkiveringTidpunkt = new DateOnly(2026, 4, 14),
                     Publicerad = ["Nej"],
                     PubliceradOppnaData = false,
                     Atkomst = ["Intern"],

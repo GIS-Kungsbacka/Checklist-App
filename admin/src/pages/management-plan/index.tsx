@@ -64,6 +64,12 @@ import {
 import { statusChipColor } from "../../utils/status-chip";
 import { toast } from "react-toastify";
 import { Controller, useForm } from "react-hook-form";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { type Dayjs } from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import "dayjs/locale/sv";
 import { FieldHelpIcon } from "../../components/FieldHelpIcon";
 import { FormLabelWithHelp } from "../../components/FormLabelWithHelp";
 import {
@@ -79,6 +85,17 @@ import {
   REDIGERINGS_KALLA_OPTIONS,
   STATUS_OPTIONS,
 } from "./constants";
+
+dayjs.extend(customParseFormat);
+
+const parseDateValue = (value: string): Dayjs | null => {
+  if (!value) return null;
+  const parsed = dayjs(value, "YYYY-MM-DD", true);
+  return parsed.isValid() ? parsed : null;
+};
+
+const formatDateValue = (value: Dayjs | null): string =>
+  value && value.isValid() ? value.format("YYYY-MM-DD") : "";
 
 const managementPlanFieldLabel = (
   fieldKey: string,
@@ -511,6 +528,37 @@ function ManagementPlanFormDialog({
                         </TextField>
                       )}
                     />
+                  ) : key === "arkiveringTidpunkt" ? (
+                    <LocalizationProvider
+                      key={key}
+                      dateAdapter={AdapterDayjs}
+                      adapterLocale="sv"
+                    >
+                      <Controller
+                        name="arkiveringTidpunkt"
+                        control={control}
+                        render={({ field }) => (
+                          <DatePicker
+                            label={managementPlanFieldLabel(key, label)}
+                            format="YYYY-MM-DD"
+                            value={parseDateValue(field.value)}
+                            onChange={(value) =>
+                              field.onChange(formatDateValue(value))
+                            }
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                onBlur: field.onBlur,
+                                inputRef: field.ref,
+                                name: field.name,
+                                slotProps: { inputLabel: { shrink: true } },
+                              },
+                              field: { clearable: true },
+                            }}
+                          />
+                        )}
+                      />
+                    </LocalizationProvider>
                   ) : (
                     <Controller
                       key={key}
