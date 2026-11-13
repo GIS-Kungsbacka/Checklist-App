@@ -916,7 +916,16 @@ export default function ManagementPlanPage({
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: { xs: 1, md: 4 }, mb: 6 }}>
+    <Container
+      maxWidth="xl"
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Box
         display="flex"
         justifyContent="space-between"
@@ -945,8 +954,11 @@ export default function ManagementPlanPage({
       <Paper
         elevation={0}
         sx={{
-          height: { xs: 300, md: 400, lg: 500, xl: 700 },
+          flex: 1,
+          minHeight: 0,
           width: "100%",
+          display: "flex",
+          flexDirection: "column",
           borderRadius: 3,
           border: "1px solid",
           borderColor: "divider",
@@ -992,6 +1004,10 @@ export default function ManagementPlanPage({
           }}
           sx={{
             border: 0,
+            flex: 1,
+            minHeight: 0,
+            height: "100%",
+            width: "100%",
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "background.paper",
               borderBottom: "1px solid",

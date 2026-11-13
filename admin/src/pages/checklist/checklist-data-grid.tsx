@@ -826,7 +826,16 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
   const rows = items.map((item) => ({ ...item, id: item.gid }));
 
   return (
-    <Container maxWidth="xl" sx={{ mt: { xs: 1, md: 4 }, mb: 6 }}>
+    <Container
+      maxWidth="xl"
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Box
         display="flex"
         justifyContent="space-between"
@@ -878,8 +887,11 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
       <Paper
         elevation={0}
         sx={{
-          height: { xs: 300, md: 400, lg: 500, xl: 700 },
+          flex: 1,
+          minHeight: 0,
           width: "100%",
+          display: "flex",
+          flexDirection: "column",
           borderRadius: 3,
           border: "1px solid",
           borderColor: "divider",
@@ -928,6 +940,10 @@ export default function ChecklistGrid({ mode }: { mode: "light" | "dark" }) {
           }}
           sx={{
             border: 0,
+            flex: 1,
+            minHeight: 0,
+            height: "100%",
+            width: "100%",
 
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "background.paper",

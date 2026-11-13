@@ -513,7 +513,17 @@ export default function ManagementPlan({
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
+    <Container
+      maxWidth="xl"
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        py: 2,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Box mb={2}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Förvaltningsplan
@@ -525,8 +535,11 @@ export default function ManagementPlan({
       <Paper
         elevation={0}
         sx={{
-          height: { xs: 300, md: 400, lg: 500, xl: 700 },
+          flex: 1,
+          minHeight: 0,
           width: "100%",
+          display: "flex",
+          flexDirection: "column",
           borderRadius: 3,
           border: "1px solid",
           borderColor: "divider",
@@ -571,6 +584,10 @@ export default function ManagementPlan({
           }}
           sx={{
             border: 0,
+            flex: 1,
+            minHeight: 0,
+            height: "100%",
+            width: "100%",
             "& .MuiDataGrid-row": {
               cursor: "pointer",
             },

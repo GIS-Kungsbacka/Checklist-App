@@ -55,9 +55,9 @@ function AppContent() {
         components: {
           MuiCssBaseline: {
             styleOverrides: {
-              body: {
-                overflowY: "scroll",
-              },
+              html: { height: "100%" },
+              body: { height: "100%", overflow: "hidden" },
+              "#root": { height: "100%" },
             },
           },
           MuiButton: {
@@ -96,11 +96,21 @@ function AppContent() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            minHeight: "100vh",
+            height: "100%",
+            overflow: "hidden",
           }}
         >
           <Header mode={mode} onToggleMode={toggleMode} />
-          <Box sx={{ flexGrow: 1 }}>
+          <Box
+            component="main"
+            sx={{
+              flex: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "auto",
+            }}
+          >
             <Routes>
               <Route
                 path="/"

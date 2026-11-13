@@ -52,6 +52,13 @@ function AppContent() {
           borderRadius: 8,
         },
         components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              html: { height: "100%" },
+              body: { height: "100%", overflow: "hidden" },
+              "#root": { height: "100%" },
+            },
+          },
           MuiButton: {
             styleOverrides: {
               root: {
@@ -99,26 +106,25 @@ function AppContent() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            minHeight: "100vh",
+            height: "100%",
+            overflow: "hidden",
           }}
         >
           <Header mode={mode} onToggleMode={toggleMode} />
           <Box
+            component="main"
             sx={(theme) => ({
-              flexGrow: 1,
+              flex: 1,
+              minHeight: 0,
               ml: "240px",
               px: 3,
-              mt: 2,
               display: "flex",
-              alignItems: { xs: "flex-start", md: "flex-start" },
-              justifyContent: "center",
-              pt: {
-                xs: `calc(${
-                  theme.mixins.toolbar.minHeight || 64
-                }px + ${theme.spacing(2)})`,
-                md: theme.spacing(5),
-              },
-              pb: { xs: theme.spacing(3), md: 0 },
+              flexDirection: "column",
+              overflow: "auto",
+              pt: `calc(${
+                theme.mixins.toolbar.minHeight || 64
+              }px + ${theme.spacing(2)})`,
+              pb: 2,
             })}
           >
             <Routes>

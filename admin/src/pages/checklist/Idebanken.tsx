@@ -469,7 +469,16 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 6 }}>
+    <Container
+      maxWidth="xl"
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <Box mb={3}>
         <Typography variant="body2" fontWeight={600}>
           Här listas objekt med antagen satt till "nej". Klicka på ångra knappen
@@ -494,8 +503,11 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
         <Paper
           elevation={0}
           sx={{
-            height: { xs: 300, md: 400, lg: 500, xl: 700 },
+            flex: 1,
+            minHeight: 0,
             width: "100%",
+            display: "flex",
+            flexDirection: "column",
             borderRadius: 3,
             border: "1px solid",
             borderColor: "divider",
@@ -535,6 +547,10 @@ export default function Idebanken({ mode }: { mode: "light" | "dark" }) {
             }}
             sx={{
               border: 0,
+              flex: 1,
+              minHeight: 0,
+              height: "100%",
+              width: "100%",
               "& .MuiDataGrid-row": {
                 cursor: "pointer",
               },
